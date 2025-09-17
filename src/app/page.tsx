@@ -10,15 +10,17 @@ export default function Home() {
   const y = useTransform(scrollY, [0, 300], [0, -50]);
 
   return (
-    <div className="min-h-screen bg-black/50  text-white overflow-hidden">
-      <p className="text-gray-400 text-xs flex flex-col justify-end items-end pr-5 pt-5">
-        <a href="https://namanrusia.com?redirect=false" className="underline">
-          view old website here
-        </a>
-      </p>
-      <p className="text-gray-400 text-xs flex flex-col justify-end items-end pr-5 pt-2">
-        📍 Boston, MA
-      </p>
+    <div className="min-h-screen bg-black/10  text-white overflow-hidden">
+      <div className="">
+        <p className="text-gray-400 text-xs flex flex-col justify-end items-end pr-5 pt-5">
+          <a href="/resume.pdf" className="underline">
+            View my resume! (Jan - June 2026 and Summer 2026 availability)
+          </a>
+        </p>
+        <p className="text-gray-400 text-xs flex flex-col justify-end items-end pr-5 pt-2">
+          📍 Boston, MA
+        </p>
+      </div>
       {/* Dynamic Ambient Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
         {/* Primary gradient orb - Orange/Red */}
@@ -206,7 +208,8 @@ export default function Home() {
               <p className="text-lg md:text-xl">
                 My approach combines technical rigor with design sensibility.
                 I'm drawn to projects that challenge conventional thinking and
-                push the boundaries of what's possible on the web.
+                push the boundaries of what's possible with a little bit of
+                creativity and a computer.
               </p>
             </div>
           </motion.div>
@@ -240,14 +243,14 @@ export default function Home() {
                   that I am immensemly grateful for. During High School in
                   Singapore, I was obsessed with entrepreneurship and building.
                   I co-founded my High School's Entrepreneurship Club, and lead
-                  us to winning the JA Company of The Year competition during my
-                  Junior year. This experience was pivotal for me, and got me
-                  interested in the technical side of building. I highlight this
-                  experience because it was the first time I was able to build
-                  something that I was proud of, and it lead me to wanting to
-                  major in Computer Science and Business Administration: mixing
-                  my passion for entrepreneurship and impact with my interest in
-                  the Technical Aspect.
+                  us to winning the JA(Junior Achievement) Company of The Year
+                  competition during my Junior year. This experience was pivotal
+                  for me, and got me interested in the technical side of
+                  building. I highlight this experience because it was the first
+                  time I was able to build something that I was proud of, and it
+                  lead me to wanting to major in Computer Science and Business
+                  Administration: mixing my passion for entrepreneurship and
+                  impact with my interest in the Technical Aspect.
                 </p>
               </div>
 
