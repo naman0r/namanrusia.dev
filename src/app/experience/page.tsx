@@ -6,15 +6,25 @@ import Link from "next/link";
 export default function Experience() {
   const experiences = [
     {
+      company: "🤷",
+      title: "Incoming co-op, spring 2026",
+      link: "",
+      period: "Jan 2026 — June 2026",
+      location: "",
+      description: "",
+      technologies: [],
+    },
+    {
       company: "Auribus Labs",
       title: "Software Engineer Intern",
       period: "April — Aug 2025",
       location: "Boston, MA",
       link: "https://www.auribuslabs.com/",
-      description: "",
+      description:
+        "Built 2 full-stack web applications for research and development of a new product. Also worked on a research iOS application (native development).",
       technologies: [
+        "Next.js",
         "Swift",
-        "SwiftUI",
         "iOS Development",
         "GCP",
         "Hasura",
@@ -22,13 +32,31 @@ export default function Experience() {
       ],
     },
     {
+      company: "TAMID at Northeastern",
+      title: "Tech Lead: Tech Consulting Track",
+      link: "https://foresight-tamid.vercel.app/about",
+      period: "Jan 2025 — Present",
+      location: "Boston, MA",
+      description:
+        "Building Foresight: An AI product which integrates with hotel Building Management Systems (BMSs) and provides real time pricing suggestions to help boutique hotels optimize revenue. Check out more info about the project here: https://foresight-tamid.vercel.app/about",
+      technologies: [
+        "Product Management",
+        "FastAPI",
+        "PostgreSQL",
+        "Neon DB",
+        "Next.js",
+        "CI/CD",
+        "RAG",
+      ],
+    },
+    {
       company: "Code4Community at Northeastern (Student Organization)",
       title: "SWE",
-      period: "Present",
-      link: "https://www.c4cneu.com/",
+      period: "September 2025 - Present",
+      link: "https://www.c4cneu.com/people",
       location: "Boston, MA",
-      description: "",
-      technologies: [],
+      description: "Core Infrastructure team",
+      technologies: ["Next.js", "AWS", "PostgreSQL", "Jest", "TypeScript"],
     },
 
     {
@@ -49,15 +77,6 @@ export default function Experience() {
       description:
         "Built mobile applications for real-world client projects and startups.",
       technologies: ["React Native", "Expo", "TypeScript", "MongoDB"],
-    },
-    {
-      company: "TAMID at Northeastern",
-      title: "Software Developer",
-      link: "https://www.nutamidtech.org/about",
-      period: "Jan 2025 — Present",
-      location: "Boston, MA",
-      description: "",
-      technologies: ["React", "Python", "Flask", "Docker", "PostgreSQL"],
     },
   ];
 

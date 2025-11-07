@@ -131,23 +131,12 @@ export default function TandemCodeProject() {
                 Technical Implementation
               </h2>
               <p className="text-gray-300 leading-relaxed mb-4">
-                Built with React Native for cross-platform mobile compatibility,
-                ensuring a seamless experience across iOS and Android devices.
-                The backend leverages Node.js with Express for robust API
-                development and real-time communication features.
+                React for the frontend, Java Spring for the backend, and docker
+                + postgres for the database. Using WebSockets for real-time
+                communication.
               </p>
               <p className="text-gray-300 leading-relaxed mb-4">
-                User authentication and data management are handled through
-                Firebase, providing secure sign-up/sign-in processes and
-                real-time database synchronization. The matching algorithm uses
-                sophisticated preference-based filtering to connect compatible
-                users.
-              </p>
-              <p className="text-gray-300 leading-relaxed">
-                The application integrates with local business APIs to provide
-                up-to-date event information and booking capabilities, creating
-                a comprehensive platform that bridges digital connections with
-                real-world experiences.
+                Clerk for authentication and database management.
               </p>
             </motion.section>
 
