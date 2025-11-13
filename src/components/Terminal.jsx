@@ -215,7 +215,7 @@ const Terminal = () => {
 
   // Focus input when terminal clicked
   const focusInput = () => {
-    if (inputRef.current && !isHacking && !gameActive && !isFlipped) {
+    if (inputRef.current && !isHacking && !isFlipped) {
       inputRef.current.focus();
     }
   };
@@ -328,8 +328,8 @@ const Terminal = () => {
 
     if (guess === gameState.targetNumber) {
       newGameState.won = true;
-      setGameState(newGameState);
       setGameActive(false);
+      setGameState(null);
       return [
         {
           type: "success",
@@ -497,7 +497,8 @@ const Terminal = () => {
 
     // Check for commands
     if (command.toLowerCase().startsWith("change name")) {
-      const newName = args[2]; // Extract the new name
+      // Extract everything after "change name "
+      const newName = command.substring(12).trim(); // "change name ".length = 12
       if (newName) {
         setGuest(newName);
         newOutput.push({
@@ -1187,7 +1188,7 @@ const Terminal = () => {
           onChange={(e) => setCommand(e.target.value)}
           onKeyDown={handleKeyDown}
           ref={inputRef}
-          disabled={isHacking || gameActive || isFlipped}
+          disabled={isHacking || isFlipped}
           autoFocus
         />
       </form>
