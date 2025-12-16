@@ -13,6 +13,8 @@ import {
   AiOutlineInstagram,
   AiOutlineClose,
 } from "react-icons/ai";
+import { RiCoupon3Fill } from "react-icons/ri";
+
 import { FaComputer } from "react-icons/fa6";
 import {
   HiOutlineBriefcase,
@@ -90,11 +92,13 @@ const Sidebar: React.FC<SidebarProps> = ({
       { icon: AiOutlineHome, label: "Home", href: "/" },
       { icon: RiRocketLine, label: "Projects", href: "/projects" },
       { icon: HiOutlineBriefcase, label: "Experience", href: "/experience" },
+      { icon: IoTerminal, label: "Terminal", href: "/terminal" },
+      { icon: RiCoupon3Fill, label: "Misc", href: "/misc" },
       //{ icon: HiOutlinePencilAlt, label: "Thoughts", href: "/blogs" },
       //{ icon: AiOutlineUser, label: "About", href: "/about" },
       //{ icon: AiOutlineMail, label: "Contact", href: "/contact" },
       //{ icon: HiOutlineWrench, label: "Tools", href: "/tools" },
-      { icon: IoTerminal, label: "Terminal", href: "/terminal" },
+
       //{ icon: FaComputer, label: "Playground", href: "/playground" },
       //{ icon: HiOutlinePencilAlt, label: "Thoughts", href: "/blogs" },
     ],
