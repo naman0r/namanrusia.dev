@@ -6,13 +6,22 @@ import Link from "next/link";
 export default function Experience() {
   const experiences = [
     {
-      company: "🤷",
+      company: "Sonos",
+      title: "Incoming intern, Summer 2026",
+      link: "",
+      period: "June 2026 — Aug 2026",
+      location: "Boston, MA",
+      description: "Core iOS team.",
+      technologies: ["iOS", "Swift"],
+    },
+    {
+      company: "Philips Healthcare",
       title: "Incoming co-op, spring 2026",
       link: "",
       period: "Jan 2026 — June 2026",
-      location: "",
-      description: "",
-      technologies: [],
+      location: "Cambridge, MA",
+      description: "Automation team.",
+      technologies: ["C#", ".NET", "Distributed Systems"],
     },
     {
       company: "Auribus Labs",
