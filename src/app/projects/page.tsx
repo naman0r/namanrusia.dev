@@ -49,6 +49,35 @@ export default function Projects() {
 
   const projects = [
     {
+      title: "Git Interviewer",
+      subtitle: "Make sure you understand your code before you commit.",
+      description: "",
+      tech: ["PyPI", "Python", "Git", "CLI tool"],
+      status: "Weekend project, V1 released",
+      featured: true,
+      github: "https://www.github.com/naman0r/git-interviewer",
+      demo: "https://pypi.org/project/git-interviewer/1.0.0/",
+      date: "December 2025",
+      image: "/git-interviewer.png",
+      slug: "git-interviewer",
+      hasDetailPage: true,
+    },
+    {
+      title: "NUtrition",
+      subtitle: "University Dining Nutrition Tracker",
+      description:
+        "Full Stack app that scrapes nutritional information from the University Dining Hall website, and users are allowed to keep detailed logs and track their meals and diet over time.",
+      tech: ["Selenium.py", "React", "Firebase", "Flask", "Supabase"],
+      status: "Current",
+      featured: false,
+      github: "https://github.com/Oasis-NEU/sp25-group-11",
+      demo: "https://nutrition-oasis.vercel.app/",
+      date: "Spring 2025",
+      image: "/NUtrition.png",
+      slug: "nutrition",
+      hasDetailPage: false,
+    },
+    {
       title: "TandemCode",
       subtitle: "Real-time collaborative interview prep tool",
       description:
@@ -159,18 +188,18 @@ export default function Projects() {
       hasDetailPage: true,
     },
     {
-      title: "NUtrition",
-      subtitle: "University Dining Nutrition Tracker",
+      title: "StudyBuddy",
+      subtitle: "University Study Group Connector",
       description:
-        "Full Stack app that scrapes nutritional information from the University Dining Hall website, and users are allowed to keep detailed logs and track their meals and diet over time.",
-      tech: ["Selenium.py", "React", "Firebase", "Flask", "Supabase"],
-      status: "Current",
+        "A full stack app that connects university students with each other to form study groups.",
+      tech: ["Streamlit", "MySQL", "Docker", "Flask"],
+      status: "Completed",
       featured: false,
-      github: "https://github.com/Oasis-NEU/sp25-group-11",
-      demo: "https://nutrition-oasis.vercel.app/",
+      github: "https://github.com/Arshayp/studybuddy-2",
+      demo: "",
       date: "Spring 2025",
-      image: "/NUtrition.png",
-      slug: "nutrition",
+      image: "/studybuddy.png",
+      slug: "studybuddy",
       hasDetailPage: false,
     },
 
@@ -202,22 +231,6 @@ export default function Projects() {
       date: "January 2025",
       image: "/car2drvr.png",
       slug: "car2drvr",
-      hasDetailPage: false,
-    },
-
-    {
-      title: "StudyBuddy",
-      subtitle: "University Study Group Connector",
-      description:
-        "A full stack app that connects university students with each other to form study groups.",
-      tech: ["Streamlit", "MySQL", "Docker", "Flask"],
-      status: "Completed",
-      featured: false,
-      github: "https://github.com/Arshayp/studybuddy-2",
-      demo: "",
-      date: "Spring 2025",
-      image: "/studybuddy.png",
-      slug: "studybuddy",
       hasDetailPage: false,
     },
 
@@ -325,7 +338,7 @@ export default function Projects() {
               {project.title}
             </h3>
             {project.hasDetailPage && (
-              <span className=" flex flex-row text-xs text-lime-500 px-2 py-1 bg-gray-800 rounded items-center animate-bounce">
+              <span className=" flex flex-row text-xs text-green-500 px-2 py-1 bg-gray-800 rounded items-center animate-bounce">
                 View Details
                 <FaArrowRightFromBracket className="ml-2" />
               </span>
@@ -505,12 +518,13 @@ export default function Projects() {
               >
                 GitHub
               </a>
-              {". "}I lead every project with curiosity, crave to learn, and
+              {". "}I lead every project with curiosity, a craving to learn, and
               with the purpose of creating a tangible impact or at the very
               least a proof of concept. I am always looking for new projects to
               work on, so feel free to reach out to me if you have any ideas!
               Some of the projects below have specific pages that go into more
-              detail about them. Click on 'View Details'.
+              detail about them. Click on 'View Details' or any of the bigger
+              project cards
             </p>
           </div>
         </motion.div>
