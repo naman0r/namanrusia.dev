@@ -22,7 +22,7 @@ const App = () => {
     console.log("Redirect param:", redirectParam);
 
     // If redirect parameter is not "false", redirect to new website
-    if (redirectParam !== "false") {
+    if (redirectParam == "nevergoingtohappen") {
       window.location.href = DEST;
     }
   }, [searchParams]);
