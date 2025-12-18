@@ -49,3 +49,4 @@ export default async function BlogPost({
     </div>
   );
 }
+
