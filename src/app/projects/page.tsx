@@ -49,6 +49,20 @@ export default function Projects() {
 
   const projects = [
     {
+      title: "Open Brain",
+      subtitle: "Memory for AI systems",
+      description: "",
+      tech: ["FastAPI", "Python", "PostgreSQL", "Vector Embeddings"],
+      status: "Weekend project, WIP",
+      featured: true,
+      github: "https://www.github.com/naman0r/open-brain",
+      demo: "",
+      date: "March 2026",
+      image: "/open-brain.png",
+      slug: "open-brain",
+      hasDetailPage: true,
+    },
+    {
       title: "Git Interviewer",
       subtitle: "Make sure you understand your code before you commit.",
       description: "",
@@ -278,8 +292,8 @@ export default function Projects() {
     selectedCategory === "All"
       ? projects
       : selectedCategory === "Featured"
-      ? projects.filter((project) => project.featured)
-      : projects.filter((project) => project.tech.includes(selectedCategory));
+        ? projects.filter((project) => project.featured)
+        : projects.filter((project) => project.tech.includes(selectedCategory));
 
   const ProjectCard = ({ project, index }: { project: any; index: number }) => {
     const handleCardClick = () => {
@@ -322,8 +336,8 @@ export default function Projects() {
                 project.status === "Current"
                   ? "bg-green-500 text-white border border-green-500/30"
                   : project.status === "Deployed"
-                  ? "bg-blue-900 text-blue-400 border border-blue-500/30"
-                  : "bg-gray-900 text-gray-400 border border-gray-500/30"
+                    ? "bg-blue-900 text-blue-400 border border-blue-500/30"
+                    : "bg-gray-900 text-gray-400 border border-gray-500/30"
               }`}
             >
               {project.status}
