@@ -93,16 +93,16 @@ const Sidebar: React.FC<SidebarProps> = ({
       { icon: RiRocketLine, label: "Projects", href: "/projects" },
       { icon: HiOutlineBriefcase, label: "Experience", href: "/experience" },
       { icon: IoTerminal, label: "Terminal", href: "/terminal" },
-      { icon: RiCoupon3Fill, label: "Misc", href: "/misc" },
+      //{ icon: RiCoupon3Fill, label: "Misc", href: "/misc" },
       //{ icon: HiOutlinePencilAlt, label: "Thoughts", href: "/blogs" },
       //{ icon: AiOutlineUser, label: "About", href: "/about" },
       //{ icon: AiOutlineMail, label: "Contact", href: "/contact" },
       //{ icon: HiOutlineWrench, label: "Tools", href: "/tools" },
 
-      //{ icon: FaComputer, label: "Playground", href: "/playground" },
+      { icon: FaComputer, label: "Playground", href: "/playground" },
       //{ icon: HiOutlinePencilAlt, label: "Thoughts", href: "/blogs" },
     ],
-    []
+    [],
   );
 
   const musicControls = useMemo(() => {
@@ -143,7 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         url: "https://x.com/namanrusia1",
       },
     ],
-    []
+    [],
   );
 
   const isActive = (href: string) => {

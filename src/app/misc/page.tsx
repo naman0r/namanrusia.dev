@@ -9,9 +9,9 @@ const MiscPage = () => {
         {/*         <p className="underline">
           favorite <Link href="/media">Media</Link>
         </p> */}
-        <p>
+        {/* <p>
           blog posts: <Link href="/blogs">Blogs</Link>
-        </p>
+        </p> */}
         <Link href="/playground">Playground page (only works on computer)</Link>
       </div>
     </div>
