@@ -35,10 +35,11 @@ export function MusicProvider({ children }: { children: ReactNode }) {
 
   // Determine which song to play based on current route
   const getSongForRoute = (path: string): string => {
-    if (path === "/projects" || path.startsWith("/projects/")) {
+    /* if (path === "/projects" || path.startsWith("/projects/")) {
       return "/sounds/clubhouse_clean.mp3";
-    }
-    return "/sounds/fastLife.mp3";
+    } */
+    //return "/sounds/fastLife.mp3";
+    return "/sounds/magnetic.mp3";
   };
 
   // Get display name for current song
@@ -48,6 +49,9 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     }
     if (src.includes("fastLife.mp3")) {
       return "Fast Life";
+    }
+    if (src.includes("magnetic.mp3")) {
+      return "Magnetic";
     }
     return "Unknown";
   };
