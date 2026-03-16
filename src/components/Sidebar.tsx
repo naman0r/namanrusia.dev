@@ -32,6 +32,8 @@ interface SidebarProps {
   isOpen?: boolean; // mobile drawer open
   onClose?: () => void; // mobile drawer close handler
   initialExpanded?: boolean; // desktop expanded/collapsed
+  expanded?: boolean; // controlled desktop expanded/collapsed
+  onExpandedChange?: (expanded: boolean) => void;
   user?: {
     name?: string;
     title?: string;
@@ -43,6 +45,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   isOpen = true,
   onClose,
   initialExpanded = true,
+  expanded: controlledExpanded,
+  onExpandedChange,
   user = {
     name: "Naman Rusia",
     title: "Student",
@@ -50,7 +54,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   },
 }) => {
   const pathname = usePathname();
-  const [expanded, setExpanded] = useState<boolean>(initialExpanded);
+  const [uncontrolledExpanded, setUncontrolledExpanded] =
+    useState<boolean>(initialExpanded);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const {
     isPlaying,
@@ -60,6 +65,15 @@ const Sidebar: React.FC<SidebarProps> = ({
     togglePlay,
     toggleMute,
   } = useMusic();
+  const expanded = controlledExpanded ?? uncontrolledExpanded;
+
+  const setExpanded = (nextExpanded: boolean) => {
+    if (controlledExpanded === undefined) {
+      setUncontrolledExpanded(nextExpanded);
+    }
+
+    onExpandedChange?.(nextExpanded);
+  };
 
   // On mobile, always treat as expanded when open
   const isExpanded = isMobile || expanded;
@@ -74,18 +88,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
-  // persist expanded state across reloads
-  useEffect(() => {
-    const saved =
-      typeof window !== "undefined" && localStorage.getItem("sidebar:expanded");
-    if (saved !== null) setExpanded(saved === "1");
-  }, []);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sidebar:expanded", expanded ? "1" : "0");
-    }
-  }, [expanded]);
 
   const navigationItems = useMemo(
     () => [
@@ -448,7 +450,11 @@ const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => setExpanded(!expanded)}
               className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 border border-white/10 hover:border-white/20 group"
               aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
-              title={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+              title={
+                isExpanded
+                  ? "Collapse sidebar (Command + Backslash)"
+                  : "Expand sidebar (Command + Backslash)"
+              }
             >
               <svg
                 className="w-3 h-3 transition-transform group-hover:scale-110"
@@ -476,6 +482,35 @@ const Sidebar: React.FC<SidebarProps> = ({
                 )}
               </AnimatePresence>
             </button>
+
+            <AnimatePresence initial={false}>
+              {isExpanded && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  className="mt-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-gray-500">
+                      Shortcut
+                    </span>
+                    <div className="flex items-center gap-1 text-[10px] text-gray-300">
+                      <kbd className="rounded-md border border-white/10 bg-black/20 px-1.5 py-1 font-mono text-[10px] text-gray-200 shadow-sm shadow-black/20">
+                        Command
+                      </kbd>
+                      <span className="text-gray-500">+</span>
+                      <kbd className="rounded-md border border-white/10 bg-black/20 px-1.5 py-1 font-mono text-[10px] text-gray-200 shadow-sm shadow-black/20">
+                        \
+                      </kbd>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-[11px] text-gray-400">
+                    Toggle the sidebar from the keyboard on desktop.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
 

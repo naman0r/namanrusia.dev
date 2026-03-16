@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Sidebar, { MobileHeader } from "../components/Sidebar";
+import { readSidebarExpanded, writeSidebarExpanded } from "@/lib/sidebar";
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -29,6 +30,52 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   //const isHomePage = true;
 
   const isHomePage = !(pathname === "/hehe");
+  const defaultSidebarExpanded = isHomePage ? false : true;
+  const [isSidebarExpanded, setIsSidebarExpanded] =
+    useState(defaultSidebarExpanded);
+  const [hasLoadedSidebarExpanded, setHasLoadedSidebarExpanded] =
+    useState(false);
+
+  useEffect(() => {
+    setIsSidebarExpanded(readSidebarExpanded(defaultSidebarExpanded));
+    setHasLoadedSidebarExpanded(true);
+  }, [defaultSidebarExpanded]);
+
+  useEffect(() => {
+    if (!hasLoadedSidebarExpanded) {
+      return;
+    }
+
+    writeSidebarExpanded(isSidebarExpanded);
+  }, [hasLoadedSidebarExpanded, isSidebarExpanded]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const isBackslashShortcutKey =
+        event.key === "\\" ||
+        event.code === "Backslash" ||
+        event.code === "IntlBackslash";
+
+      if (
+        window.innerWidth < 1024 ||
+        event.defaultPrevented ||
+        event.repeat ||
+        !event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.shiftKey ||
+        !isBackslashShortcutKey
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      setIsSidebarExpanded((expanded) => !expanded);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   if (isHomePage) {
     return (
@@ -39,6 +86,8 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
             isOpen={isSidebarOpen}
             onClose={closeSidebar}
             initialExpanded={false}
+            expanded={isSidebarExpanded}
+            onExpandedChange={setIsSidebarExpanded}
             user={{
               name: "Naman Rusia",
               title: "Software Engineer",
@@ -65,6 +114,8 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
         isOpen={isSidebarOpen}
         onClose={closeSidebar}
         initialExpanded={true}
+        expanded={isSidebarExpanded}
+        onExpandedChange={setIsSidebarExpanded}
         user={{
           name: "Naman Rusia",
           title: "Software Engineer",
