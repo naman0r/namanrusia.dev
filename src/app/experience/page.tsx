@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function Experience() {
   const experiences = [
-/*     {
+    /*     {
       company: "Sonos",
       title: "Incoming intern, Summer 2026",
       link: "",
@@ -16,12 +16,21 @@ export default function Experience() {
     }, */
     {
       company: "Philips Healthcare",
-      title: "Software Engineering co-op, spring 2026",
+      title:
+        "Software Engineering co-op, spring 2026, Systems Integration and Automation team.",
       link: "",
       period: "Jan 2026 — June 2026",
       location: "Cambridge, MA",
-      description: "Systems Integration and Automation team.",
-      technologies: ["C#", ".NET", "Distributed Systems"],
+      description:
+        "Automating deployments of Philips PICiX Hostpital Patient Monitoring system in a distributed virtualized environment at the largest scale at Philips",
+      technologies: [
+        "FastAPI",
+        "Python",
+        "Powershell",
+        "C#",
+        ".NET",
+        "Distributed Systems",
+      ],
     },
     {
       company: "Auribus Labs",
