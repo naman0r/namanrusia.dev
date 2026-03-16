@@ -6,6 +6,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
+import {
+  readSidebarExpanded,
+  subscribeToSidebarExpandedChange,
+} from "@/lib/sidebar";
 
 export default function Projects() {
   const router = useRouter();
@@ -19,25 +23,15 @@ export default function Projects() {
       setIsMobile(window.innerWidth < 1024);
     };
 
-    // theres gotta be a better way to do this
-    const checkSidebarState = () => {
-      if (typeof window !== "undefined") {
-        const saved = localStorage.getItem("sidebar:expanded");
-        setSidebarExpanded(saved !== "0");
-      }
-    };
-
     checkMobile();
-    checkSidebarState();
+    setSidebarExpanded(readSidebarExpanded(true));
 
     window.addEventListener("resize", checkMobile);
-
-    // Listen for sidebar state changes
-    const interval = setInterval(checkSidebarState, 100);
+    const unsubscribe = subscribeToSidebarExpandedChange(setSidebarExpanded);
 
     return () => {
       window.removeEventListener("resize", checkMobile);
-      clearInterval(interval);
+      unsubscribe();
     };
   }, []);
 

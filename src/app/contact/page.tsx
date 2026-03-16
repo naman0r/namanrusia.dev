@@ -9,6 +9,10 @@ import {
   AiOutlineInstagram,
   AiOutlineTwitter,
 } from "react-icons/ai";
+import {
+  readSidebarExpanded,
+  subscribeToSidebarExpandedChange,
+} from "@/lib/sidebar";
 
 export default function Contact() {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
@@ -20,24 +24,15 @@ export default function Contact() {
       setIsMobile(window.innerWidth < 1024);
     };
 
-    const checkSidebarState = () => {
-      if (typeof window !== "undefined") {
-        const saved = localStorage.getItem("sidebar:expanded");
-        setSidebarExpanded(saved !== "0");
-      }
-    };
-
     checkMobile();
-    checkSidebarState();
+    setSidebarExpanded(readSidebarExpanded(true));
 
     window.addEventListener("resize", checkMobile);
-
-    // Listen for sidebar state changes
-    const interval = setInterval(checkSidebarState, 100);
+    const unsubscribe = subscribeToSidebarExpandedChange(setSidebarExpanded);
 
     return () => {
       window.removeEventListener("resize", checkMobile);
-      clearInterval(interval);
+      unsubscribe();
     };
   }, []);
 

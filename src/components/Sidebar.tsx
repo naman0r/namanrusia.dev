@@ -32,6 +32,8 @@ interface SidebarProps {
   isOpen?: boolean; // mobile drawer open
   onClose?: () => void; // mobile drawer close handler
   initialExpanded?: boolean; // desktop expanded/collapsed
+  expanded?: boolean; // controlled desktop expanded/collapsed
+  onExpandedChange?: (expanded: boolean) => void;
   user?: {
     name?: string;
     title?: string;
@@ -43,6 +45,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   isOpen = true,
   onClose,
   initialExpanded = true,
+  expanded: controlledExpanded,
+  onExpandedChange,
   user = {
     name: "Naman Rusia",
     title: "Student",
@@ -50,7 +54,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   },
 }) => {
   const pathname = usePathname();
-  const [expanded, setExpanded] = useState<boolean>(initialExpanded);
+  const [uncontrolledExpanded, setUncontrolledExpanded] =
+    useState<boolean>(initialExpanded);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const {
     isPlaying,
@@ -60,6 +65,15 @@ const Sidebar: React.FC<SidebarProps> = ({
     togglePlay,
     toggleMute,
   } = useMusic();
+  const expanded = controlledExpanded ?? uncontrolledExpanded;
+
+  const setExpanded = (nextExpanded: boolean) => {
+    if (controlledExpanded === undefined) {
+      setUncontrolledExpanded(nextExpanded);
+    }
+
+    onExpandedChange?.(nextExpanded);
+  };
 
   // On mobile, always treat as expanded when open
   const isExpanded = isMobile || expanded;
@@ -74,18 +88,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
-  // persist expanded state across reloads
-  useEffect(() => {
-    const saved =
-      typeof window !== "undefined" && localStorage.getItem("sidebar:expanded");
-    if (saved !== null) setExpanded(saved === "1");
-  }, []);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sidebar:expanded", expanded ? "1" : "0");
-    }
-  }, [expanded]);
 
   const navigationItems = useMemo(
     () => [
