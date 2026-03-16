@@ -56,20 +56,8 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
         event.code === "Backslash" ||
         event.code === "IntlBackslash";
 
-      if (event.metaKey || isBackslashShortcutKey) {
-        console.log("[sidebar-hotkey] keydown", {
-          key: event.key,
-          code: event.code,
-          metaKey: event.metaKey,
-          ctrlKey: event.ctrlKey,
-          altKey: event.altKey,
-          shiftKey: event.shiftKey,
-          defaultPrevented: event.defaultPrevented,
-          repeat: event.repeat,
-        });
-      }
-
       if (
+        window.innerWidth < 1024 ||
         event.defaultPrevented ||
         event.repeat ||
         !event.metaKey ||
@@ -82,15 +70,6 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
       }
 
       event.preventDefault();
-      console.log("[sidebar-hotkey] matched shortcut");
-
-      if (window.innerWidth < 1024) {
-        console.log("[sidebar-hotkey] toggling mobile sidebar");
-        setIsSidebarOpen((isOpen) => !isOpen);
-        return;
-      }
-
-      console.log("[sidebar-hotkey] toggling desktop sidebar");
       setIsSidebarExpanded((expanded) => !expanded);
     };
 
