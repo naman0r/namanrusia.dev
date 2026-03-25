@@ -1,16 +1,78 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useInView,
+  useSpring,
+  AnimatePresence,
+} from "framer-motion";
 import Link from "next/link";
+import ParticleField from "@/components/ParticleField";
+import ScrambleText from "@/components/ScrambleText";
+
+function CountUp({ target, suffix = "" }: { target: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+  useEffect(() => {
+    if (!isInView) return;
+    const duration = 1400;
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * target));
+      if (progress < 1) requestAnimationFrame(tick);
+      else setCount(target);
+    };
+
+    requestAnimationFrame(tick);
+  }, [isInView, target]);
+
+  return (
+    <span ref={ref}>
+      {count}
+      {suffix}
+    </span>
+  );
+}
+
+const ROLES = ["finance & tech", "software & design", "ideas & code", "startups & impact"];
 
 export default function Home() {
-  const { scrollY } = useScroll();
+  const { scrollY, scrollYProgress } = useScroll();
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
   const y = useTransform(scrollY, [0, 300], [0, -50]);
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+
+  const [roleIdx, setRoleIdx] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setRoleIdx((i) => (i + 1) % ROLES.length), 2200);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <div className="min-h-screen bg-black/10  text-white overflow-hidden">
+      {/* Scroll progress bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-[2px] origin-left z-[9997]"
+        style={{
+          scaleX,
+          background:
+            "linear-gradient(90deg, #f97316 0%, #a855f7 50%, #38bdf8 100%)",
+        }}
+      />
+
+      {/* Particle constellation */}
+      <ParticleField />
+
       {/* Social Icons */}
       <div className="fixed top-20 right-6 md:top-6 z-40 flex gap-4">
         <Link
@@ -173,22 +235,61 @@ export default function Home() {
         className="relative min-h-screen flex items-center justify-center px-6"
       >
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.21, 0.47, 0.32, 0.98] }}
-          >
+          <div>
             <h1 className="text-5xl md:text-7xl font-light mb-8 tracking-tight">
-              <span className="text-gray-500 glow">Hey, I'm</span> Naman
+              <motion.span
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
+                className="text-gray-500 glow"
+              >
+                Hey, I&apos;m{" "}
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
+                className="shimmer-text"
+              >
+                Naman
+              </motion.span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-gray-400 font-light leading-relaxed max-w-2xl">
+            <motion.p
+              initial={{ opacity: 0, y: 16, filter: "blur(10px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 1.1, delay: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
+              className="text-xl md:text-2xl text-gray-400 font-light leading-relaxed max-w-2xl"
+            >
               A Computer Science and Business student interested in the
               intersection of Finance, Software, Design and building{" "}
               <span className="text-gray-200">impactful </span>
               software.
-            </p>
-          </motion.div>
+            </motion.p>
+
+            {/* Cycling role text */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.6 }}
+              className="mt-6 flex items-center gap-3 text-sm text-gray-600"
+            >
+              <span className="w-8 h-px bg-gray-700 shrink-0" />
+              <span>building at the intersection of</span>
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={ROLES[roleIdx]}
+                  initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
+                  transition={{ duration: 0.35 }}
+                  className="text-gray-300 font-medium"
+                >
+                  {ROLES[roleIdx]}
+                </motion.span>
+              </AnimatePresence>
+            </motion.div>
+          </div>
         </div>
 
         {/* Scroll indicator */}
@@ -221,9 +322,11 @@ export default function Home() {
             transition={{ duration: 1 }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <h2 className="text-sm uppercase tracking-[0.2em] text-gray-600 mb-12">
-              Philosophy
-            </h2>
+            <ScrambleText
+              text="Philosophy"
+              tag="h2"
+              className="text-sm uppercase tracking-[0.2em] text-gray-600 mb-12"
+            />
 
             <div className="space-y-8 text-gray-300 leading-relaxed">
               <p className="text-2xl md:text-3xl font-light text-white">
@@ -248,6 +351,36 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Stats Section */}
+      <section className="relative py-16 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 border border-white/5 rounded-2xl p-8 bg-white/[0.02] backdrop-blur-sm">
+            {[
+              { value: 14, label: "Projects Built", suffix: "+" },
+              { value: 16, label: "Countries Visited", suffix: "+" },
+              { value: 3, label: "Years Coding", suffix: "" },
+              { value: 5, label: "Internship Roles", suffix: "" },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                className="text-center"
+              >
+                <div className="text-4xl md:text-5xl font-light text-white mb-2 tabular-nums">
+                  <CountUp target={stat.value} suffix={stat.suffix} />
+                </div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-gray-500">
+                  {stat.label}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Background Section */}
       <section className="relative py-32 px-6">
         <div className="max-w-4xl mx-auto">
@@ -257,9 +390,11 @@ export default function Home() {
             transition={{ duration: 1 }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <h2 className="text-sm uppercase tracking-[0.2em] text-gray-600 mb-12">
-              Background
-            </h2>
+            <ScrambleText
+              text="Background"
+              tag="h2"
+              className="text-sm uppercase tracking-[0.2em] text-gray-600 mb-12"
+            />
 
             <div className="grid md:grid-cols-2 gap-12">
               <div>

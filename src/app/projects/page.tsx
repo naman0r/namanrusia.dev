@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
@@ -290,6 +290,10 @@ export default function Projects() {
         : projects.filter((project) => project.tech.includes(selectedCategory));
 
   const ProjectCard = ({ project, index }: { project: any; index: number }) => {
+    const [tilt, setTilt] = useState({ x: 0, y: 0 });
+    const [glow, setGlow] = useState({ x: 50, y: 50, opacity: 0 });
+    const cardRef = useRef<HTMLDivElement>(null);
+
     const handleCardClick = () => {
       if (project.hasDetailPage) {
         router.push(`/projects/${project.slug}`);
@@ -301,18 +305,44 @@ export default function Projects() {
       window.open(url, "_blank");
     };
 
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      setTilt({ x: (y - 0.5) * -10, y: (x - 0.5) * 10 });
+      setGlow({ x: x * 100, y: y * 100, opacity: 1 });
+    };
+
+    const handleMouseLeave = () => {
+      setTilt({ x: 0, y: 0 });
+      setGlow((g) => ({ ...g, opacity: 0 }));
+    };
+
     return (
       <motion.div
+        ref={cardRef}
         key={project.slug}
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: index * 0.1 }}
         viewport={{ once: true }}
         onClick={handleCardClick}
-        className={`relative overflow-hidden rounded-2xl bg-gray-900/50 border border-gray-800 backdrop-blur-sm transition-all duration-300 ${
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        animate={{ rotateX: tilt.x, rotateY: tilt.y }}
+        style={{ transformStyle: "preserve-3d", perspective: 800 }}
+        className={`relative overflow-hidden rounded-2xl bg-gray-900/50 border border-gray-800 backdrop-blur-sm transition-colors duration-300 ${
           project.featured ? "md:col-span-2" : ""
         } ${project.hasDetailPage ? "cursor-pointer" : ""}`}
       >
+        {/* Cursor-tracking glow */}
+        <div
+          className="absolute inset-0 pointer-events-none z-10 transition-opacity duration-300 rounded-2xl"
+          style={{
+            background: `radial-gradient(400px circle at ${glow.x}% ${glow.y}%, rgba(139,92,246,0.18), transparent 60%)`,
+            opacity: glow.opacity,
+          }}
+        />
         {/* Project Image */}
         <div className="relative h-64 overflow-hidden">
           <Image

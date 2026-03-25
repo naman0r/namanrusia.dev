@@ -108,3 +108,37 @@ textarea,
       12 12,
     grabbing !important;
 }
+
+/* Hide system cursor when custom React cursor is active */
+body.has-custom-cursor,
+body.has-custom-cursor * {
+  cursor: none !important;
+}
+
+/* Shimmer text animation */
+@keyframes text-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #ffffff 30%,
+    #a78bfa 42%,
+    #38bdf8 50%,
+    #f472b6 58%,
+    #ffffff 70%,
+    #ffffff 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: text-shimmer 6s linear infinite;
+}

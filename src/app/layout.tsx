@@ -4,6 +4,7 @@ import "./globals.css";
 import LayoutWrapper from "./LayoutWrapper";
 import { MusicProvider } from "@/contexts/MusicContext";
 import MusicConsentPopup from "@/components/MusicConsentPopup";
+import CustomCursor from "@/components/CustomCursor";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <MusicProvider>
+          <CustomCursor />
           <LayoutWrapper>{children}</LayoutWrapper>
           <MusicConsentPopup />
         </MusicProvider>
