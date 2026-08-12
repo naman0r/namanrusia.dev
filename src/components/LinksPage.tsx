@@ -1,0 +1,69 @@
+import {
+  AiOutlineGithub,
+  AiOutlineLinkedin,
+  AiOutlineMail,
+  AiOutlineTwitter,
+} from "react-icons/ai";
+import { FiFileText, FiGlobe } from "react-icons/fi";
+
+const links = [
+  {
+    name: "GitHub",
+    href: "https://github.com/naman0r",
+    icon: AiOutlineGithub,
+  },
+  {
+    name: "LinkedIn",
+    href: "https://linkedin.com/in/namanrusia",
+    icon: AiOutlineLinkedin,
+  },
+  {
+    name: "Email",
+    href: "mailto:rusia.n@northeastern.edu",
+    icon: AiOutlineMail,
+  },
+  {
+    name: "Resume",
+    href: "/resume.pdf",
+    icon: FiFileText,
+  },
+  {
+    name: "Portfolio",
+    href: "/",
+    icon: FiGlobe,
+  },
+];
+
+export default function LinksPage() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center bg-white px-6 py-16 text-black">
+      <div className="w-full max-w-md">
+        <h1 className="text-center text-2xl font-semibold tracking-tight">
+          Naman Rusia
+        </h1>
+        <p className="mt-1 text-center text-sm text-gray-500">
+          Computer Science student and tech enthusiast
+        </p>
+
+        <ul className="mt-10 space-y-3">
+          {links.map(({ name, href, icon: Icon }) => {
+            const isExternal = href.startsWith("http");
+            return (
+              <li key={name}>
+                <a
+                  href={href}
+                  target={isExternal ? "_blank" : undefined}
+                  rel={isExternal ? "noopener noreferrer" : undefined}
+                  className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 text-base transition-colors hover:border-gray-400 hover:bg-gray-50"
+                >
+                  <Icon className="h-5 w-5 text-gray-700" />
+                  <span>{name}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </main>
+  );
+}

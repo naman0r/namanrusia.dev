@@ -29,6 +29,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     pathname === "/playground"; */
   //const isHomePage = true;
 
+  // Bare routes render with no sidebar/chrome at all
+  const isBareRoute = pathname === "/me" || pathname === "/links";
+
   const isHomePage = !(pathname === "/hehe");
   const defaultSidebarExpanded = isHomePage ? false : true;
   const [isSidebarExpanded, setIsSidebarExpanded] =
@@ -76,6 +79,10 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  if (isBareRoute) {
+    return <>{children}</>;
+  }
 
   if (isHomePage) {
     return (
