@@ -46,7 +46,7 @@ export default function Contact() {
     {
       name: "Email",
       handle: "rusia.n@northeastern.edu",
-      url: "mailto:namanrusia@northeastern.edu",
+      url: "mailto:rusia.n@northeastern.edu",
       icon: AiOutlineMail,
       gradient: "from-red-500 to-pink-600",
       description: "Drop me a line anytime",
