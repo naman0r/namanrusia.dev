@@ -4,11 +4,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useMusic } from "@/contexts/MusicContext";
 import { useEffect, useState } from "react";
 
+// Temporarily disabled: music must never start unprompted.
+// Users start it from the sidebar play button. Flip to true to bring the popup back.
+const SHOW_CONSENT_POPUP = false;
+
 export default function MusicConsentPopup() {
   const { hasConsented, setConsent } = useMusic();
   const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
+    if (!SHOW_CONSENT_POPUP) return;
+
     // Only show popup on landing page and every time they reload
     const isHomePage = window.location.pathname === "/";
     if (isHomePage) {
@@ -24,7 +30,7 @@ export default function MusicConsentPopup() {
     setShowPopup(false);
   };
 
-  if (hasConsented || !showPopup) return null;
+  if (!SHOW_CONSENT_POPUP || hasConsented || !showPopup) return null;
 
   return (
     <AnimatePresence>
