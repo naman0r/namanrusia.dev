@@ -22,16 +22,6 @@ const links = [
     href: "mailto:rusia.n@northeastern.edu",
     icon: AiOutlineMail,
   },
-  {
-    name: "Resume",
-    href: "/resume.pdf",
-    icon: FiFileText,
-  },
-  {
-    name: "Portfolio",
-    href: "/",
-    icon: FiGlobe,
-  },
 ];
 
 export default function LinksPage() {
