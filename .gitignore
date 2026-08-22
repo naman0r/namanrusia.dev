@@ -45,3 +45,6 @@ src/app/misc/_resources/
 # personal / private
 me.md
 public/gallery/
+
+# git worktrees
+.worktrees/

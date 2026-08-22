@@ -30,7 +30,8 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   //const isHomePage = true;
 
   // Bare routes render with no sidebar/chrome at all
-  const isBareRoute = pathname === "/me" || pathname === "/links";
+  const isBareRoute =
+    pathname === "/me" || pathname === "/links";
 
   const isHomePage = !(pathname === "/hehe");
   const defaultSidebarExpanded = isHomePage ? false : true;
