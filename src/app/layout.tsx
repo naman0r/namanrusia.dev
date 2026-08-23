@@ -4,6 +4,7 @@ import "./globals.css";
 import LayoutWrapper from "./LayoutWrapper";
 import { MusicProvider } from "@/contexts/MusicContext";
 import MusicConsentPopup from "@/components/MusicConsentPopup";
+import Analytics from "@/components/Analytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
         <MusicProvider>
           <LayoutWrapper>{children}</LayoutWrapper>
           <MusicConsentPopup />
+          <Analytics />
         </MusicProvider>
       </body>
     </html>
