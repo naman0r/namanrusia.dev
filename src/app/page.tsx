@@ -170,14 +170,22 @@ export default function Home() {
       {/* Hero Section */}
       <motion.section
         style={{ opacity, y }}
-        className="relative min-h-screen flex items-center justify-center px-6"
+        className="relative min-h-screen flex items-center justify-center px-6 py-28"
       >
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.21, 0.47, 0.32, 0.98] }}
           >
+            <div className="inline-flex items-center gap-2.5 mb-8 rounded-full border border-gray-800 bg-white/[0.03] px-3.5 py-1.5 text-[10px] uppercase tracking-[0.18em] text-gray-400">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              </span>
+              Open to Summer 2027 internships and co-ops
+            </div>
+
             <h1 className="text-5xl md:text-7xl font-light mb-8 tracking-tight">
               <span className="text-gray-500 glow">Hey, I'm</span> Naman
             </h1>
@@ -189,6 +197,69 @@ export default function Home() {
               software.
             </p>
           </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 1,
+              delay: 0.35,
+              ease: [0.21, 0.47, 0.32, 0.98],
+            }}
+            className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm"
+          >
+            <Link
+              href="/projects"
+              className="text-gray-300 hover:text-lime-400 transition-colors border-b border-gray-800 hover:border-lime-400/50 pb-0.5"
+            >
+              See my work
+            </Link>
+            <Link
+              href="/resume.pdf"
+              className="text-gray-500 hover:text-sky-400 transition-colors border-b border-transparent hover:border-sky-400/50 pb-0.5"
+            >
+              Resume
+            </Link>
+            <Link
+              href="/experience"
+              className="text-gray-500 hover:text-rose-400 transition-colors border-b border-transparent hover:border-rose-400/50 pb-0.5"
+            >
+              Experience
+            </Link>
+            <a
+              href="mailto:rusia.n@northeastern.edu"
+              className="text-gray-500 hover:text-orange-400 transition-colors border-b border-transparent hover:border-orange-400/50 pb-0.5"
+            >
+              Email me
+            </a>
+          </motion.div>
+
+          <motion.dl
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 1,
+              delay: 0.5,
+              ease: [0.21, 0.47, 0.32, 0.98],
+            }}
+            className="mt-14 grid gap-x-8 gap-y-6 border-t border-gray-900 pt-8 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            {[
+              ["Now", "Director of SWE Track, TAMID"],
+              ["Recently", "SWE Intern at Sonos, SDE Co-op at Philips"],
+              ["Education", "Northeastern \u00b7 CS + Business \u00b7 Apr 2028"],
+              ["Focus", "Backend, cloud and systems \u00b7 Boston, MA"],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt className="text-[10px] uppercase tracking-[0.2em] text-gray-600">
+                  {label}
+                </dt>
+                <dd className="mt-2 text-[13px] leading-relaxed text-gray-400">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </motion.dl>
         </div>
 
         {/* Scroll indicator */}
