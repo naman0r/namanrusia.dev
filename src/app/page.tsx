@@ -3,21 +3,38 @@
 import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
+import {
+  readSidebarExpanded,
+  subscribeToSidebarExpandedChange,
+} from "@/lib/sidebar";
 
 export default function Home() {
+  // The sidebar is fixed and overlays the page, so content needs to clear it.
+  // The mobile/desktop split is pure CSS; only expanded vs collapsed needs state.
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+
+  useEffect(() => {
+    setSidebarExpanded(readSidebarExpanded(false));
+    return subscribeToSidebarExpandedChange(setSidebarExpanded);
+  }, []);
+
+  const contentPadding = `px-6 lg:pr-12 ${
+    sidebarExpanded ? "lg:pl-[280px]" : "lg:pl-[108px]"
+  }`;
+
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
   const y = useTransform(scrollY, [0, 300], [0, -50]);
 
   return (
-    <div className="min-h-screen bg-black/10  text-white overflow-hidden">
+    <div className="min-h-screen bg-black/10 text-[#e9e4da] overflow-hidden">
       {/* Social Icons */}
       <div className="fixed top-20 right-6 md:top-6 z-40 flex gap-4">
         <Link
           href="https://github.com/naman0r"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-500 hover:text-white transition-colors duration-300"
+          className="text-white/45 hover:text-white transition-colors duration-300"
           aria-label="GitHub"
         >
           <svg
@@ -33,7 +50,7 @@ export default function Home() {
           href="https://linkedin.com/in/namanrusia/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-500 hover:text-white transition-colors duration-300"
+          className="text-white/45 hover:text-white transition-colors duration-300"
           aria-label="LinkedIn"
         >
           <svg
@@ -48,8 +65,8 @@ export default function Home() {
       </div>
 
       <div className="">
-        <p className="text-gray-400 text-xs flex flex-col justify-end items-end pr-5 pt-5"></p>
-        <p className="text-gray-400 text-xs flex flex-col justify-end items-end pr-5 pt-2">
+        <p className="text-white/60 text-xs flex flex-col justify-end items-end pr-5 pt-5"></p>
+        <p className="text-white/60 text-xs flex flex-col justify-end items-end pr-5 pt-2">
           {/*📍 Boston, MA*/}
         </p>
       </div>
@@ -170,7 +187,7 @@ export default function Home() {
       {/* Hero Section */}
       <motion.section
         style={{ opacity, y }}
-        className="relative min-h-screen flex items-center justify-center px-6 py-28"
+        className={`relative min-h-screen flex flex-col justify-center py-28 ${contentPadding}`}
       >
         <div className="max-w-4xl mx-auto w-full">
           <motion.div
@@ -178,22 +195,42 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.21, 0.47, 0.32, 0.98] }}
           >
-            <div className="inline-flex items-center gap-2.5 mb-8 rounded-full border border-gray-800 bg-white/[0.03] px-3.5 py-1.5 text-[10px] uppercase tracking-[0.18em] text-gray-400">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              </span>
-              Open to Summer 2027 internships and co-ops
+            <div className="mb-10 flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-white/60">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                </span>
+                Open to Summer 2027 internships and co-ops
+              </div>
+
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-[#e2b07a]/80">
+                <svg
+                  className="h-3 w-3"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                Boston, MA
+              </div>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-light mb-8 tracking-tight">
-              <span className="text-gray-500 glow">Hey, I'm</span> Naman
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light mb-8 leading-[0.95] tracking-tight">
+              <span className="text-white/45 glow">Hey, I'm</span>{" "}
+              <span className="text-[#e2b07a]">Naman</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-gray-400 font-light leading-relaxed max-w-2xl">
+            <p className="text-xl md:text-2xl text-white/60 font-light leading-relaxed max-w-2xl">
               A Computer Science and Business student interested in the
               intersection of Finance, Software, Design and building{" "}
-              <span className="text-gray-200">impactful </span>
+              <span className="text-[#8fb8dd]">impactful </span>
               software.
             </p>
           </motion.div>
@@ -206,29 +243,29 @@ export default function Home() {
               delay: 0.35,
               ease: [0.21, 0.47, 0.32, 0.98],
             }}
-            className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm"
+            className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-3 text-[15px]"
           >
             <Link
               href="/projects"
-              className="text-gray-300 hover:text-lime-400 transition-colors border-b border-gray-800 hover:border-lime-400/50 pb-0.5"
+              className="text-[#8fb8dd] hover:text-[#e9e4da] transition-colors border-b border-[#8fb8dd]/40 hover:border-[#e9e4da]/60 pb-0.5"
             >
               See my work
             </Link>
             <Link
               href="/resume.pdf"
-              className="text-gray-500 hover:text-sky-400 transition-colors border-b border-transparent hover:border-sky-400/50 pb-0.5"
+              className="text-white/45 hover:text-[#e2b07a] transition-colors border-b border-transparent hover:border-[#e2b07a]/50 pb-0.5"
             >
               Resume
             </Link>
             <Link
               href="/experience"
-              className="text-gray-500 hover:text-rose-400 transition-colors border-b border-transparent hover:border-rose-400/50 pb-0.5"
+              className="text-white/45 hover:text-[#8fb8dd] transition-colors border-b border-transparent hover:border-[#8fb8dd]/50 pb-0.5"
             >
               Experience
             </Link>
             <a
               href="mailto:rusia.n@northeastern.edu"
-              className="text-gray-500 hover:text-orange-400 transition-colors border-b border-transparent hover:border-orange-400/50 pb-0.5"
+              className="text-white/45 hover:text-[#e2b07a] transition-colors border-b border-transparent hover:border-[#e2b07a]/50 pb-0.5"
             >
               Email me
             </a>
@@ -242,19 +279,22 @@ export default function Home() {
               delay: 0.5,
               ease: [0.21, 0.47, 0.32, 0.98],
             }}
-            className="mt-14 grid gap-x-8 gap-y-6 border-t border-gray-900 pt-8 sm:grid-cols-2 lg:grid-cols-4"
+            className="mt-20 grid gap-x-8 gap-y-8 border-t border-white/10 pt-10 sm:grid-cols-2 lg:grid-cols-4"
           >
             {[
-              ["Now", "Director of SWE Track, TAMID"],
-              ["Recently", "SWE Intern at Sonos, SDE Co-op at Philips"],
-              ["Education", "Northeastern \u00b7 CS + Business \u00b7 Apr 2028"],
-              ["Focus", "Backend, cloud and systems \u00b7 Boston, MA"],
-            ].map(([label, value]) => (
+              ["Now", "Director of SWE Track, TAMID", "#8fb8dd"],
+              ["Recently", "SWE Intern at Sonos, SDE Co\u2011op at Philips", "#e2b07a"],
+              ["Education", "Northeastern \u00b7 CS + Business, Apr 2028", "#8fb8dd"],
+              ["Focus", "Backend, cloud and systems", "#e2b07a"],
+            ].map(([label, value, accent]) => (
               <div key={label}>
-                <dt className="text-[10px] uppercase tracking-[0.2em] text-gray-600">
+                <dt
+                  className="text-[11px] uppercase tracking-[0.2em]"
+                  style={{ color: accent, opacity: 0.75 }}
+                >
                   {label}
                 </dt>
-                <dd className="mt-2 text-[13px] leading-relaxed text-gray-400">
+                <dd className="mt-3 text-[14px] leading-relaxed text-white/70">
                   {value}
                 </dd>
               </div>
@@ -272,19 +312,19 @@ export default function Home() {
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="w-5 h-8 border border-gray-700 rounded-full flex justify-center"
+            className="w-5 h-8 border border-white/20 rounded-full flex justify-center"
           >
             <motion.div
               animate={{ y: [0, 12, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="w-0.5 h-2 bg-gray-600 rounded-full mt-2"
+              className="w-0.5 h-2 bg-white/40 rounded-full mt-2"
             />
           </motion.div>
         </motion.div>
       </motion.section>
 
       {/* Philosophy Section */}
-      <section className="relative py-32 px-6">
+      <section className={`relative py-32 ${contentPadding}`}>
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
@@ -292,11 +332,11 @@ export default function Home() {
             transition={{ duration: 1 }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <h2 className="text-sm uppercase tracking-[0.2em] text-gray-600 mb-12">
+            <h2 className="text-sm uppercase tracking-[0.2em] text-[#e2b07a]/70 mb-12">
               Philosophy
             </h2>
 
-            <div className="space-y-8 text-gray-300 leading-relaxed">
+            <div className="space-y-8 text-white/70 leading-relaxed">
               <p className="text-2xl md:text-3xl font-light text-white">
                 Code is a medium for thought.
               </p>
@@ -320,7 +360,7 @@ export default function Home() {
       </section>
 
       {/* Background Section */}
-      <section className="relative py-32 px-6">
+      <section className={`relative py-32 ${contentPadding}`}>
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
@@ -328,7 +368,7 @@ export default function Home() {
             transition={{ duration: 1 }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <h2 className="text-sm uppercase tracking-[0.2em] text-gray-600 mb-12">
+            <h2 className="text-sm uppercase tracking-[0.2em] text-[#8fb8dd]/70 mb-12">
               Background
             </h2>
 
@@ -337,7 +377,7 @@ export default function Home() {
                 <h3 className="text-xl font-light text-white mb-4">
                   Background
                 </h3>
-                <p className="text-gray-400 leading-relaxed">
+                <p className="text-white/60 leading-relaxed">
                   I grew up in 3 separate countries. I was born in the{" "}
                   <span className="hover:text-red-300">US</span>, but lived in{" "}
                   <span className="hover:text-green-300">India</span> and{" "}
@@ -360,7 +400,7 @@ export default function Home() {
 
               <div>
                 <h3 className="text-xl font-light text-white mb-4">Focus</h3>
-                <p className="text-gray-400 leading-relaxed">
+                <p className="text-white/60 leading-relaxed">
                   I love learning. Outside of internships and classes, I love
                   taking on side projects and learning something new every
                   couple of days. Recently I've been learning about Neural
@@ -407,7 +447,7 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-12 pt-20">
               <div>
                 <h3 className="text-xl font-light text-white mb-4">College</h3>
-                <p className="text-gray-400 leading-relaxed">
+                <p className="text-white/60 leading-relaxed">
                   I love exploring outside of classrooms. Over the course of my
                   time at Northeastern University, I have been involved with{" "}
                   <Link
@@ -464,7 +504,7 @@ export default function Home() {
 
               <div>
                 <h3 className="text-xl font-light text-white mb-4">Journey</h3>
-                <p className="text-gray-400 leading-relaxed">
+                <p className="text-white/60 leading-relaxed">
                   I haven't been coding since I was six. I picked up a few CS
                   classes in high school, but my 'eureka' moment came during my
                   first semester of college, where I had a project idea that I
@@ -486,8 +526,8 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="mt-16 pt-16 border-t border-gray-900">
-              <p className="text-gray-500 text-sm">
+            <div className="mt-16 pt-16 border-t border-white/10">
+              <p className="text-white/45 text-sm">
                 Would always love to chat! Reach out to me through LinkedIn or
                 Email: rusia.n[at]northeastern[dot]edu . Please also check out
                 the rest of the pages of my personal website! Although this one
@@ -513,25 +553,25 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="relative py-12 px-6 border-t border-gray-900">
+      <footer className={`relative py-12 border-t border-white/10 ${contentPadding}`}>
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <p className="text-gray-600 text-sm">Made with ❤️ by Naman</p>
+          <p className="text-white/35 text-sm">Made with ❤️ by Naman</p>
           <div className="flex space-x-6">
             <Link
               href="https://github.com/naman0r"
-              className="text-gray-600 hover:text-lime-400 transition-colors text-sm hover:underline"
+              className="text-white/35 hover:text-lime-400 transition-colors text-sm hover:underline"
             >
               GitHub
             </Link>
             <Link
               href="https://linkedin.com/in/namanrusia/"
-              className="text-gray-600 hover:text-rose-400 transition-colors text-sm hover:underline"
+              className="text-white/35 hover:text-rose-400 transition-colors text-sm hover:underline"
             >
               LinkedIn
             </Link>
             <Link
-              href="mailto:rusia.n@northreastern.edu"
-              className="text-gray-600 hover:text-sky-400 transition-colors text-sm hover:underline"
+              href="mailto:rusia.n@northeastern.edu"
+              className="text-white/35 hover:text-sky-400 transition-colors text-sm hover:underline"
             >
               Email
             </Link>
