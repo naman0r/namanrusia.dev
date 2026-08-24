@@ -385,7 +385,7 @@ export default function Home() {
 
             <div className="grid md:grid-cols-2 gap-12">
               <div>
-                <h3 className="text-xl font-light text-white mb-4">
+                <h3 className="text-xl font-light text-[#e9e4da] mb-4">
                   Background
                 </h3>
                 <p className="text-white/60 leading-relaxed">
@@ -393,28 +393,23 @@ export default function Home() {
                   <span className="hover:text-red-300">US</span>, but lived in{" "}
                   <span className="hover:text-green-300">India</span> and{" "}
                   <span className="hover:text-red-600">Singapore</span> for most
-                  of my childhood. Having such a diverse upbringing is something
-                  that I am immensemly grateful for. During High School in
-                  Singapore, I was obsessed with entrepreneurship and building.
-                  I co-founded my High School's Entrepreneurship Club, and lead
-                  us to winning the JA (Junior Achievement) Company of The Year
-                  competition(Most promising category) during my Junior year.
-                  This experience was pivotal for me, and got me interested in
-                  the technical side of building. I highlight this experience
-                  because it was the first time I was able to build something
-                  that I was proud of, and it lead me to wanting to major in
-                  Computer Science and Business Administration: mixing my
-                  passion for entrepreneurship and impact with my interest in
-                  the Technical Aspect.
+                  of my childhood. During high school in Singapore I was
+                  obsessed with entrepreneurship and building. I co-founded my
+                  school's Entrepreneurship Club and led us to win the JA
+                  (Junior Achievement) Company of The Year competition, Most
+                  Promising category, during my junior year. It got me
+                  interested in the technical side of building. That was the
+                  first thing I built that I was proud of, and it's why I picked
+                  Computer Science and Business Administration.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-light text-white mb-4">Focus</h3>
+                <h3 className="text-xl font-light text-[#e9e4da] mb-4">Focus</h3>
                 <p className="text-white/60 leading-relaxed">
-                  I love learning. Outside of internships and classes, I love
-                  taking on side projects and learning something new every
-                  couple of days. Recently I've been learning about Neural
+                  Outside of internships and classes I take on side projects
+                  and learn something new every couple of days. Recently that's
+                  been Neural
                   Networks and their implementation with the help of{" "}
                   <Link
                     href="https://youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ&si=HDnjdU1r9EJlTFqt"
@@ -432,17 +427,17 @@ export default function Home() {
                     TandemCode
                   </Link>{" "}
                   to explore how I can build a social platform which further
-                  incentivizes with peer-aided tech interview prep. Click{" "}
+                  incentivizes peer-aided tech interview prep. Click{" "}
                   <Link
                     href="/projects/tandemcode"
                     className="underline hover:text-lime-400"
                   >
                     here
                   </Link>{" "}
-                  to learn more about the project!
+                  to learn more about the project.
                   <br />
-                  <br />I also have completed internships at Startups to explore
-                  my passion in the intersection of Tech and Entrepreneurship. I
+                  <br />I also have completed internships at startups to explore
+                  the intersection of tech and entrepreneurship. I
                   recently interned at{" "}
                   <Link
                     href="https://www.venu3d.com/"
@@ -450,16 +445,16 @@ export default function Home() {
                   >
                     Venu AI
                   </Link>
-                  , a Y-Combinator backed startup, where I got a lot of agency
-                  to build out end-to-end core features!
+                  , a Y Combinator backed startup, where I had a lot of agency
+                  to build core features end to end.
                 </p>
               </div>
             </div>
             <div className="grid md:grid-cols-2 gap-12 pt-20">
               <div>
-                <h3 className="text-xl font-light text-white mb-4">College</h3>
+                <h3 className="text-xl font-light text-[#e9e4da] mb-4">College</h3>
                 <p className="text-white/60 leading-relaxed">
-                  I love exploring outside of classrooms. Over the course of my
+                  Over the course of my
                   time at Northeastern University, I have been involved with{" "}
                   <Link
                     href="https://www.forgenu.com/home"
@@ -473,8 +468,8 @@ export default function Home() {
                   <Link href="" className="underline hover:text-blue-500">
                     TAMID at Northeastern
                   </Link>
-                  , a multi-facited organization where I met some of the best
-                  people and also made some cool technical projects as a part of
+                  , a multi-faceted organization where I've shipped technical
+                  projects as part of
                   their{" "}
                   <span className="hover:text-blue-400">Tech Consulting</span>{" "}
                   track. Over the past 2 semesters, I have also been involved
@@ -485,7 +480,7 @@ export default function Home() {
                   >
                     Code4Community
                   </Link>
-                  , a pro-bono software consultancy.Through C4C, I worked on 2
+                  , a pro-bono software consultancy. Through C4C I worked on 2
                   projects: an internal recruitment dashboard and a software
                   project for{" "}
                   <Link
@@ -508,45 +503,40 @@ export default function Home() {
                   >
                     NUtrition
                   </Link>
-                  , a dining hall macroneutrient tracker for Northeastern
+                  , a dining hall macronutrient tracker for Northeastern
                   University students.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-light text-white mb-4">Journey</h3>
+                <h3 className="text-xl font-light text-[#e9e4da] mb-4">Journey</h3>
                 <p className="text-white/60 leading-relaxed">
                   I haven't been coding since I was six. I picked up a few CS
                   classes in high school, but my 'eureka' moment came during my
                   first semester of college, where I had a project idea that I
-                  got obsessed with. Ever since, coding is my creative outlet. I
-                  love building cool and impactful software. Take a look at my{" "}
+                  got obsessed with. I've been building ever since. Take a look
+                  at my{" "}
                   <Link href="/projects" className="underline">
                     projects
                   </Link>{" "}
-                  to learn more about the problems I've endevoured to solve.
+                  for the problems I've worked on.
                   <br />
                   <br />
-                  Apart from coding, I love hanging out with my friends, going
-                  to the gym, and travelling (16 countries and counting!). I
-                  have also come to love to cook (havent burned down anything
-                  yet). I am also hugely adicted to Clash Royale (message me to
-                  play if you think you can beat me). I have also been getting
-                  into watching F1 recently.
+                  Apart from coding: friends, the gym, and travelling, 16
+                  countries so far. I've come to love cooking. I'm hugely
+                  addicted to Clash Royale. And I've been getting into F1.
                 </p>
               </div>
             </div>
 
             <div className="mt-16 pt-16 border-t border-white/10">
               <p className="text-white/45 text-sm">
-                Would always love to chat! Reach out to me through LinkedIn or
-                Email: rusia.n[at]northeastern[dot]edu . Please also check out
-                the rest of the pages of my personal website! Although this one
-                was text-heavy, the other pages are a lot more engaging and
-                grounded in immersion and interactivity.
+                Always up for a chat. Reach me through LinkedIn or at
+                rusia.n[at]northeastern[dot]edu. This page is the text-heavy
+                one; the rest of the site is more interactive.
                 <br />
                 <br />
-                you can view the source code for this website{" "}
+                You can view the source code for this website{" "}
                 <Link
                   href="https://github.com/naman0r/namanrusia.dev"
                   className="underline"
