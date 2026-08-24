@@ -3,21 +3,38 @@
 import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
+import {
+  readSidebarExpanded,
+  subscribeToSidebarExpandedChange,
+} from "@/lib/sidebar";
 
 export default function Home() {
+  // The sidebar is fixed and overlays the page, so content needs to clear it.
+  // The mobile/desktop split is pure CSS; only expanded vs collapsed needs state.
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+
+  useEffect(() => {
+    setSidebarExpanded(readSidebarExpanded(false));
+    return subscribeToSidebarExpandedChange(setSidebarExpanded);
+  }, []);
+
+  const contentPadding = `px-6 lg:pr-12 ${
+    sidebarExpanded ? "lg:pl-[280px]" : "lg:pl-[108px]"
+  }`;
+
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
   const y = useTransform(scrollY, [0, 300], [0, -50]);
 
   return (
-    <div className="min-h-screen bg-black/10  text-white overflow-hidden">
+    <div className="min-h-screen bg-black/10 text-[#e9e4da] overflow-hidden">
       {/* Social Icons */}
       <div className="fixed top-20 right-6 md:top-6 z-40 flex gap-4">
         <Link
           href="https://github.com/naman0r"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-500 hover:text-white transition-colors duration-300"
+          className="text-white/45 hover:text-white transition-colors duration-300"
           aria-label="GitHub"
         >
           <svg
@@ -33,7 +50,7 @@ export default function Home() {
           href="https://linkedin.com/in/namanrusia/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-500 hover:text-white transition-colors duration-300"
+          className="text-white/45 hover:text-white transition-colors duration-300"
           aria-label="LinkedIn"
         >
           <svg
@@ -48,8 +65,8 @@ export default function Home() {
       </div>
 
       <div className="">
-        <p className="text-gray-400 text-xs flex flex-col justify-end items-end pr-5 pt-5"></p>
-        <p className="text-gray-400 text-xs flex flex-col justify-end items-end pr-5 pt-2">
+        <p className="text-white/60 text-xs flex flex-col justify-end items-end pr-5 pt-5"></p>
+        <p className="text-white/60 text-xs flex flex-col justify-end items-end pr-5 pt-2">
           {/*📍 Boston, MA*/}
         </p>
       </div>
@@ -170,25 +187,130 @@ export default function Home() {
       {/* Hero Section */}
       <motion.section
         style={{ opacity, y }}
-        className="relative min-h-screen flex items-center justify-center px-6"
+        className={`relative min-h-screen flex flex-col justify-center py-28 ${contentPadding}`}
       >
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.21, 0.47, 0.32, 0.98] }}
           >
-            <h1 className="text-5xl md:text-7xl font-light mb-8 tracking-tight">
-              <span className="text-gray-500 glow">Hey, I'm</span> Naman
+            <div className="mb-10 flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-white/60">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                </span>
+                Open to Summer 2027 and Spring 2027 co-ops/internships
+              </div>
+
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-[#e2b07a]/80">
+                <svg
+                  className="h-3 w-3"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                Boston, MA
+              </div>
+            </div>
+
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light mb-8 leading-[0.95] tracking-tight">
+              <span className="text-white/45 glow">Hey, I'm</span>{" "}
+              <span className="text-[#e2b07a]">Naman</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-gray-400 font-light leading-relaxed max-w-2xl">
-              A Computer Science and Business student interested in the
-              intersection of Finance, Software, Design and building{" "}
-              <span className="text-gray-200">impactful </span>
-              software.
+            <p className="text-xl md:text-2xl text-white/60 font-light leading-relaxed max-w-2xl">
+              I'm drawn to creating{" "}
+              <span className="text-[#8fb8dd]">impact </span>
+              through software, and connecting ideas, people and code.
             </p>
           </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 1,
+              delay: 0.35,
+              ease: [0.21, 0.47, 0.32, 0.98],
+            }}
+            className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-3 text-[15px]"
+          >
+            <Link
+              href="/projects"
+              className="text-[#8fb8dd] hover:text-[#e9e4da] transition-colors border-b border-[#8fb8dd]/40 hover:border-[#e9e4da]/60 pb-0.5"
+            >
+              See my work
+            </Link>
+            <Link
+              href="/resume.pdf"
+              className="text-white/45 hover:text-[#e2b07a] transition-colors border-b border-transparent hover:border-[#e2b07a]/50 pb-0.5"
+            >
+              Resume
+            </Link>
+            <Link
+              href="/experience"
+              className="text-white/45 hover:text-[#8fb8dd] transition-colors border-b border-transparent hover:border-[#8fb8dd]/50 pb-0.5"
+            >
+              Experience
+            </Link>
+            <a
+              href="mailto:rusia.n@northeastern.edu"
+              className="text-white/45 hover:text-[#e2b07a] transition-colors border-b border-transparent hover:border-[#e2b07a]/50 pb-0.5"
+            >
+              Email me
+            </a>
+          </motion.div>
+
+          <motion.dl
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 1,
+              delay: 0.5,
+              ease: [0.21, 0.47, 0.32, 0.98],
+            }}
+            className="mt-20 grid gap-x-8 gap-y-8 border-t border-white/10 pt-10 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            {[
+              [
+                "Now",
+                "Director of SWE Track, TAMID; Creator of this ridiculous website",
+                "#8fb8dd",
+              ],
+              [
+                "Previously",
+                "SWE Intern at Sonos, Philips Healthcare (and more!)",
+                "#e2b07a",
+              ],
+              [
+                "Education",
+                "Northeastern \u00b7 CS + Business, Apr 2028",
+                "#8fb8dd",
+              ],
+              ["Focus", "Backend, cloud and systems", "#e2b07a"],
+            ].map(([label, value, accent]) => (
+              <div key={label}>
+                <dt
+                  className="text-[11px] uppercase tracking-[0.2em]"
+                  style={{ color: accent, opacity: 0.75 }}
+                >
+                  {label}
+                </dt>
+                <dd className="mt-3 text-[14px] leading-relaxed text-white/70">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </motion.dl>
         </div>
 
         {/* Scroll indicator */}
@@ -201,19 +323,19 @@ export default function Home() {
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="w-5 h-8 border border-gray-700 rounded-full flex justify-center"
+            className="w-5 h-8 border border-white/20 rounded-full flex justify-center"
           >
             <motion.div
               animate={{ y: [0, 12, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="w-0.5 h-2 bg-gray-600 rounded-full mt-2"
+              className="w-0.5 h-2 bg-white/40 rounded-full mt-2"
             />
           </motion.div>
         </motion.div>
       </motion.section>
 
       {/* Philosophy Section */}
-      <section className="relative py-32 px-6">
+      <section className={`relative py-32 ${contentPadding}`}>
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
@@ -221,11 +343,11 @@ export default function Home() {
             transition={{ duration: 1 }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <h2 className="text-sm uppercase tracking-[0.2em] text-gray-600 mb-12">
+            <h2 className="text-sm uppercase tracking-[0.2em] text-[#e2b07a]/70 mb-12">
               Philosophy
             </h2>
 
-            <div className="space-y-8 text-gray-300 leading-relaxed">
+            <div className="space-y-8 text-white/70 leading-relaxed">
               <p className="text-2xl md:text-3xl font-light text-white">
                 Code is a medium for thought.
               </p>
@@ -249,7 +371,7 @@ export default function Home() {
       </section>
 
       {/* Background Section */}
-      <section className="relative py-32 px-6">
+      <section className={`relative py-32 ${contentPadding}`}>
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
@@ -257,42 +379,37 @@ export default function Home() {
             transition={{ duration: 1 }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <h2 className="text-sm uppercase tracking-[0.2em] text-gray-600 mb-12">
+            <h2 className="text-sm uppercase tracking-[0.2em] text-[#8fb8dd]/70 mb-12">
               Background
             </h2>
 
             <div className="grid md:grid-cols-2 gap-12">
               <div>
-                <h3 className="text-xl font-light text-white mb-4">
+                <h3 className="text-xl font-light text-[#e9e4da] mb-4">
                   Background
                 </h3>
-                <p className="text-gray-400 leading-relaxed">
+                <p className="text-white/60 leading-relaxed">
                   I grew up in 3 separate countries. I was born in the{" "}
                   <span className="hover:text-red-300">US</span>, but lived in{" "}
                   <span className="hover:text-green-300">India</span> and{" "}
                   <span className="hover:text-red-600">Singapore</span> for most
-                  of my childhood. Having such a diverse upbringing is something
-                  that I am immensemly grateful for. During High School in
-                  Singapore, I was obsessed with entrepreneurship and building.
-                  I co-founded my High School's Entrepreneurship Club, and lead
-                  us to winning the JA (Junior Achievement) Company of The Year
-                  competition(Most promising category) during my Junior year.
-                  This experience was pivotal for me, and got me interested in
-                  the technical side of building. I highlight this experience
-                  because it was the first time I was able to build something
-                  that I was proud of, and it lead me to wanting to major in
-                  Computer Science and Business Administration: mixing my
-                  passion for entrepreneurship and impact with my interest in
-                  the Technical Aspect.
+                  of my childhood. During high school in Singapore I was
+                  obsessed with entrepreneurship and building. I co-founded my
+                  school's Entrepreneurship Club and led us to win the JA
+                  (Junior Achievement) Company of The Year competition, Most
+                  Promising category, during my junior year. It got me
+                  interested in the technical side of building. That was the
+                  first thing I built that I was proud of, and it's why I picked
+                  Computer Science and Business Administration.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-light text-white mb-4">Focus</h3>
-                <p className="text-gray-400 leading-relaxed">
-                  I love learning. Outside of internships and classes, I love
-                  taking on side projects and learning something new every
-                  couple of days. Recently I've been learning about Neural
+                <h3 className="text-xl font-light text-[#e9e4da] mb-4">Focus</h3>
+                <p className="text-white/60 leading-relaxed">
+                  Outside of internships and classes I take on side projects
+                  and learn something new every couple of days. Recently that's
+                  been Neural
                   Networks and their implementation with the help of{" "}
                   <Link
                     href="https://youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ&si=HDnjdU1r9EJlTFqt"
@@ -310,17 +427,17 @@ export default function Home() {
                     TandemCode
                   </Link>{" "}
                   to explore how I can build a social platform which further
-                  incentivizes with peer-aided tech interview prep. Click{" "}
+                  incentivizes peer-aided tech interview prep. Click{" "}
                   <Link
                     href="/projects/tandemcode"
                     className="underline hover:text-lime-400"
                   >
                     here
                   </Link>{" "}
-                  to learn more about the project!
+                  to learn more about the project.
                   <br />
-                  <br />I also have completed internships at Startups to explore
-                  my passion in the intersection of Tech and Entrepreneurship. I
+                  <br />I also have completed internships at startups to explore
+                  the intersection of tech and entrepreneurship. I
                   recently interned at{" "}
                   <Link
                     href="https://www.venu3d.com/"
@@ -328,16 +445,16 @@ export default function Home() {
                   >
                     Venu AI
                   </Link>
-                  , a Y-Combinator backed startup, where I got a lot of agency
-                  to build out end-to-end core features!
+                  , a Y Combinator backed startup, where I had a lot of agency
+                  to build core features end to end.
                 </p>
               </div>
             </div>
             <div className="grid md:grid-cols-2 gap-12 pt-20">
               <div>
-                <h3 className="text-xl font-light text-white mb-4">College</h3>
-                <p className="text-gray-400 leading-relaxed">
-                  I love exploring outside of classrooms. Over the course of my
+                <h3 className="text-xl font-light text-[#e9e4da] mb-4">College</h3>
+                <p className="text-white/60 leading-relaxed">
+                  Over the course of my
                   time at Northeastern University, I have been involved with{" "}
                   <Link
                     href="https://www.forgenu.com/home"
@@ -351,8 +468,8 @@ export default function Home() {
                   <Link href="" className="underline hover:text-blue-500">
                     TAMID at Northeastern
                   </Link>
-                  , a multi-facited organization where I met some of the best
-                  people and also made some cool technical projects as a part of
+                  , a multi-faceted organization where I've shipped technical
+                  projects as part of
                   their{" "}
                   <span className="hover:text-blue-400">Tech Consulting</span>{" "}
                   track. Over the past 2 semesters, I have also been involved
@@ -363,7 +480,7 @@ export default function Home() {
                   >
                     Code4Community
                   </Link>
-                  , a pro-bono software consultancy.Through C4C, I worked on 2
+                  , a pro-bono software consultancy. Through C4C I worked on 2
                   projects: an internal recruitment dashboard and a software
                   project for{" "}
                   <Link
@@ -386,45 +503,40 @@ export default function Home() {
                   >
                     NUtrition
                   </Link>
-                  , a dining hall macroneutrient tracker for Northeastern
+                  , a dining hall macronutrient tracker for Northeastern
                   University students.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-light text-white mb-4">Journey</h3>
-                <p className="text-gray-400 leading-relaxed">
+                <h3 className="text-xl font-light text-[#e9e4da] mb-4">Journey</h3>
+                <p className="text-white/60 leading-relaxed">
                   I haven't been coding since I was six. I picked up a few CS
                   classes in high school, but my 'eureka' moment came during my
                   first semester of college, where I had a project idea that I
-                  got obsessed with. Ever since, coding is my creative outlet. I
-                  love building cool and impactful software. Take a look at my{" "}
+                  got obsessed with. I've been building ever since. Take a look
+                  at my{" "}
                   <Link href="/projects" className="underline">
                     projects
                   </Link>{" "}
-                  to learn more about the problems I've endevoured to solve.
+                  for the problems I've worked on.
                   <br />
                   <br />
-                  Apart from coding, I love hanging out with my friends, going
-                  to the gym, and travelling (16 countries and counting!). I
-                  have also come to love to cook (havent burned down anything
-                  yet). I am also hugely adicted to Clash Royale (message me to
-                  play if you think you can beat me). I have also been getting
-                  into watching F1 recently.
+                  Apart from coding: friends, the gym, and travelling, 16
+                  countries so far. I've come to love cooking. I'm hugely
+                  addicted to Clash Royale. And I've been getting into F1.
                 </p>
               </div>
             </div>
 
-            <div className="mt-16 pt-16 border-t border-gray-900">
-              <p className="text-gray-500 text-sm">
-                Would always love to chat! Reach out to me through LinkedIn or
-                Email: rusia.n[at]northeastern[dot]edu . Please also check out
-                the rest of the pages of my personal website! Although this one
-                was text-heavy, the other pages are a lot more engaging and
-                grounded in immersion and interactivity.
+            <div className="mt-16 pt-16 border-t border-white/10">
+              <p className="text-white/45 text-sm">
+                Always up for a chat. Reach me through LinkedIn or at
+                rusia.n[at]northeastern[dot]edu. This page is the text-heavy
+                one; the rest of the site is more interactive.
                 <br />
                 <br />
-                you can view the source code for this website{" "}
+                You can view the source code for this website{" "}
                 <Link
                   href="https://github.com/naman0r/namanrusia.dev"
                   className="underline"
@@ -442,25 +554,27 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="relative py-12 px-6 border-t border-gray-900">
+      <footer
+        className={`relative py-12 border-t border-white/10 ${contentPadding}`}
+      >
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <p className="text-gray-600 text-sm">Made with ❤️ by Naman</p>
+          <p className="text-white/35 text-sm">Made with ❤️ by Naman</p>
           <div className="flex space-x-6">
             <Link
               href="https://github.com/naman0r"
-              className="text-gray-600 hover:text-lime-400 transition-colors text-sm hover:underline"
+              className="text-white/35 hover:text-lime-400 transition-colors text-sm hover:underline"
             >
               GitHub
             </Link>
             <Link
               href="https://linkedin.com/in/namanrusia/"
-              className="text-gray-600 hover:text-rose-400 transition-colors text-sm hover:underline"
+              className="text-white/35 hover:text-rose-400 transition-colors text-sm hover:underline"
             >
               LinkedIn
             </Link>
             <Link
-              href="mailto:rusia.n@northreastern.edu"
-              className="text-gray-600 hover:text-sky-400 transition-colors text-sm hover:underline"
+              href="mailto:rusia.n@northeastern.edu"
+              className="text-white/35 hover:text-sky-400 transition-colors text-sm hover:underline"
             >
               Email
             </Link>
