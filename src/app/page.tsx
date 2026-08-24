@@ -201,7 +201,7 @@ export default function Home() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 </span>
-                Open to Summer 2027 internships and co-ops
+                Open to Summer 2027 and Spring 2027 co-ops/internships
               </div>
 
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-[#e2b07a]/80">
@@ -228,10 +228,9 @@ export default function Home() {
             </h1>
 
             <p className="text-xl md:text-2xl text-white/60 font-light leading-relaxed max-w-2xl">
-              A Computer Science and Business student interested in the
-              intersection of Finance, Software, Design and building{" "}
-              <span className="text-[#8fb8dd]">impactful </span>
-              software.
+              I'm drawn to creating{" "}
+              <span className="text-[#8fb8dd]">impact </span>
+              through software, and connecting ideas, people and code.
             </p>
           </motion.div>
 
@@ -282,9 +281,21 @@ export default function Home() {
             className="mt-20 grid gap-x-8 gap-y-8 border-t border-white/10 pt-10 sm:grid-cols-2 lg:grid-cols-4"
           >
             {[
-              ["Now", "Director of SWE Track, TAMID", "#8fb8dd"],
-              ["Recently", "SWE Intern at Sonos, SDE Co\u2011op at Philips", "#e2b07a"],
-              ["Education", "Northeastern \u00b7 CS + Business, Apr 2028", "#8fb8dd"],
+              [
+                "Now",
+                "Director of SWE Track, TAMID; Creator of this ridiculous website",
+                "#8fb8dd",
+              ],
+              [
+                "Previously",
+                "SWE Intern at Sonos, Philips Healthcare (and more!)",
+                "#e2b07a",
+              ],
+              [
+                "Education",
+                "Northeastern \u00b7 CS + Business, Apr 2028",
+                "#8fb8dd",
+              ],
               ["Focus", "Backend, cloud and systems", "#e2b07a"],
             ].map(([label, value, accent]) => (
               <div key={label}>
@@ -553,7 +564,9 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className={`relative py-12 border-t border-white/10 ${contentPadding}`}>
+      <footer
+        className={`relative py-12 border-t border-white/10 ${contentPadding}`}
+      >
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <p className="text-white/35 text-sm">Made with ❤️ by Naman</p>
           <div className="flex space-x-6">
