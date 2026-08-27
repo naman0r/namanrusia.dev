@@ -92,8 +92,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navigationItems = useMemo(
     () => [
       { icon: AiOutlineHome, label: "Home", href: "/" },
-      { icon: RiRocketLine, label: "Projects", href: "/projects" },
       { icon: HiOutlineBriefcase, label: "Experience", href: "/experience" },
+      { icon: RiRocketLine, label: "Projects", href: "/projects" },
       { icon: IoTerminal, label: "Terminal", href: "/terminal" },
       //{ icon: RiCoupon3Fill, label: "Misc", href: "/misc" },
       //{ icon: HiOutlinePencilAlt, label: "Thoughts", href: "/blogs" },
