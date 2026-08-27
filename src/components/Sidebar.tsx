@@ -92,16 +92,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navigationItems = useMemo(
     () => [
       { icon: AiOutlineHome, label: "Home", href: "/" },
-      { icon: RiRocketLine, label: "Projects", href: "/projects" },
       { icon: HiOutlineBriefcase, label: "Experience", href: "/experience" },
+      { icon: RiRocketLine, label: "Projects", href: "/projects" },
       { icon: IoTerminal, label: "Terminal", href: "/terminal" },
       //{ icon: RiCoupon3Fill, label: "Misc", href: "/misc" },
       //{ icon: HiOutlinePencilAlt, label: "Thoughts", href: "/blogs" },
-      //{ icon: AiOutlineUser, label: "About", href: "/about" },
       //{ icon: AiOutlineMail, label: "Contact", href: "/contact" },
       //{ icon: HiOutlineWrench, label: "Tools", href: "/tools" },
-
-      { icon: FaComputer, label: "Playground", href: "/playground" },
+      //{ icon: FaComputer, label: "Playground", href: "/playground" },
       //{ icon: HiOutlinePencilAlt, label: "Thoughts", href: "/blogs" },
     ],
     [],
@@ -416,7 +414,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation */}
-        <nav className="mt-1 flex-1 overflow-y-auto px-1">
+        <nav className="mt-1 shrink-0 overflow-y-auto overflow-x-hidden px-1">
           <ul className="flex flex-col gap-1">
             {navigationItems.map((n) => (
               <RailItem
@@ -430,18 +428,25 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Divider after navigation */}
           <div className="my-4 mx-auto w-8 h-px bg-white/10"></div>
-
-          {/* Expand hint when collapsed */}
-          {!isMobile && !isExpanded && (
-            <div className="flex flex-col items-center gap-2 px-1 py-3">
-              <div className="w-6 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
-              <div className="text-[10px] text-gray-500 text-center rotate-90 whitespace-nowrap select-none">
-                Click to expand
-              </div>
-              <div className="w-6 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
-            </div>
-          )}
         </nav>
+
+        {/* Expand hint when collapsed. Kept outside <nav> so it can never make
+            the navigation scrollable, and set with writing-mode rather than
+            rotate-90 so it occupies a real vertical box instead of overflowing
+            a 13px-tall one. */}
+        {!isMobile && !isExpanded && (
+          <div className="flex shrink-0 justify-center px-1 pt-1 pb-3">
+            <span
+              className="select-none whitespace-nowrap text-[10px] tracking-wider text-gray-500"
+              style={{ writingMode: "vertical-rl" }}
+            >
+              Click to expand
+            </span>
+          </div>
+        )}
+
+        {/* absorbs the leftover height so the footer stays pinned to the bottom */}
+        <div className="min-h-0 flex-1" />
 
         {/* Expand/Collapse Button for Desktop */}
         {!isMobile && (

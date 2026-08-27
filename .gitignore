@@ -50,3 +50,5 @@ src/app/landing-lab
 
 # git worktrees
 .worktrees/
+
+src/app/experience-lab/

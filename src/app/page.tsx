@@ -18,6 +18,18 @@ export default function Home() {
     return subscribeToSidebarExpandedChange(setSidebarExpanded);
   }, []);
 
+  // Mobile browsers resize the viewport as the URL bar hides and shows, which
+  // makes the scroll-linked hero fade jump around. Skip it on phones.
+  const [isPhone, setIsPhone] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsPhone(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
   const contentPadding = `px-6 lg:pr-12 ${
     sidebarExpanded ? "lg:pl-[280px]" : "lg:pl-[108px]"
   }`;
@@ -186,7 +198,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <motion.section
-        style={{ opacity, y }}
+        style={isPhone ? { opacity: 1, y: 0 } : { opacity, y }}
         className={`relative min-h-screen flex flex-col justify-center py-28 ${contentPadding}`}
       >
         <div className="max-w-4xl mx-auto w-full">
