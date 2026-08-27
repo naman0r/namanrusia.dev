@@ -1,9 +1,27 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import {
+  readSidebarExpanded,
+  subscribeToSidebarExpandedChange,
+} from "@/lib/sidebar";
 
 export default function Experience() {
+  // The sidebar is fixed and overlays the page, so content has to clear it.
+  // The mobile/desktop split is pure CSS; only expanded vs collapsed needs state.
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+
+  useEffect(() => {
+    setSidebarExpanded(readSidebarExpanded(false));
+    return subscribeToSidebarExpandedChange(setSidebarExpanded);
+  }, []);
+
+  const contentPadding = `px-6 lg:pr-12 ${
+    sidebarExpanded ? "lg:pl-[280px]" : "lg:pl-[108px]"
+  }`;
+
   const experiences = [
     /*     {
       company: "Sonos",
@@ -107,7 +125,9 @@ export default function Experience() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white py-12 px-6">
+    <div
+      className={`min-h-screen bg-black text-white py-12 transition-[padding] duration-300 ${contentPadding}`}
+    >
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
