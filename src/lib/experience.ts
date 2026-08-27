@@ -25,7 +25,7 @@ export const roles: Role[] = [
     title: "Software Engineering Intern, iOS App Experience",
     short: "SWE Intern, iOS",
     blurb:
-      "Worked on several exciting user facing features for the Sonos iOS app. Implemented 3 major features from the ground up, implementing telemetry and architecting the feature. ",
+      "Worked on several exciting user facing features for the Sonos iOS app. Implemented 3 major features from the ground up, implementing telemetry and architecting the features. Will come back and update when the features GA and I can share screenshots :) ",
     location: "Boston, MA",
     period: "Jun — Aug 2026",
     start: 2026.417,
@@ -329,4 +329,3 @@ export const orgLogos: Record<string, string> = {
   Forge: "/logos/forge.jpg",
   "Oasis at Northeastern": "/logos/oasis.png",
 };
-
