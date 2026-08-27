@@ -50,3 +50,6 @@ src/app/landing-lab
 
 # git worktrees
 .worktrees/
+
+# local-only design lab, kept in the worktree for refinements
+src/app/experience-lab/
