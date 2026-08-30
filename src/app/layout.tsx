@@ -5,6 +5,7 @@ import LayoutWrapper from "./LayoutWrapper";
 import { MusicProvider } from "@/contexts/MusicContext";
 import MusicConsentPopup from "@/components/MusicConsentPopup";
 import Analytics from "@/components/Analytics";
+import { siteUrl } from "@/lib/config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Naman Rusia | Portfolio",
   description:
     "Full-stack developer and software engineer specializing in modern web technologies",
