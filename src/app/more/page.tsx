@@ -12,33 +12,159 @@ import Folder from "./Folder";
 // dx is the window's left edge in px from the hero's center (so windows hug the copy at any
 // width instead of drifting over it), y is percent of the hero, w is width in px, ratio is w/h.
 const photos = [
-  { src: "/gallery/layla.jpeg", name: "layla.jpeg", dx: -500, y: 5, w: 150, ratio: "3 / 4" },
-  { src: "/gallery/mom.jpeg", name: "mom.jpeg", dx: -330, y: 8, w: 170, ratio: "4 / 3" },
-  { src: "/gallery/sid2.jpeg", name: "sid-again.jpeg", dx: -120, y: 4, w: 160, ratio: "4 / 3" },
-  { src: "/more/rank-1-of-521.jpg", name: "rank-1-of-521.png", dx: 50, y: 3, w: 250, ratio: "2.17 / 1" },
-  { src: "/gallery/hk.jpeg", name: "the-peak.jpeg", dx: 500, y: 12, w: 210, ratio: "4 / 3" },
-  { src: "/more/big-buddha.jpg", name: "big-buddha.jpg", dx: 350, y: 37, w: 180, ratio: "4 / 3" },
-  { src: "/more/IMG_8795.mp4", name: "IMG_8795.mov", dx: -720, y: 38, w: 120, ratio: "9 / 16" },
-  { src: "/gallery/dab.jpeg", name: "louvre-2016.jpeg", dx: -560, y: 44, w: 130, ratio: "9 / 16" },
-  { src: "/more/the-pru.jpeg", name: "the-pru.jpeg", dx: -700, y: 68, w: 150, ratio: "3 / 4" },
-  { src: "/more/skydiving.jpg", name: "13000ft.jpg", dx: -20, y: 67, w: 260, ratio: "16 / 7" },
-  { src: "/more/deck-12.jpeg", name: "deck-12.jpeg", dx: 570, y: 70, w: 150, ratio: "3 / 4" },
-  { src: "/more/strava-harvard-bridge.png", name: "long_walks.jpeg", dx: 280, y: 72, w: 250, ratio: "16 / 9" },
+  {
+    src: "/gallery/layla.jpeg",
+    name: "layla.jpeg",
+    dx: -500,
+    y: 5,
+    w: 150,
+    ratio: "3 / 4",
+  },
+  {
+    src: "/gallery/mom.jpeg",
+    name: "mom.jpeg",
+    dx: -330,
+    y: 8,
+    w: 170,
+    ratio: "4 / 3",
+  },
+  {
+    src: "/gallery/sid2.jpeg",
+    name: "sid-again.jpeg",
+    dx: -120,
+    y: 4,
+    w: 160,
+    ratio: "4 / 3",
+  },
+  {
+    src: "/more/rank-1-of-521.jpg",
+    name: "rank-1-of-521.png",
+    dx: 50,
+    y: 3,
+    w: 250,
+    ratio: "2.17 / 1",
+  },
+  {
+    src: "/gallery/hk.jpeg",
+    name: "the-peak.jpeg",
+    dx: 500,
+    y: 12,
+    w: 210,
+    ratio: "4 / 3",
+  },
+  {
+    src: "/more/big-buddha.jpg",
+    name: "big-buddha.jpg",
+    dx: 350,
+    y: 37,
+    w: 180,
+    ratio: "4 / 3",
+  },
+  {
+    src: "/more/IMG_8795.mp4",
+    name: "IMG_8795.mov",
+    dx: -720,
+    y: 38,
+    w: 120,
+    ratio: "9 / 16",
+  },
+  {
+    src: "/gallery/dab.jpeg",
+    name: "louvre-2016.jpeg",
+    dx: -560,
+    y: 44,
+    w: 130,
+    ratio: "9 / 16",
+  },
+  {
+    src: "/more/the-pru.jpeg",
+    name: "the-pru.jpeg",
+    dx: -700,
+    y: 68,
+    w: 150,
+    ratio: "3 / 4",
+  },
+  {
+    src: "/more/skydiving.jpg",
+    name: "13000ft.jpg",
+    dx: -20,
+    y: 67,
+    w: 260,
+    ratio: "16 / 7",
+  },
+  {
+    src: "/more/deck-12.jpeg",
+    name: "deck-12.jpeg",
+    dx: 570,
+    y: 70,
+    w: 150,
+    ratio: "3 / 4",
+  },
+  {
+    src: "/more/strava-harvard-bridge.png",
+    name: "long_walks.jpeg",
+    dx: 280,
+    y: 72,
+    w: 250,
+    ratio: "16 / 9",
+  },
   // Drop the guitar photo into public/more and uncomment.
   // { src: "/more/guitar.jpeg", name: "guitar.jpeg", dx: 120, y: 70, w: 170, ratio: "3 / 4" },
 ];
 
 // Project icons in public/more/icons, dropped bare on the desk like desktop files.
 const icons = [
-  { src: "/more/icons/dockmaster.png", label: "dockmaster", dx: -700, y: 10, w: 72 },
-  { src: "/more/icons/foresight.png", label: "foresight", dx: -660, y: 26, w: 60 },
-  { src: "/more/icons/mindfulmomentum.png", label: "mindfulmomentum", dx: 350, y: 8, w: 64 },
-  { src: "/more/icons/nutrition.png", label: "nutrition", dx: 340, y: 25, w: 64 },
-  { src: "/more/icons/tandemcode.png", label: "tandemcode", dx: 560, y: 58, w: 64 },
+  {
+    src: "/more/icons/dockmaster.png",
+    label: "dockmaster",
+    dx: -700,
+    y: 10,
+    w: 72,
+  },
+  {
+    src: "/more/icons/foresight.png",
+    label: "foresight",
+    dx: -660,
+    y: 26,
+    w: 60,
+  },
+  {
+    src: "/more/icons/mindfulmomentum.png",
+    label: "mindfulmomentum",
+    dx: 350,
+    y: 8,
+    w: 64,
+  },
+  {
+    src: "/more/icons/nutrition.png",
+    label: "nutrition",
+    dx: 340,
+    y: 25,
+    w: 64,
+  },
+  {
+    src: "/more/icons/tandemcode.png",
+    label: "tandemcode",
+    dx: 560,
+    y: 58,
+    w: 64,
+  },
   { src: "/more/icons/sideband.png", label: "sideband", dx: 600, y: 37, w: 60 },
   { src: "/more/icons/bhchp.png", label: "bhchp", dx: 400, y: 64, w: 64 },
-  { src: "/more/icons/826-boston.png", label: "826 boston", dx: -210, y: 78, w: 56 },
-  { src: "/more/icons/car2drvr.png", label: "car2drvr", dx: -400, y: 73, w: 150 },
+  {
+    src: "/more/icons/826-boston.png",
+    label: "826 boston",
+    dx: -210,
+    y: 78,
+    w: 56,
+  },
+  {
+    src: "/more/icons/car2drvr.png",
+    label: "car2drvr",
+    dx: -400,
+    y: 73,
+    w: 150,
+  },
 ];
 
 const elsewhere = [
@@ -123,9 +249,23 @@ function Photo({
         <div className="relative" style={{ aspectRatio: ratio }}>
           {src.endsWith(".mp4") ? (
             // A silent looping clip reads as a gif but is a fraction of the size.
-            <video src={src} autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" />
+            <video
+              src={src}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 h-full w-full object-cover"
+            />
           ) : (
-            <Image src={src} alt="" fill priority={priority} sizes={sizes} className="object-cover" />
+            <Image
+              src={src}
+              alt=""
+              fill
+              priority={priority}
+              sizes={sizes}
+              className="object-cover"
+            />
           )}
         </div>
       </Window>
@@ -156,7 +296,11 @@ function Float({
     <motion.div
       initial={{ opacity: 0, scale: 0.92, y: 12 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ delay: 0.15 + i * 0.06, duration: 0.5, ease: [0.2, 0.7, 0.2, 1] }}
+      transition={{
+        delay: 0.15 + i * 0.06,
+        duration: 0.5,
+        ease: [0.2, 0.7, 0.2, 1],
+      }}
       drag
       dragMomentum={false}
       whileDrag={{ scale: 1.03 }}
@@ -169,7 +313,15 @@ function Float({
   );
 }
 
-function DesktopIcon({ src, label, w }: { src: string; label: string; w: number }) {
+function DesktopIcon({
+  src,
+  label,
+  w,
+}: {
+  src: string;
+  label: string;
+  w: number;
+}) {
   return (
     <div className="group flex flex-col items-center gap-1.5">
       {/* Plain img: these are tiny PNGs of odd aspect ratios, not worth the optimizer's sizing rules. */}
@@ -202,7 +354,8 @@ function FolderWord({
   // One blank column between letters. A trailing blank would throw the word off
   // centre, so only the full stop earns the two columns after the last letter.
   const cols =
-    letters.reduce((n, g) => n + g[0].length, letters.length - 1) + (stop ? 2 : 0);
+    letters.reduce((n, g) => n + g[0].length, letters.length - 1) +
+    (stop ? 2 : 0);
   const cells: boolean[] = [];
   for (let r = 0; r < 5; r++) {
     letters.forEach((g, i) => {
@@ -219,7 +372,9 @@ function FolderWord({
     >
       {cells.map((on, i) => (
         <div key={i} className="aspect-[64/52]">
-          {on && <Folder className="w-full scale-[1.18] drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]" />}
+          {on && (
+            <Folder className="w-full scale-[1.18] drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]" />
+          )}
         </div>
       ))}
     </div>
@@ -251,8 +406,11 @@ export default function More() {
           <a href="#top" className="font-semibold">
             naman rusia
           </a>
-          <a href="#note" className="hidden text-ink/60 hover:text-ink md:inline">
-            the note
+          <a
+            href="#note"
+            className="hidden text-ink/60 hover:text-ink md:inline"
+          >
+            note
           </a>
         </nav>
         <div className="flex items-center gap-3.5 text-[12px] text-ink/55">
@@ -266,7 +424,10 @@ export default function More() {
         </div>
       </header>
 
-      <section id="top" className="relative flex min-h-[calc(100vh-2.25rem)] flex-col items-center justify-center overflow-hidden px-6 py-24">
+      <section
+        id="top"
+        className="relative flex min-h-[calc(100vh-2.25rem)] flex-col items-center justify-center overflow-hidden px-6 py-24"
+      >
         {isWide &&
           photos.map((p, i) => (
             <Float key={p.name} i={i} dx={p.dx * scale} y={p.y} w={p.w * scale}>
@@ -275,7 +436,13 @@ export default function More() {
           ))}
         {isWide &&
           icons.map((ic, i) => (
-            <Float key={ic.src} i={photos.length + i} dx={ic.dx * scale} y={ic.y} w={Math.max(ic.w * scale, 40)}>
+            <Float
+              key={ic.src}
+              i={photos.length + i}
+              dx={ic.dx * scale}
+              y={ic.y}
+              w={Math.max(ic.w * scale, 40)}
+            >
               <DesktopIcon {...ic} w={Math.round(ic.w * scale)} />
             </Float>
           ))}
@@ -288,7 +455,10 @@ export default function More() {
         >
           <h1 className="flex flex-col items-center">
             <span className="sr-only">more about naman rusia</span>
-            <FolderWord word="more about" className="w-[min(72vw,540px)] lg:w-[min(38vw,540px)]" />
+            <FolderWord
+              word="more about"
+              className="w-[min(72vw,540px)] lg:w-[min(38vw,540px)]"
+            />
             <FolderWord
               word="naman"
               stop
@@ -317,30 +487,25 @@ export default function More() {
 
       <div className="mx-auto max-w-3xl px-6">
         <section id="note" className="scroll-mt-16 py-24">
-          <Label>the note</Label>
+          <Label>note</Label>
           <Window title="notes" paper className="mt-6 w-full max-w-xl">
             <div className="bg-paper px-7 py-6 text-[16px] leading-relaxed text-ink/80">
               <p className="mb-3">
-                hi, i&apos;m naman. this is the part of the internet where i don&apos;t have to be
-                employable.
+                hi, i&apos;m naman. this is the part of the internet where i
+                don&apos;t have to be employable.
               </p>
               <p className="mb-3">
-                grew up between the us, india and singapore. now in boston, studying computer
-                science and business. the rest of the time i am walking somewhere far, on a bike,
-                or in an airport. there is a guitar in the corner that gets more attention than my
-                problem sets.
+                grew up between the us, india and singapore. now in boston,
+                studying computer science and business. I am constantly building
+                and shipping, and I geuinelly love building
               </p>
               <p className="mb-3">
                 i like building things end to end, and{" "}
                 <mark className="rounded-sm bg-[#feea3d]/70 px-0.5 text-black">
-                  i think the best software feels like someone actually cared.
+                  i think the best software feels obsessed over.
                 </mark>
               </p>
-              <p className="mb-3">
-                currently working through neural networks from first principles, because knowing
-                how the thing works is the whole point.
-              </p>
-              <p className="mb-8">the photos are real, the filenames are not.</p>
+              <p className="mb-3">currently in classes</p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Image
@@ -367,14 +532,19 @@ export default function More() {
           <ul className="flex flex-wrap gap-x-7 gap-y-2 text-[14px] text-ink/55">
             {elsewhere.map((p) => (
               <li key={p.label}>
-                <a href={p.href} target="_blank" rel="noopener noreferrer" className="hover:text-ink">
+                <a
+                  href={p.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-ink"
+                >
                   {p.label}
                 </a>
               </li>
             ))}
             <li>
               <Link href="/projects" className="hover:text-ink">
-                work
+                projects
               </Link>
             </li>
             <li>
@@ -383,7 +553,10 @@ export default function More() {
               </Link>
             </li>
             <li>
-              <a href="mailto:rusia.n@northeastern.edu" className="hover:text-ink">
+              <a
+                href="mailto:rusia.n@northeastern.edu"
+                className="hover:text-ink"
+              >
                 email
               </a>
             </li>
