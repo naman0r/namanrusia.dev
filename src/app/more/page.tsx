@@ -13,7 +13,7 @@ import Folder from "./Folder";
 // width instead of drifting over it), y is percent of the hero, w is width in px, ratio is w/h.
 const photos = [
   {
-    src: "/gallery/layla.jpeg",
+    src: "/more/layla.jpeg",
     name: "layla.jpeg",
     dx: -500,
     y: 5,
@@ -21,7 +21,7 @@ const photos = [
     ratio: "3 / 4",
   },
   {
-    src: "/gallery/mom.jpeg",
+    src: "/more/mom.jpeg",
     name: "mom.jpeg",
     dx: -330,
     y: 8,
@@ -29,7 +29,7 @@ const photos = [
     ratio: "4 / 3",
   },
   {
-    src: "/gallery/sid2.jpeg",
+    src: "/more/sid2.jpeg",
     name: "sid-again.jpeg",
     dx: -120,
     y: 4,
@@ -45,7 +45,7 @@ const photos = [
     ratio: "2.17 / 1",
   },
   {
-    src: "/gallery/hk.jpeg",
+    src: "/more/hk.jpeg",
     name: "the-peak.jpeg",
     dx: 500,
     y: 12,
@@ -69,7 +69,7 @@ const photos = [
     ratio: "9 / 16",
   },
   {
-    src: "/gallery/dab.jpeg",
+    src: "/more/dab.jpeg",
     name: "louvre-2016.jpeg",
     dx: -560,
     y: 44,
