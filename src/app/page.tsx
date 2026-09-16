@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import {
@@ -280,6 +280,7 @@ export default function Home() {
             >
               Email me
             </a>
+            <MoreAboutMe />
           </motion.div>
 
           <motion.dl
@@ -594,5 +595,66 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+const CIPHER_GLYPHS = "!<>-_\\/[]{}=+*^?#01";
+
+// Scrambles into view on load, on hover, and every few seconds so it keeps
+// catching the eye. The link carries the real label for screen readers.
+function MoreAboutMe() {
+  const label = "more about me";
+  const [shown, setShown] = useState(label);
+  const frame = useRef(0);
+
+  const decode = useCallback(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    cancelAnimationFrame(frame.current);
+    const start = performance.now();
+    const tick = (now: number) => {
+      const revealed = Math.floor((now - start) / 45);
+      setShown(
+        label
+          .split("")
+          .map((c, i) =>
+            c === " " || i < revealed
+              ? c
+              : CIPHER_GLYPHS[Math.floor(Math.random() * CIPHER_GLYPHS.length)],
+          )
+          .join(""),
+      );
+      if (revealed < label.length) frame.current = requestAnimationFrame(tick);
+    };
+    frame.current = requestAnimationFrame(tick);
+  }, []);
+
+  useEffect(() => {
+    decode();
+    const id = setInterval(decode, 6000);
+    return () => {
+      clearInterval(id);
+      cancelAnimationFrame(frame.current);
+    };
+  }, [decode]);
+
+  return (
+    <Link
+      href="/more"
+      aria-label="More about me"
+      onMouseEnter={decode}
+      onFocus={decode}
+      className="group inline-flex items-baseline gap-1.5 border-b border-dashed border-[#e2b07a]/50 pb-0.5 font-mono tracking-[0.08em] text-[#e2b07a] [text-shadow:0_0_14px_rgba(226,176,122,0.55)] transition-colors hover:border-[#8fb8dd]/70 hover:text-[#8fb8dd] hover:[text-shadow:0_0_16px_rgba(143,184,221,0.7)]"
+    >
+      <span aria-hidden className="text-white/35">
+        ./
+      </span>
+      <span aria-hidden className="whitespace-pre">
+        {shown}
+      </span>
+      <span
+        aria-hidden
+        className="inline-block h-[1em] w-[0.5em] translate-y-[0.15em] animate-pulse bg-current motion-reduce:animate-none"
+      />
+    </Link>
   );
 }
