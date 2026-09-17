@@ -418,12 +418,13 @@ export default function Home() {
               </div>
 
               <div>
-                <h3 className="text-xl font-light text-[#e9e4da] mb-4">Focus</h3>
+                <h3 className="text-xl font-light text-[#e9e4da] mb-4">
+                  Focus
+                </h3>
                 <p className="text-white/60 leading-relaxed">
-                  Outside of internships and classes I take on side projects
-                  and learn something new every couple of days. Recently that's
-                  been Neural
-                  Networks and their implementation with the help of{" "}
+                  Outside of internships and classes I take on side projects and
+                  learn something new every couple of days. Recently that's been
+                  Neural Networks and their implementation with the help of{" "}
                   <Link
                     href="https://youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ&si=HDnjdU1r9EJlTFqt"
                     target="_blank"
@@ -450,8 +451,8 @@ export default function Home() {
                   to learn more about the project.
                   <br />
                   <br />I also have completed internships at startups to explore
-                  the intersection of tech and entrepreneurship. I
-                  recently interned at{" "}
+                  the intersection of tech and entrepreneurship. I recently
+                  interned at{" "}
                   <Link
                     href="https://www.venu3d.com/"
                     className="underline hover:text-lime-400"
@@ -465,10 +466,12 @@ export default function Home() {
             </div>
             <div className="grid md:grid-cols-2 gap-12 pt-20">
               <div>
-                <h3 className="text-xl font-light text-[#e9e4da] mb-4">College</h3>
+                <h3 className="text-xl font-light text-[#e9e4da] mb-4">
+                  College
+                </h3>
                 <p className="text-white/60 leading-relaxed">
-                  Over the course of my
-                  time at Northeastern University, I have been involved with{" "}
+                  Over the course of my time at Northeastern University, I have
+                  been involved with{" "}
                   <Link
                     href="https://www.forgenu.com/home"
                     className="underline hover:text-orange-500"
@@ -482,8 +485,7 @@ export default function Home() {
                     TAMID at Northeastern
                   </Link>
                   , a multi-faceted organization where I've shipped technical
-                  projects as part of
-                  their{" "}
+                  projects as part of their{" "}
                   <span className="hover:text-blue-400">Tech Consulting</span>{" "}
                   track. Over the past 2 semesters, I have also been involved
                   with{" "}
@@ -522,7 +524,9 @@ export default function Home() {
               </div>
 
               <div>
-                <h3 className="text-xl font-light text-[#e9e4da] mb-4">Journey</h3>
+                <h3 className="text-xl font-light text-[#e9e4da] mb-4">
+                  Journey
+                </h3>
                 <p className="text-white/60 leading-relaxed">
                   I haven't been coding since I was six. I picked up a few CS
                   classes in high school, but my 'eureka' moment came during my
@@ -645,9 +649,7 @@ function MoreAboutMe() {
       onFocus={decode}
       className="group inline-flex items-baseline gap-1.5 border-b border-dashed border-[#e2b07a]/50 pb-0.5 font-mono tracking-[0.08em] text-[#e2b07a] [text-shadow:0_0_14px_rgba(226,176,122,0.55)] transition-colors hover:border-[#8fb8dd]/70 hover:text-[#8fb8dd] hover:[text-shadow:0_0_16px_rgba(143,184,221,0.7)]"
     >
-      <span aria-hidden className="text-white/35">
-        ./
-      </span>
+      <span aria-hidden className="text-white/35"></span>
       <span aria-hidden className="whitespace-pre">
         {shown}
       </span>
