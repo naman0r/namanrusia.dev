@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { BatteryMedium, Moon, Sun, Wifi } from "lucide-react";
 import Window from "./Window";
 import Folder from "./Folder";
+
+const RubiksCube = dynamic(() => import("./RubiksCube"), { ssr: false });
 
 // Edit this list. src is any image under public/, name is the caption under the window.
 // dx is the window's left edge in px from the hero's center (so windows hug the copy at any
@@ -470,6 +473,8 @@ export default function More() {
           </p>
         </motion.div>
       </section>
+
+      <RubiksCube />
 
       <section className="grid grid-cols-2 gap-6 px-6 pb-8 lg:hidden">
         {photos.map((p, i) => (
