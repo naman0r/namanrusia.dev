@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import {
   AiOutlineGithub,
@@ -9,38 +9,9 @@ import {
   AiOutlineInstagram,
   AiOutlineTwitter,
 } from "react-icons/ai";
-import {
-  readSidebarExpanded,
-  subscribeToSidebarExpandedChange,
-} from "@/lib/sidebar";
 
 export default function Contact() {
-  const [sidebarExpanded, setSidebarExpanded] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
 
-  // Check sidebar state and screen size (same logic as projects page)
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
-    checkMobile();
-    setSidebarExpanded(readSidebarExpanded(true));
-
-    window.addEventListener("resize", checkMobile);
-    const unsubscribe = subscribeToSidebarExpandedChange(setSidebarExpanded);
-
-    return () => {
-      window.removeEventListener("resize", checkMobile);
-      unsubscribe();
-    };
-  }, []);
-
-  // Calculate left padding based on sidebar state
-  const getLeftPadding = () => {
-    if (isMobile) return "px-6";
-    return sidebarExpanded ? "pl-[280px] pr-12" : "pl-[108px] pr-12";
-  };
 
   const socialLinks = [
     {
@@ -88,7 +59,7 @@ export default function Contact() {
 
   return (
     <div
-      className={`min-h-screen bg-black text-white py-12 lg:py-16 ${getLeftPadding()} relative overflow-hidden transition-all duration-300`}
+      className={`min-h-screen bg-black text-white py-12 lg:py-16 px-6 lg:pl-[108px] lg:pr-12 relative overflow-hidden transition-all duration-300`}
     >
       {/* Background Effects */}
       <div className="fixed inset-0 -z-10 overflow-hidden">

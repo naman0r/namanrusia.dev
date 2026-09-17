@@ -3,21 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
-import {
-  readSidebarExpanded,
-  subscribeToSidebarExpandedChange,
-} from "@/lib/sidebar";
 
 export default function Home() {
-  // The sidebar is fixed and overlays the page, so content needs to clear it.
-  // The mobile/desktop split is pure CSS; only expanded vs collapsed needs state.
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
-
-  useEffect(() => {
-    setSidebarExpanded(readSidebarExpanded(false));
-    return subscribeToSidebarExpandedChange(setSidebarExpanded);
-  }, []);
-
   // Mobile browsers resize the viewport as the URL bar hides and shows, which
   // makes the scroll-linked hero fade jump around. Skip it on phones.
   const [isPhone, setIsPhone] = useState(false);
@@ -30,9 +17,9 @@ export default function Home() {
     return () => query.removeEventListener("change", update);
   }, []);
 
-  const contentPadding = `px-6 lg:pr-12 ${
-    sidebarExpanded ? "lg:pl-[280px]" : "lg:pl-[108px]"
-  }`;
+  // The sidebar rail is fixed at 88px and expands as an overlay, so content
+  // only ever has to clear the rail.
+  const contentPadding = "px-6 lg:pl-[108px] lg:pr-12";
 
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);

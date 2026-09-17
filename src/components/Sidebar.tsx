@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,9 +31,6 @@ import { useMusic } from "@/contexts/MusicContext";
 interface SidebarProps {
   isOpen?: boolean; // mobile drawer open
   onClose?: () => void; // mobile drawer close handler
-  initialExpanded?: boolean; // desktop expanded/collapsed
-  expanded?: boolean; // controlled desktop expanded/collapsed
-  onExpandedChange?: (expanded: boolean) => void;
   user?: {
     name?: string;
     title?: string;
@@ -44,9 +41,6 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen = true,
   onClose,
-  initialExpanded = true,
-  expanded: controlledExpanded,
-  onExpandedChange,
   user = {
     name: "Naman Rusia",
     title: "Student",
@@ -54,8 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   },
 }) => {
   const pathname = usePathname();
-  const [uncontrolledExpanded, setUncontrolledExpanded] =
-    useState<boolean>(initialExpanded);
+  const [hovered, setHovered] = useState(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const {
     isPlaying,
@@ -65,18 +58,22 @@ const Sidebar: React.FC<SidebarProps> = ({
     togglePlay,
     toggleMute,
   } = useMusic();
-  const expanded = controlledExpanded ?? uncontrolledExpanded;
 
-  const setExpanded = (nextExpanded: boolean) => {
-    if (controlledExpanded === undefined) {
-      setUncontrolledExpanded(nextExpanded);
-    }
-
-    onExpandedChange?.(nextExpanded);
+  // Desktop: the rail expands as an overlay while the pointer or keyboard
+  // focus is inside it, so page content never has to reflow. The short
+  // leave delay stops it flickering when the cursor skims the edge.
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const enter = () => {
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    setHovered(true);
+  };
+  const leave = () => {
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    leaveTimer.current = setTimeout(() => setHovered(false), 150);
   };
 
   // On mobile, always treat as expanded when open
-  const isExpanded = isMobile || expanded;
+  const isExpanded = isMobile || hovered;
 
   // Check if mobile
   useEffect(() => {
@@ -221,13 +218,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               </motion.span>
             )}
           </AnimatePresence>
-
-          {/* Tooltip when collapsed */}
-          {!isExpanded && (
-            <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 scale-95 opacity-0 rounded-lg bg-gray-900/95 px-3 py-2 text-xs text-white shadow-lg ring-1 ring-white/10 transition-all group-hover:opacity-100 group-hover:scale-100 whitespace-nowrap z-50">
-              {label}
-            </span>
-          )}
         </Link>
       </li>
     );
@@ -266,18 +256,19 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
         className={`${
           isMobile ? "fixed" : "sticky"
-        } inset-y-0 left-0 z-50 flex h-screen flex-col border-r transition-all duration-200 bg-gray-950/90 px-2 py-3 shadow-2xl shadow-black/40 backdrop-blur-xl ${
-          !isMobile && !isExpanded
-            ? "border-white/20 hover:border-blue-500/30 cursor-pointer"
-            : "border-white/10"
-        }`}
+        } inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-white/10 bg-gray-950/90 px-2 py-3 shadow-2xl shadow-black/40 backdrop-blur-xl`}
         style={{
           backgroundImage:
             "radial-gradient(1200px 400px at -10% -10%, rgba(99,102,241,0.12), transparent 40%), radial-gradient(1200px 400px at 110% 110%, rgba(56,189,248,0.12), transparent 40%)",
         }}
         role="navigation"
         aria-label="Primary"
-        onClick={!isMobile && !isExpanded ? () => setExpanded(true) : undefined}
+        onMouseEnter={enter}
+        onMouseLeave={leave}
+        onFocus={enter}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) leave();
+        }}
       >
         {/* Mobile close button */}
         {isMobile && (
@@ -309,38 +300,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                 className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-gray-950"
                 aria-hidden
               />
-
-              {/* Expand trigger for desktop - always visible with subtle hint */}
-              {!isMobile && !isExpanded && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button
-                    onClick={() => setExpanded(true)}
-                    className="absolute inset-0 rounded-full bg-black/0 hover:bg-black/30 transition-all duration-200 flex items-center justify-center group"
-                    aria-label="Expand sidebar"
-                  >
-                    <div className="relative">
-                      {/* Subtle expand hint - always visible */}
-                      <div className="w-2 h-2 bg-white/20 rounded-full animate-pulse group-hover:bg-white/60 transition-colors" />
-                      {/* Arrow on hover */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg
-                          className="w-3 h-3 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  </button>
-                </div>
-              )}
             </div>
 
             <AnimatePresence initial={false}>
@@ -351,36 +310,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                   exit={{ opacity: 0, x: -6 }}
                   className="flex-1"
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-semibold text-white leading-5">
-                        {user.name}
-                      </h3>
-                      <p className="text-xs text-gray-400">Student | SWE</p>
-                    </div>
-                    {!isMobile && (
-                      <button
-                        onClick={() => setExpanded(false)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200 group border border-transparent hover:border-white/20"
-                        aria-label="Collapse sidebar"
-                        title="Collapse sidebar"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 19l-7-7 7-7"
-                          />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
+                  <h3 className="text-sm font-semibold text-white leading-5">
+                    {user.name}
+                  </h3>
+                  <p className="text-xs text-gray-400">Student | SWE</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -430,94 +363,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="my-4 mx-auto w-8 h-px bg-white/10"></div>
         </nav>
 
-        {/* Expand hint when collapsed. Kept outside <nav> so it can never make
-            the navigation scrollable, and set with writing-mode rather than
-            rotate-90 so it occupies a real vertical box instead of overflowing
-            a 13px-tall one. */}
-        {!isMobile && !isExpanded && (
-          <div className="flex shrink-0 justify-center px-1 pt-1 pb-3">
-            <span
-              className="select-none whitespace-nowrap text-[10px] tracking-wider text-gray-500"
-              style={{ writingMode: "vertical-rl" }}
-            >
-              Click to expand
-            </span>
-          </div>
-        )}
-
         {/* absorbs the leftover height so the footer stays pinned to the bottom */}
         <div className="min-h-0 flex-1" />
-
-        {/* Expand/Collapse Button for Desktop */}
-        {!isMobile && (
-          <div className="px-2 py-2">
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 border border-white/10 hover:border-white/20 group"
-              aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
-              title={
-                isExpanded
-                  ? "Collapse sidebar (Command + Backslash)"
-                  : "Expand sidebar (Command + Backslash)"
-              }
-            >
-              <svg
-                className="w-3 h-3 transition-transform group-hover:scale-110"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d={isExpanded ? "M15 19l-7-7 7-7" : "M9 5l7 7-7 7"}
-                />
-              </svg>
-              <AnimatePresence initial={false}>
-                {isExpanded && (
-                  <motion.span
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: "auto" }}
-                    exit={{ opacity: 0, width: 0 }}
-                    className="overflow-hidden whitespace-nowrap"
-                  >
-                    Collapse
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </button>
-
-            <AnimatePresence initial={false}>
-              {isExpanded && (
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  className="mt-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-gray-500">
-                      Shortcut
-                    </span>
-                    <div className="flex items-center gap-1 text-[10px] text-gray-300">
-                      <kbd className="rounded-md border border-white/10 bg-black/20 px-1.5 py-1 font-mono text-[10px] text-gray-200 shadow-sm shadow-black/20">
-                        Command
-                      </kbd>
-                      <span className="text-gray-500">+</span>
-                      <kbd className="rounded-md border border-white/10 bg-black/20 px-1.5 py-1 font-mono text-[10px] text-gray-200 shadow-sm shadow-black/20">
-                        \
-                      </kbd>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-[11px] text-gray-400">
-                    Toggle the sidebar from the keyboard on desktop.
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
 
         {/* Connect Section */}
         <div className="mt-auto w-full px-2 pb-3 pt-3">
@@ -634,11 +481,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                         }`}
                       />
                     )}
-
-                    {/* Tooltip when collapsed */}
-                    <span className="pointer-events-none absolute left-full top-1/2 ml-3 -translate-y-1/2 scale-95 whitespace-nowrap rounded-lg bg-gray-900/95 px-3 py-2 text-xs text-white opacity-0 shadow-lg ring-1 ring-white/10 transition-all group-hover:scale-100 group-hover:opacity-100 z-50">
-                      {control.label}
-                    </span>
                   </button>
                 ))}
 
@@ -660,10 +502,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                       className="group relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-gray-300 transition hover:text-white hover:bg-white/10 hover:border-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
                     >
                       <Icon className="h-4 w-4" />
-                      {/* Tooltip when collapsed */}
-                      <span className="pointer-events-none absolute left-full top-1/2 ml-3 -translate-y-1/2 scale-95 whitespace-nowrap rounded-lg bg-gray-900/95 px-3 py-2 text-xs text-white opacity-0 shadow-lg ring-1 ring-white/10 transition-all group-hover:scale-100 group-hover:opacity-100 z-50">
-                        {s.label}
-                      </span>
                     </a>
                   );
                 })}
