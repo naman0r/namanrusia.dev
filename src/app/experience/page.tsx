@@ -1,12 +1,11 @@
 "use client";
 
+import { CONTENT_PADDING } from "@/components/Sidebar";
 import ExperienceTimeline from "./ExperienceTimeline";
 import ExperienceBackground from "./ExperienceBackground";
 
 export default function Experience() {
-  // The sidebar rail is fixed at 88px and expands as an overlay, so content
-  // only ever has to clear the rail.
-  const contentPadding = "px-6 lg:pl-[108px] lg:pr-12";
+  const contentPadding = `px-6 ${CONTENT_PADDING} lg:pr-12`;
 
   return (
     <div

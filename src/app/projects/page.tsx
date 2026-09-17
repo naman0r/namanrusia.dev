@@ -1,5 +1,6 @@
 "use client";
 
+import { CONTENT_PADDING } from "@/components/Sidebar";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -375,7 +376,7 @@ export default function Projects() {
 
   return (
     <div
-      className={`min-h-screen bg-black/20 text-white py-12 lg:py-12 px-6 lg:pl-[108px] lg:pr-12 relative overflow-hidden transition-all duration-300`}
+      className={`min-h-screen bg-black/20 text-white py-12 lg:py-12 px-6 ${CONTENT_PADDING} lg:pr-12 relative overflow-hidden transition-all duration-300`}
     >
       {/* Dynamic Moving Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden">

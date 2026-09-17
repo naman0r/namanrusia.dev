@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import Sidebar, { MobileHeader } from "../components/Sidebar";
+import Sidebar, { MobileHeader, CONTENT_PADDING } from "../components/Sidebar";
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -70,7 +70,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
       />
 
       {/* Main Content */}
-      <main className="flex flex-1 flex-col overflow-hidden">
+      <main className={`flex flex-1 flex-col overflow-hidden ${CONTENT_PADDING}`}>
         {/* Mobile Header */}
         <MobileHeader onMenuClick={toggleSidebar} title="Naman's Portfolio" />
 

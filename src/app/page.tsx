@@ -1,5 +1,6 @@
 "use client";
 
+import { CONTENT_PADDING } from "@/components/Sidebar";
 import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
@@ -17,9 +18,7 @@ export default function Home() {
     return () => query.removeEventListener("change", update);
   }, []);
 
-  // The sidebar rail is fixed at 88px and expands as an overlay, so content
-  // only ever has to clear the rail.
-  const contentPadding = "px-6 lg:pl-[108px] lg:pr-12";
+  const contentPadding = `px-6 ${CONTENT_PADDING} lg:pr-12`;
 
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);

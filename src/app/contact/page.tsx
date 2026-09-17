@@ -1,5 +1,6 @@
 "use client";
 
+import { CONTENT_PADDING } from "@/components/Sidebar";
 import React from "react";
 import { motion } from "framer-motion";
 import {
@@ -59,7 +60,7 @@ export default function Contact() {
 
   return (
     <div
-      className={`min-h-screen bg-black text-white py-12 lg:py-16 px-6 lg:pl-[108px] lg:pr-12 relative overflow-hidden transition-all duration-300`}
+      className={`min-h-screen bg-black text-white py-12 lg:py-16 px-6 ${CONTENT_PADDING} lg:pr-12 relative overflow-hidden transition-all duration-300`}
     >
       {/* Background Effects */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
