@@ -5,6 +5,8 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import Window from "./Window";
+import { motion } from "framer-motion";
+import CubeMosaic from "./CubeMosaic";
 
 type Axis = "x" | "y" | "z";
 type Move = { axis: Axis; layer: number; direction: number };
@@ -234,34 +236,52 @@ export default function RubiksCube() {
 
   const buttonClass = "rounded-md border border-ink/15 bg-desk px-3 py-2 text-[12px] text-ink/75 shadow-sm transition hover:bg-ink/5 disabled:cursor-not-allowed disabled:opacity-35";
   return (
-    <section id="cube" className="mx-auto max-w-3xl scroll-mt-16 px-6 py-16">
+    <section id="cube" className="mx-auto max-w-6xl scroll-mt-16 px-6 py-16">
       <div className="mb-5 flex items-baseline justify-between gap-4">
         <h2 className="text-[12px] tracking-wide text-ink/55">a little distraction</h2>
         <span className="text-[11px] text-ink/35">go on, mess it up.</span>
       </div>
-      <Window title="rubik's cube">
-        <div className="relative bg-desk">
-          <div className="pointer-events-none absolute inset-x-0 top-5 z-10 flex justify-between px-5 text-[11px] text-ink/45">
-            <span role="status">{busy ? "turning..." : status}</span>
-            <span>{moves} moves</span>
-          </div>
-          <div ref={host} className="h-[360px] cursor-grab touch-none active:cursor-grabbing sm:h-[420px]" role="img" aria-label="Interactive Rubik's cube. Drag a sticker to turn its layer, or use the face buttons below." />
-          <div className="px-5 pb-6 text-center">
-            <p className="mb-5 text-[11px] text-ink/45">drag a sticker to turn a layer · drag around the cube to rotate</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {Object.keys(faces).map((face) => (
-                <button key={face} className={buttonClass + " min-w-9 font-mono"} disabled={!ready || busy} aria-label={`Turn ${ { U: "top", D: "bottom", L: "left", R: "right", F: "front", B: "back" }[face]} face${reverse ? " counterclockwise" : " clockwise"}`} onClick={() => command.current(face, reverse)}>{face}{reverse ? "′" : ""}</button>
-              ))}
-              <button className={buttonClass} aria-pressed={reverse} onClick={() => setReverse(!reverse)}>reverse {reverse ? "on" : "off"}</button>
+      <div className="grid grid-cols-2 items-center gap-4 lg:grid-cols-[160px_minmax(0,1fr)_160px] lg:gap-8">
+        <motion.div
+          drag
+          dragMomentum={false}
+          whileDrag={{ scale: 1.03 }}
+          className="relative z-20 w-32 cursor-grab touch-none active:cursor-grabbing sm:w-40"
+        >
+          <CubeMosaic src="/more/mona-lisa-mosaic.glb" label="Mona Lisa mosaic made from 100 Rubik's cubes." />
+        </motion.div>
+        <Window title="rubik's cube" className="col-span-2 row-start-2 lg:col-span-1 lg:col-start-2 lg:row-start-1">
+          <div className="relative bg-desk">
+            <div className="pointer-events-none absolute inset-x-0 top-5 z-10 flex justify-between px-5 text-[11px] text-ink/45">
+              <span role="status">{busy ? "turning..." : status}</span>
+              <span>{moves} moves</span>
             </div>
-            <div className="mt-4 flex justify-center gap-2">
-              <button className={buttonClass + " !bg-[#1d6ee5] !text-white"} disabled={!ready || busy} onClick={() => command.current("scramble")}>scramble</button>
-              <button className={buttonClass} disabled={!ready || busy || !moves} onClick={() => command.current("undo")}>undo</button>
-              <button className={buttonClass} disabled={!ready || busy} onClick={() => command.current("reset")}>reset</button>
+            <div ref={host} className="h-[360px] cursor-grab touch-none active:cursor-grabbing sm:h-[420px]" role="img" aria-label="Interactive Rubik's cube. Drag a sticker to turn its layer, or use the face buttons below." />
+            <div className="px-5 pb-6 text-center">
+              <p className="mb-5 text-[11px] text-ink/45">drag a sticker to turn a layer · drag around the cube to rotate</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {Object.keys(faces).map((face) => (
+                  <button key={face} className={buttonClass + " min-w-9 font-mono"} disabled={!ready || busy} aria-label={`Turn ${ { U: "top", D: "bottom", L: "left", R: "right", F: "front", B: "back" }[face]} face${reverse ? " counterclockwise" : " clockwise"}`} onClick={() => command.current(face, reverse)}>{face}{reverse ? "′" : ""}</button>
+                ))}
+                <button className={buttonClass} aria-pressed={reverse} onClick={() => setReverse(!reverse)}>reverse {reverse ? "on" : "off"}</button>
+              </div>
+              <div className="mt-4 flex justify-center gap-2">
+                <button className={buttonClass + " !bg-[#1d6ee5] !text-white"} disabled={!ready || busy} onClick={() => command.current("scramble")}>scramble</button>
+                <button className={buttonClass} disabled={!ready || busy || !moves} onClick={() => command.current("undo")}>undo</button>
+                <button className={buttonClass} disabled={!ready || busy} onClick={() => command.current("reset")}>reset</button>
+              </div>
             </div>
           </div>
-        </div>
-      </Window>
+        </Window>
+        <motion.div
+          drag
+          dragMomentum={false}
+          whileDrag={{ scale: 1.03 }}
+          className="relative z-20 col-start-2 row-start-1 w-32 cursor-grab touch-none justify-self-end active:cursor-grabbing sm:w-40 lg:col-start-3"
+        >
+          <CubeMosaic src="/more/naman-mosaic.glb" label="Naman Rusia spelled in a Rubik's cube mosaic." />
+        </motion.div>
+      </div>
     </section>
   );
 }
