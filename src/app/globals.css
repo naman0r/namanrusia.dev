@@ -21,7 +21,7 @@
    area matches; light-dark() follows color-scheme, which the menubar toggle pins. */
 body:has([data-more]) {
   color-scheme: light dark;
-  --desk: light-dark(#f5f5f5, #131313);
+  --desk: light-dark(#e5e5e5, #131313);
   --ink: light-dark(#000, #ededed);
   --pane: light-dark(#fff, #1d1d1f);
   --chrome: light-dark(#f0f0f0, #3a3a3c);
