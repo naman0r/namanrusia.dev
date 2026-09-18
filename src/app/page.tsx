@@ -311,6 +311,48 @@ export default function Home() {
           </motion.dl>
         </div>
 
+        {/* left offset clears the 88px rail; hidden below lg where the rail becomes a drawer.
+            Sits inside the hero's py-28 top gutter so it never overlaps content. */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 1 }}
+          className="pointer-events-none absolute top-9 left-[100px] hidden items-start gap-2 lg:flex"
+        >
+          <motion.svg
+            width="56"
+            height="40"
+            viewBox="0 0 56 40"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-[#e2b07a]/70"
+            animate={{ x: [0, -5, 0] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+            aria-hidden
+          >
+            <motion.path
+              d="M54 6 C 38 0, 30 22, 40 22 C 48 22, 44 8, 30 12 C 18 15, 10 24, 4 34"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ delay: 1.8, duration: 1.4, ease: "easeInOut" }}
+            />
+            <motion.path
+              d="M3 22 L4 34 L15 30"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 3.1, duration: 0.3 }}
+            />
+          </motion.svg>
+          <span className="-rotate-3 pt-0.5 text-[11px] uppercase tracking-[0.18em] text-white/45">
+            psst, hover the sidebar
+            <br />
+            for more pages
+          </span>
+        </motion.div>
+
         {/* Scroll indicator */}
         <motion.div
           initial={{ opacity: 0 }}
