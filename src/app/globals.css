@@ -11,6 +11,51 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-mono);
   --font-mono: var(--font-geist-mono);
+  --color-desk: var(--desk);
+  --color-ink: var(--ink);
+  --color-pane: var(--pane);
+  --color-paper: var(--paper);
+}
+
+/* /more is light-first with optional dark mode. Tokens live on body so the overscroll
+   area matches; light-dark() follows color-scheme, which the menubar toggle pins. */
+body:has([data-more]) {
+  color-scheme: light dark;
+  --desk: light-dark(#cccccc, #131313);
+  --ink: light-dark(#000, #ededed);
+  --pane: light-dark(#fff, #1d1d1f);
+  --chrome: light-dark(#f0f0f0, #3a3a3c);
+  --chrome-edge: light-dark(#d6d5d7, #2b2b2d);
+  --paper: light-dark(#fffdf3, #26241a);
+  --paper-chrome: light-dark(#f6efc9, #4a4530);
+  --paper-chrome-edge: light-dark(#e9dfa9, #3a3625);
+  --glint: light-dark(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.08));
+  background: var(--desk);
+  cursor: auto;
+}
+:root[data-theme="light"] body:has([data-more]) {
+  color-scheme: light;
+}
+:root[data-theme="dark"] body:has([data-more]) {
+  color-scheme: dark;
+}
+/* The site-wide dot cursors don't fit the desk; fall back to the system ones there. */
+[data-more] a,
+[data-more] a *,
+[data-more] button,
+[data-more] button * {
+  cursor: pointer !important;
+}
+[data-more] .cursor-grab,
+[data-more] .cursor-grab * {
+  cursor: grab !important;
+}
+[data-more] .cursor-grab:active,
+[data-more] .cursor-grab:active * {
+  cursor: grabbing !important;
+}
+:root:has([data-more]) {
+  scroll-behavior: smooth;
 }
 
 body {
