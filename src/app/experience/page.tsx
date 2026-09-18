@@ -1,26 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  readSidebarExpanded,
-  subscribeToSidebarExpandedChange,
-} from "@/lib/sidebar";
+import { CONTENT_PADDING } from "@/components/Sidebar";
 import ExperienceTimeline from "./ExperienceTimeline";
 import ExperienceBackground from "./ExperienceBackground";
 
 export default function Experience() {
-  // The sidebar is fixed and overlays the page, so content has to clear it.
-  // The mobile/desktop split is pure CSS; only expanded vs collapsed needs state.
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
-
-  useEffect(() => {
-    setSidebarExpanded(readSidebarExpanded(false));
-    return subscribeToSidebarExpandedChange(setSidebarExpanded);
-  }, []);
-
-  const contentPadding = `px-6 lg:pr-12 ${
-    sidebarExpanded ? "lg:pl-[280px]" : "lg:pl-[108px]"
-  }`;
+  const contentPadding = `px-6 ${CONTENT_PADDING} lg:pr-12`;
 
   return (
     <div

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
-import Sidebar, { MobileHeader } from "../components/Sidebar";
-import { readSidebarExpanded, writeSidebarExpanded } from "@/lib/sidebar";
+import Sidebar, { MobileHeader, CONTENT_PADDING } from "../components/Sidebar";
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -21,65 +20,11 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     setIsSidebarOpen(false);
   };
 
-  // Check if we're on the homepage
-  /* const isHomePage =
-    pathname === "/" ||
-    pathname === "/experience" ||
-    pathname === "/terminal" ||
-    pathname === "/playground"; */
-  //const isHomePage = true;
-
   // Bare routes render with no sidebar/chrome at all
   const isBareRoute =
     pathname === "/me" || pathname === "/links" || pathname === "/more";
 
   const isHomePage = !(pathname === "/hehe");
-  const defaultSidebarExpanded = isHomePage ? false : true;
-  const [isSidebarExpanded, setIsSidebarExpanded] =
-    useState(defaultSidebarExpanded);
-  const [hasLoadedSidebarExpanded, setHasLoadedSidebarExpanded] =
-    useState(false);
-
-  useEffect(() => {
-    setIsSidebarExpanded(readSidebarExpanded(defaultSidebarExpanded));
-    setHasLoadedSidebarExpanded(true);
-  }, [defaultSidebarExpanded]);
-
-  useEffect(() => {
-    if (!hasLoadedSidebarExpanded) {
-      return;
-    }
-
-    writeSidebarExpanded(isSidebarExpanded);
-  }, [hasLoadedSidebarExpanded, isSidebarExpanded]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const isBackslashShortcutKey =
-        event.key === "\\" ||
-        event.code === "Backslash" ||
-        event.code === "IntlBackslash";
-
-      if (
-        window.innerWidth < 1024 ||
-        event.defaultPrevented ||
-        event.repeat ||
-        !event.metaKey ||
-        event.ctrlKey ||
-        event.altKey ||
-        event.shiftKey ||
-        !isBackslashShortcutKey
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-      setIsSidebarExpanded((expanded) => !expanded);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
 
   if (isBareRoute) {
     return <>{children}</>;
@@ -93,9 +38,6 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
           <Sidebar
             isOpen={isSidebarOpen}
             onClose={closeSidebar}
-            initialExpanded={false}
-            expanded={isSidebarExpanded}
-            onExpandedChange={setIsSidebarExpanded}
             user={{
               name: "Naman Rusia",
               title: "Software Engineer",
@@ -121,9 +63,6 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={closeSidebar}
-        initialExpanded={true}
-        expanded={isSidebarExpanded}
-        onExpandedChange={setIsSidebarExpanded}
         user={{
           name: "Naman Rusia",
           title: "Software Engineer",
@@ -132,7 +71,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
       />
 
       {/* Main Content */}
-      <main className="flex flex-1 flex-col overflow-hidden">
+      <main className={`flex flex-1 flex-col overflow-hidden ${CONTENT_PADDING}`}>
         {/* Mobile Header */}
         <MobileHeader onMenuClick={toggleSidebar} title="Naman's Portfolio" />
 

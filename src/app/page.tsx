@@ -1,23 +1,11 @@
 "use client";
 
+import { CONTENT_PADDING } from "@/components/Sidebar";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
-import {
-  readSidebarExpanded,
-  subscribeToSidebarExpandedChange,
-} from "@/lib/sidebar";
 
 export default function Home() {
-  // The sidebar is fixed and overlays the page, so content needs to clear it.
-  // The mobile/desktop split is pure CSS; only expanded vs collapsed needs state.
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
-
-  useEffect(() => {
-    setSidebarExpanded(readSidebarExpanded(false));
-    return subscribeToSidebarExpandedChange(setSidebarExpanded);
-  }, []);
-
   // Mobile browsers resize the viewport as the URL bar hides and shows, which
   // makes the scroll-linked hero fade jump around. Skip it on phones.
   const [isPhone, setIsPhone] = useState(false);
@@ -30,9 +18,7 @@ export default function Home() {
     return () => query.removeEventListener("change", update);
   }, []);
 
-  const contentPadding = `px-6 lg:pr-12 ${
-    sidebarExpanded ? "lg:pl-[280px]" : "lg:pl-[108px]"
-  }`;
+  const contentPadding = `px-6 ${CONTENT_PADDING} lg:pr-12`;
 
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
@@ -325,6 +311,48 @@ export default function Home() {
             ))}
           </motion.dl>
         </div>
+
+        {/* left offset clears the 88px rail; hidden below lg where the rail becomes a drawer.
+            Sits inside the hero's py-28 top gutter so it never overlaps content. */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 1 }}
+          className="pointer-events-none absolute top-9 left-[100px] hidden items-start gap-2 lg:flex"
+        >
+          <motion.svg
+            width="56"
+            height="40"
+            viewBox="0 0 56 40"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-[#e2b07a]/70"
+            animate={{ x: [0, -5, 0] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+            aria-hidden
+          >
+            <motion.path
+              d="M54 6 C 38 0, 30 22, 40 22 C 48 22, 44 8, 30 12 C 18 15, 10 24, 4 34"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ delay: 1.8, duration: 1.4, ease: "easeInOut" }}
+            />
+            <motion.path
+              d="M3 22 L4 34 L15 30"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 3.1, duration: 0.3 }}
+            />
+          </motion.svg>
+          <span className="-rotate-3 pt-0.5 text-[11px] uppercase tracking-[0.18em] text-white/45">
+            psst, hover the sidebar
+            <br />
+            for more pages
+          </span>
+        </motion.div>
 
         {/* Scroll indicator */}
         <motion.div
