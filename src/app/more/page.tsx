@@ -468,9 +468,7 @@ export default function More() {
               className="mt-4 w-[min(88vw,660px)] lg:w-[min(46vw,660px)]"
             />
           </h1>
-          <p className="mt-6 text-[11px] text-ink/40">
-            the not-a-resume page &middot; everything on the desk is draggable
-          </p>
+        
         </motion.div>
       </section>
 
