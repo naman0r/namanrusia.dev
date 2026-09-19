@@ -24,9 +24,9 @@ export function siteDay(now = new Date()): string {
  * A per-day, per-visitor pseudonymous id.
  *
  * Because the day is part of the hash, the same person gets a different id
- * tomorrow: we can count unique visitors within a day, but nobody -- including
- * us -- can link those ids across days, and the IP is never stored. Same
- * approach Plausible and Fathom use, and why the site needs no cookie banner.
+ * tomorrow, so unique visitors are counted per day. The id alone can't be
+ * linked across days, but /api/track now stores the raw IP next to it, so the
+ * rows can be. Don't describe this id as anonymous.
  */
 export function visitorId(ip: string, userAgent: string, salt: string): string {
   return createHash("sha256")

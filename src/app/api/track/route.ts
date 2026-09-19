@@ -67,6 +67,30 @@ function utmFrom(query: string | null) {
   };
 }
 
+/** Vercel's geo-IP headers. City arrives percent-encoded ("S%C3%A3o%20Paulo"). */
+function geoFrom(headers: Headers) {
+  const coord = (name: string) => {
+    const raw = headers.get(name);
+    const n = Number(raw);
+    return raw && Number.isFinite(n) ? n : null;
+  };
+  let city = headers.get("x-vercel-ip-city");
+  try {
+    city = city && decodeURIComponent(city);
+  } catch {
+    /* keep the raw value */
+  }
+  return {
+    country: clip(headers.get("x-vercel-ip-country"), 2),
+    region: clip(headers.get("x-vercel-ip-country-region"), 8),
+    city: clip(city, 120),
+    postal: clip(headers.get("x-vercel-ip-postal-code"), 16),
+    latitude: coord("x-vercel-ip-latitude"),
+    longitude: coord("x-vercel-ip-longitude"),
+    timezone: clip(headers.get("x-vercel-ip-timezone"), 64),
+  };
+}
+
 function sanitizeMeta(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const json = JSON.stringify(value);
@@ -96,9 +120,10 @@ export async function POST(req: NextRequest) {
 
   // analyticsConfigured() above already checked this is set.
   const salt = process.env.ANALYTICS_SALT as string;
-  const vid = visitorId(clientIp(req.headers), userAgent, salt);
+  const ip = clientIp(req.headers);
+  const vid = visitorId(ip, userAgent, salt);
   const { device, browser, os } = parseUserAgent(userAgent);
-  const country = clip(req.headers.get("x-vercel-ip-country"), 2);
+  const geo = geoFrom(req.headers);
   const selfHost = (req.headers.get("host") ?? "")
     .split(":")[0]
     .replace(/^www\./, "")
@@ -118,7 +143,9 @@ export async function POST(req: NextRequest) {
         referrer_host: referrerHost === selfHost ? null : referrerHost,
         target: clip(e.target, 200),
         target_href: clip(e.href, 1024),
-        country,
+        // 0.0.0.0 is clientIp's "header missing" placeholder, not an address.
+        ip: ip === "0.0.0.0" ? null : clip(ip, 64),
+        ...geo,
         device,
         browser,
         os,
