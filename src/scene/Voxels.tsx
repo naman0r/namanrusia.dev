@@ -6,12 +6,14 @@ import { DynamicDrawUsage, InstancedBufferAttribute, type InstancedMesh } from "
 import { stage, useStage } from "@/lib/stage";
 import { buildCity, buildShots, CARTS, GATES, type FrameCtx, type Shot } from "./shots";
 
-type Buf = { pos: Float32Array; col: Float32Array; scl: Float32Array };
+/** A shot placed in the world. `rot` is its row-major 3x3 orientation, which every voxel shares. */
+type Buf = { pos: Float32Array; col: Float32Array; scl: Float32Array; rot: Float32Array };
 
 const makeBuf = (n: number): Buf => ({
   pos: new Float32Array(n * 3),
   col: new Float32Array(n * 3),
   scl: new Float32Array(n * 3),
+  rot: new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]),
 });
 
 // Share of a morph spent waiting on each voxel's own delay; the rest is travel.
@@ -33,22 +35,16 @@ function place(shot: Shot, ctx: FrameCtx, out: Buf, tiltX: number, tiltY: number
   const cy = Math.cos(p.ry + tiltY);
   const sy = Math.sin(p.ry + tiltY);
   // R = Rx * Ry
-  const r00 = cy,
-    r02 = sy;
-  const r10 = sx * sy,
-    r11 = cx,
-    r12 = -sx * cy;
-  const r20 = -cx * sy,
-    r21 = sx,
-    r22 = cx * cy;
+  const r = out.rot;
+  r.set([cy, 0, sy, sx * sy, cx, -sx * cy, -cx * sy, sx, cx * cy]);
   const pos = out.pos;
   for (let o = 0; o < t.n * 3; o += 3) {
     const x = pos[o] * p.s;
     const y = pos[o + 1] * p.s;
     const z = pos[o + 2] * p.s;
-    pos[o] = r00 * x + r02 * z + p.x;
-    pos[o + 1] = r10 * x + r11 * y + r12 * z + p.y;
-    pos[o + 2] = r20 * x + r21 * y + r22 * z + p.z;
+    pos[o] = r[0] * x + r[2] * z + p.x;
+    pos[o + 1] = r[3] * x + r[4] * y + r[5] * z + p.y;
+    pos[o + 2] = r[6] * x + r[7] * y + r[8] * z + p.z;
     out.scl[o] *= p.s;
     out.scl[o + 1] *= p.s;
     out.scl[o + 2] *= p.s;
@@ -87,6 +83,7 @@ function makeSim(count: number) {
     tiltY: 0,
     hover: new Float32Array(CARTS),
     gate: new Float32Array(GATES),
+    rot: new Float32Array(9),
   };
 }
 
@@ -120,6 +117,7 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
         S.snap.pos.set(S.out.pos);
         S.snap.col.set(S.out.col);
         S.snap.scl.set(S.out.scl);
+        S.snap.rot.set(S.out.rot);
         S.snapAt = S.time;
       }
       S.key = key;
@@ -138,27 +136,31 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
     S.tiltX += (stage.pointer.y * 0.12 - S.tiltX) * k3;
     S.tiltY += (stage.pointer.x * 0.22 - S.tiltY) * k3;
 
-    const ctx: FrameCtx = {
-      time: S.time,
-      dt,
-      local: stage.local,
-      mobile,
-      reduced,
-      hover: S.hover,
-      gate: S.gate,
-      burstAge: stage.burst ? (performance.now() - stage.burst) / 1000 : -1,
-    };
-
     const ia = Math.floor(S.pos);
     const ib = Math.min(last, ia + 1);
     const mix = S.pos - ia;
     const morphing = ib !== ia && mix > 1e-4;
     const A = shots[list[ia]];
     const B = shots[list[ib]];
-    A.tick?.(ctx);
-    if (morphing) B.tick?.(ctx);
-    place(A, ctx, S.a, S.tiltX, S.tiltY);
-    if (morphing) place(B, ctx, S.b, S.tiltX, S.tiltY);
+    // Each shot reads the scroll progress of its own section, so neither jumps mid-morph.
+    const ctx = (i: number): FrameCtx => ({
+      time: S.time,
+      dt,
+      local: stage.locals[i] ?? 0,
+      mobile,
+      reduced,
+      hover: S.hover,
+      gate: S.gate,
+      burstAge: stage.burst && !reduced ? (performance.now() - stage.burst) / 1000 : -1,
+    });
+    const ca = ctx(ia);
+    A.tick?.(ca);
+    place(A, ca, S.a, S.tiltX, S.tiltY);
+    if (morphing) {
+      const cb = ctx(ib);
+      B.tick?.(cb);
+      place(B, cb, S.b, S.tiltX, S.tiltY);
+    }
 
     // Reduced motion still follows the page, but voxels slide straight between shots instead of flying.
     const snapK = reduced ? 1 : (S.time - S.snapAt) / 1.6;
@@ -168,6 +170,7 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
     const mat = m.instanceMatrix.array as Float32Array;
     const colAttr = m.instanceColor.array as Float32Array;
     const { a, b, out, seed, snap } = S;
+    const R = S.rot;
 
     for (let i = 0; i < count; i++) {
       const o = i * 3;
@@ -181,6 +184,7 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
       let sx = a.scl[o];
       let sy = a.scl[o + 1];
       let sz = a.scl[o + 2];
+      R.set(a.rot);
       let arc = 0;
 
       if (morphing) {
@@ -194,6 +198,7 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
         sx += (b.scl[o] - sx) * mi;
         sy += (b.scl[o + 1] - sy) * mi;
         sz += (b.scl[o + 2] - sz) * mi;
+        for (let k = 0; k < 9; k++) R[k] += (b.rot[k] - R[k]) * mi;
         arc = Math.sin(Math.PI * mi) * flight;
       }
       if (fromSnap) {
@@ -207,6 +212,7 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
         sx = snap.scl[o] + (sx - snap.scl[o]) * mi;
         sy = snap.scl[o + 1] + (sy - snap.scl[o + 1]) * mi;
         sz = snap.scl[o + 2] + (sz - snap.scl[o + 2]) * mi;
+        for (let k = 0; k < 9; k++) R[k] = snap.rot[k] + (R[k] - snap.rot[k]) * mi;
         arc = Math.max(arc, Math.sin(Math.PI * mi));
       }
 
@@ -228,24 +234,35 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
       out.scl[o + 1] = sy;
       out.scl[o + 2] = sz;
 
-      // Column-major T * R * S, with R = Ry(ang) * Rx(0.7 ang).
-      const e = i * 16;
+      // Column-major T * R * Rt * S, where the tumble Rt = Ry(ang) * Rx(0.7 ang). Blending two
+      // orientations mid-morph skews the matrix a little, which the tumble hides.
       const ang = arc * seed[i * 5 + 4] * Math.PI;
-      const ca = Math.cos(ang);
-      const sa = Math.sin(ang);
-      const cb2 = Math.cos(ang * 0.7);
-      const sb = Math.sin(ang * 0.7);
-      mat[e] = ca * sx;
-      mat[e + 1] = 0;
-      mat[e + 2] = -sa * sx;
+      const tc = Math.cos(ang);
+      const ts = Math.sin(ang);
+      const uc = Math.cos(ang * 0.7);
+      const us = Math.sin(ang * 0.7);
+      const e = i * 16;
+      // Rt's columns, each scaled by its axis.
+      const c0x = tc * sx,
+        c0y = 0,
+        c0z = -ts * sx;
+      const c1x = ts * us * sy,
+        c1y = uc * sy,
+        c1z = tc * us * sy;
+      const c2x = ts * uc * sz,
+        c2y = -us * sz,
+        c2z = tc * uc * sz;
+      mat[e] = R[0] * c0x + R[1] * c0y + R[2] * c0z;
+      mat[e + 1] = R[3] * c0x + R[4] * c0y + R[5] * c0z;
+      mat[e + 2] = R[6] * c0x + R[7] * c0y + R[8] * c0z;
       mat[e + 3] = 0;
-      mat[e + 4] = sa * sb * sy;
-      mat[e + 5] = cb2 * sy;
-      mat[e + 6] = ca * sb * sy;
+      mat[e + 4] = R[0] * c1x + R[1] * c1y + R[2] * c1z;
+      mat[e + 5] = R[3] * c1x + R[4] * c1y + R[5] * c1z;
+      mat[e + 6] = R[6] * c1x + R[7] * c1y + R[8] * c1z;
       mat[e + 7] = 0;
-      mat[e + 8] = sa * cb2 * sz;
-      mat[e + 9] = -sb * sz;
-      mat[e + 10] = ca * cb2 * sz;
+      mat[e + 8] = R[0] * c2x + R[1] * c2y + R[2] * c2z;
+      mat[e + 9] = R[3] * c2x + R[4] * c2y + R[5] * c2z;
+      mat[e + 10] = R[6] * c2x + R[7] * c2y + R[8] * c2z;
       mat[e + 11] = 0;
       mat[e + 12] = px;
       mat[e + 13] = py;
@@ -256,6 +273,9 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
       colAttr[o + 1] = cg;
       colAttr[o + 2] = cb;
     }
+    // The snapshot for the next page change takes the orientation the scene is showing now.
+    out.rot.set(a.rot);
+    if (morphing && mix > 0.5) out.rot.set(b.rot);
     m.instanceMatrix.needsUpdate = true;
     m.instanceColor.needsUpdate = true;
   });

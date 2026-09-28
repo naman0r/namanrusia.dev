@@ -60,6 +60,7 @@ export function Experience() {
                     href={`/experience#${o.id}`}
                     onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(i)}
                     onFocus={() => setHovered(i)}
+                    onBlur={() => setHovered(null)}
                     className={`grid grid-cols-[2.25rem_4px_1fr] items-center gap-x-3 px-3 py-3 transition-colors sm:grid-cols-[2.75rem_4px_2.25rem_1fr_auto] sm:gap-x-4 sm:px-4 ${
                       active === i ? "bg-coal" : ""
                     }`}

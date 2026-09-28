@@ -35,7 +35,8 @@ export function ProjectList({ items, start }: { items: Project[]; /** Number the
   }, [hovered]);
 
   useEffect(() => {
-    stage.hoveredProject = hovered ? featured.indexOf(hovered) : -1;
+    // Items arrive from server components as copies, so match by slug rather than identity.
+    stage.hoveredProject = hovered ? featured.findIndex((f) => f.slug === hovered.slug) : -1;
   }, [hovered]);
 
   return (

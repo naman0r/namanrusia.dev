@@ -22,7 +22,8 @@ export const metadata: Metadata = {
   title: { default: profile.name, template: `%s · ${profile.name}` },
   description,
   authors: [{ name: profile.name, url: siteUrl }],
-  openGraph: { type: "website", url: "/", siteName: profile.name, title: profile.name, description },
+  // Pages other than home set their own openGraph, which replaces this one wholesale.
+  openGraph: { type: "website", siteName: profile.name, title: profile.name, description },
   twitter: { card: "summary_large_image", creator: "@namanrusia1" },
   alternates: { canonical: "/" },
 };

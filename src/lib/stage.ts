@@ -13,8 +13,8 @@ export const stage = {
   shots: ["cube"] as ShotId[],
   /** Continuous position through `shots`: 1.4 is 40% of the way from shot 1 to shot 2. */
   position: 0,
-  /** 0..1 progress through the active section. */
-  local: 0,
+  /** 0..1 progress through each `[data-shot]` section, by the viewport's middle. */
+  locals: [] as number[],
   section: "",
   pointer: { x: 0, y: 0 },
   hoveredProject: -1,

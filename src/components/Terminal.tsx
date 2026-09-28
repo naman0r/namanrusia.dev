@@ -212,7 +212,7 @@ export function Terminal() {
                 setValue(history[next]);
               } else if (e.key === "ArrowDown") {
                 e.preventDefault();
-                const next = cursor - 1;
+                const next = Math.max(-1, cursor - 1);
                 setCursor(next);
                 setValue(next < 0 ? "" : history[next]);
               }

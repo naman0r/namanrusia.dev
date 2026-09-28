@@ -58,7 +58,7 @@ export function Activity({ days }: { days: Day[] }) {
         className="mt-10 border-2 border-line bg-ink p-4"
         aria-label={`GitHub contribution calendar: ${total} contributions in the last year`}
       >
-        <div className="overflow-x-auto [scrollbar-width:thin]">
+        <div data-lenis-prevent-horizontal className="overflow-x-auto [scrollbar-width:thin]">
           <div className="min-w-[680px]">
             <div className="label mb-1.5 grid text-[10px] text-dust" style={{ gridTemplateColumns: `repeat(${weeks}, 1fr)` }}>
               {months.map((m) => (

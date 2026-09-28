@@ -6,10 +6,13 @@ import { Gantt } from "@/components/Gantt";
 import { experience, monthYear, TIMELINE_START } from "@/content/experience";
 import { education, profile, skills } from "@/content/profile";
 
+const description = "Every internship, studio and campus role, and what I built in each.";
+
 export const metadata: Metadata = {
   title: "Experience",
-  description: "Every internship, studio and campus role, and what I built in each.",
+  description,
   alternates: { canonical: "/experience" },
+  openGraph: { title: "Experience · Naman Rusia", description, url: "/experience" },
 };
 
 export default function ExperiencePage() {

@@ -14,7 +14,14 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/projects/[slug]">): Promise<Metadata> {
   const p = getProject((await params).slug);
-  return p ? { title: p.title, description: `${p.tagline} ${p.summary}`, alternates: { canonical: `/projects/${p.slug}` } } : {};
+  if (!p) return {};
+  const description = `${p.tagline} ${p.summary}`;
+  return {
+    title: p.title,
+    description,
+    alternates: { canonical: `/projects/${p.slug}` },
+    openGraph: { title: `${p.title} · Naman Rusia`, description, url: `/projects/${p.slug}` },
+  };
 }
 
 function Block({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
@@ -183,7 +190,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
               alt={`${p.title} screenshot`}
               width={1600}
               height={900}
-              priority
+              preload
               className="block h-auto max-h-[70vh] w-full object-cover object-top"
             />
           ) : (

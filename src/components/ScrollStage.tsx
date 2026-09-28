@@ -49,9 +49,9 @@ export function ScrollStage() {
       let active = 0;
       sections.forEach((s, i) => {
         if (probe >= s.top) active = i;
+        stage.locals[i] = Math.min(1, Math.max(0, (y + vh * 0.5 - s.top) / s.height));
       });
       const s = sections[active];
-      stage.local = Math.min(1, Math.max(0, (y + vh * 0.5 - s.top) / s.height));
 
       if (position > last - 0.05 && stage.burst === 0) stage.burst = performance.now();
       if (position < last - 0.6) stage.burst = 0;
@@ -68,6 +68,7 @@ export function ScrollStage() {
         return { id: el.id, shot: el.dataset.shot as ShotId, top: r.top + window.scrollY, height: r.height };
       });
       stage.shots = sections.length ? sections.map((s) => s.shot) : ["lost"];
+      stage.locals.length = sections.length;
       update();
     };
 

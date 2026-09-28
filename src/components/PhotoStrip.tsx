@@ -14,6 +14,7 @@ export function PhotoStrip() {
   return (
     <ul
       ref={strip}
+      data-lenis-prevent-horizontal
       className="-mx-4 flex cursor-grab snap-x gap-5 overflow-x-auto px-4 pb-8 pt-2 [scrollbar-width:none] active:cursor-grabbing md:-mx-8 md:px-8"
       onPointerDown={(e) => {
         if (e.pointerType !== "mouse" || !strip.current) return;

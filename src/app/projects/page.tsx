@@ -3,10 +3,13 @@ import Link from "next/link";
 import { ProjectList } from "@/components/ProjectList";
 import { projects } from "@/content/projects";
 
+const description = "Every project I've built, newest first: developer tools, AI apps, hardware and hackathon builds.";
+
 export const metadata: Metadata = {
   title: "Projects",
-  description: "Every project I've built, newest first: developer tools, AI apps, hardware and hackathon builds.",
+  description,
   alternates: { canonical: "/projects" },
+  openGraph: { title: "Projects · Naman Rusia", description, url: "/projects" },
 };
 
 export default function ProjectsIndex() {
