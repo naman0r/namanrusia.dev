@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-export type ShotId = "globe" | "cube" | "track" | "carts" | "photos" | "city" | "monogram" | "skyline" | "library" | "monolith" | "lost";
+export type ShotId = "globe" | "cube" | "track" | "carts" | "city" | "monogram" | "skyline" | "library" | "monolith" | "lost";
 
 export type Day = [date: string, count: number];
 
@@ -21,8 +21,6 @@ export const stage = {
   hoveredProject: -1,
   /** Slug of the project page being viewed, for its cartridge. */
   project: "",
-  /** Index into `photos` of the polaroid under the pointer, for the mosaic. */
-  photo: -1,
   activeCheckpoint: -1,
   /** performance.now() when the last section was reached, to fire its burst once per visit. */
   burst: 0,

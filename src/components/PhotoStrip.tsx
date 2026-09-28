@@ -3,13 +3,12 @@
 import Image from "next/image";
 import { useRef } from "react";
 import { photos } from "@/content/profile";
-import { stage } from "@/lib/stage";
 
 const HEIGHT = 260;
 
 /**
  * Polaroids in a sideways strip. A mouse can grab and drag it; touch and trackpads scroll it
- * natively. Pointing at a photo (or tapping it) tells the scene which one to rebuild.
+ * natively.
  */
 export function PhotoStrip() {
   const strip = useRef<HTMLUListElement>(null);
@@ -30,17 +29,12 @@ export function PhotoStrip() {
         strip.current.scrollLeft = d.left - (e.clientX - d.x);
       }}
       onPointerUp={() => (drag.current = null)}
-      onPointerLeave={(e) => {
-        drag.current = null;
-        if (e.pointerType === "mouse") stage.photo = -1;
-      }}
+      onPointerLeave={() => (drag.current = null)}
       onDragStart={(e) => e.preventDefault()}
     >
       {photos.map((p, i) => (
         <li
           key={p.src}
-          onPointerEnter={(e) => e.pointerType === "mouse" && (stage.photo = i)}
-          onClick={() => (stage.photo = i)}
           className={`shrink-0 snap-start bg-bone p-2 pb-0 shadow-[6px_6px_0_0_var(--color-coal)] transition-transform duration-150 ease-(--ease-step) hover:-translate-y-1 hover:rotate-0 ${
             i % 3 === 0 ? "-rotate-2" : i % 3 === 1 ? "rotate-1" : "-rotate-1"
           }`}

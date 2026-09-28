@@ -1,6 +1,6 @@
 import { Color } from "three";
 import { experience, roleEnd, TIMELINE_END, TIMELINE_START } from "@/content/experience";
-import { homes, photos } from "@/content/profile";
+import { homes } from "@/content/profile";
 import { featured, projects } from "@/content/projects";
 import { stage, type Day, type ShotId } from "@/lib/stage";
 import { ACCENT, HEAT, heatLevel } from "./palette";
@@ -133,7 +133,6 @@ function spinY(pos: Float32Array, n: number, angle: number) {
   }
 }
 
-const smoothstep01 = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 const pose = (x: number, y: number, z: number, rx: number, ry: number, s: number): Pose => ({ x, y, z, rx, ry, s });
@@ -752,104 +751,6 @@ function monolith(n: number): Shot {
   };
 }
 
-// What the camera-roll mosaic cycles through when nobody is pointing at a photo: the scenic ones.
-const SCENIC = ["/photos/the-pru.jpeg", "/photos/deck-12.jpeg", "/photos/rank-1-of-521.jpg", "/photos/strava-harvard-bridge.png"].map(
-  (src) => photos.findIndex((p) => p.src === src),
-);
-
-/**
- * The camera roll as voxels: whichever photo you point at is rebuilt as a relief mosaic, and it
- * wipes across to the next one. Photos load small (96px) through the image optimizer, on demand.
- */
-function mosaic(n: number): Shot {
-  const t = alloc(n);
-  const cols = n >= 3000 ? 64 : 48;
-  const rows = (cols * 3) / 4;
-  const v = 0.1;
-  for (let i = 0; i < n; i++) {
-    const gx = i % cols;
-    const gy = Math.floor(i / cols);
-    put(t, i, (gx - (cols - 1) / 2) * v, ((rows - 1) / 2 - gy) * v, 0, C.dust, i < cols * rows ? v * 0.9 : 0);
-  }
-
-  const loaded = new Map<number, { col: Float32Array; z: Float32Array; on: Float32Array }>();
-  const loading = new Set<number>();
-  const load = (k: number) => {
-    if (k < 0 || loading.has(k)) return;
-    loading.add(k);
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = cols;
-      canvas.height = rows;
-      const g = canvas.getContext("2d")!;
-      // Landscape photos cover-crop to 4:3; portrait ones fit whole, or Layla becomes just a nose.
-      const scale = img.height > img.width ? rows / img.height : Math.max(cols / img.width, rows / img.height);
-      const w = img.width * scale;
-      const h = img.height * scale;
-      g.drawImage(img, (cols - w) / 2, (rows - h) / 2, w, h);
-      const data = g.getImageData(0, 0, cols, rows).data;
-      const col = new Float32Array(cols * rows * 3);
-      const z = new Float32Array(cols * rows);
-      const on = new Float32Array(cols * rows);
-      for (let p = 0; p < cols * rows; p++) {
-        const [r, gg, b] = [data[p * 4] / 255, data[p * 4 + 1] / 255, data[p * 4 + 2] / 255];
-        col.set([r ** 2.2 * 1.25, gg ** 2.2 * 1.25, b ** 2.2 * 1.25], p * 3);
-        z[p] = (0.2126 * r + 0.7152 * gg + 0.0722 * b - 0.5) * 0.7;
-        on[p] = data[p * 4 + 3] > 127 ? 1 : 0;
-      }
-      loaded.set(k, { col, z, on });
-    };
-    img.src = `/_next/image?url=${encodeURIComponent(photos[k].src)}&w=96&q=75`;
-  };
-
-  let clock = 0;
-  let cycle = 0;
-  let cycledAt = 0;
-  let cur = -1;
-  let prev = -1;
-  let since = 0;
-  return {
-    target: t,
-    pose: (c) => (c.mobile ? pose(0, 2.6, -2, 0.1, -0.2, 0.62) : pose(4.3, 1, -1, 0.12, -0.35 + Math.sin(c.time * 0.3) * 0.08, 1)),
-    tick(c) {
-      clock += c.dt;
-      if (stage.photo < 0 && clock - cycledAt > 5) {
-        cycle++;
-        cycledAt = clock;
-      }
-      const want = stage.photo >= 0 ? stage.photo : SCENIC[cycle % SCENIC.length];
-      load(want);
-      load(SCENIC[(cycle + 1) % SCENIC.length]);
-      if (want !== cur && loaded.has(want)) {
-        prev = cur;
-        cur = want;
-        since = clock;
-      }
-    },
-    animate(c, pos, col, scl) {
-      const a = loaded.get(prev);
-      const b = loaded.get(cur);
-      for (let p = 0; p < cols * rows && p < t.n; p++) {
-        const o = p * 3;
-        // A wipe from left to right, each column a beat behind the last.
-        const f = b ? smoothstep01((clock - since) * 1.8 - ((p % cols) / cols) * 0.9) : 0;
-        const za = a ? a.z[p] : 0;
-        const zb = b ? b.z[p] : 0;
-        pos[o + 2] = za + (zb - za) * f + Math.sin(f * Math.PI) * 0.4;
-        for (let q = 0; q < 3; q++) {
-          const ca = a ? a.col[o + q] : col[o + q] * (0.6 + 0.4 * Math.sin(c.time * 2 + p * 0.05));
-          const cb = b ? b.col[o + q] : ca;
-          col[o + q] = ca + (cb - ca) * f;
-        }
-        const oa = a ? a.on[p] : 1;
-        const size = v * 0.9 * (oa + ((b ? b.on[p] : oa) - oa) * f) * (1 + Math.sin(f * Math.PI) * 0.4);
-        scl[o] = scl[o + 1] = scl[o + 2] = size;
-      }
-    },
-  };
-}
-
 /** The GitHub contribution calendar as bars, one column per week. */
 export function buildCity(n: number, days: Day[] | null): Shot {
   const t = alloc(n);
@@ -1097,7 +998,6 @@ export function buildShots(n: number): Omit<Record<ShotId, Shot>, "city"> {
     skyline: skyline(n),
     library: library(n),
     monolith: monolith(n),
-    photos: mosaic(n),
     lost: lost(n),
   };
 }

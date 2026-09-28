@@ -21,7 +21,7 @@ export function SceneMount() {
   const [ready, setReady] = useState(false);
   const { section } = useStage();
   // On phones text sits on top of the scene, so it steps back except where the layout leaves it room.
-  const titleScreen = usePathname() === "/" && ["", "top", "photos", "contact"].includes(section);
+  const titleScreen = usePathname() === "/" && ["", "top", "contact"].includes(section);
 
   useEffect(() => {
     if (!hasWebGL()) return;
