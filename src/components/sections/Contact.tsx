@@ -23,7 +23,7 @@ export function Contact() {
           <span className="text-accent">06</span> · Contact
         </p>
         <h2 id="contact-title" className="mt-4 max-w-3xl text-2xl leading-tight text-bone md:text-5xl">
-          Recruiting for Spring or Summer 2027, building something, or just want to talk Clash Royale? Write to me.
+          Feel free to reach out.
         </h2>
         <a
           href={`mailto:${profile.email}`}
