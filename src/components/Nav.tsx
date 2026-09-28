@@ -58,7 +58,8 @@ export function Nav() {
 
         <ul className="ml-auto flex items-center gap-0.5 sm:gap-1">
           {LINKS.map((l, i) => {
-            const active = home ? section === l.section : pathname.startsWith(l.href);
+            // Sections can hold several scenes (about-story, about-cube); the prefix names the section.
+            const active = home ? section.split("-")[0] === l.section : pathname.startsWith(l.href);
             return (
               <li key={l.href} className={i > 1 ? "max-sm:hidden" : ""}>
                 <Link

@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from "react";
 
-export type ShotId = "cube" | "globe" | "track" | "carts" | "city" | "monogram" | "skyline" | "shelf" | "lost";
+export type ShotId = "globe" | "cube" | "track" | "carts" | "city" | "monogram" | "skyline" | "shelf" | "lost";
+
+export type CubePhase = "solved" | "scrambling" | "scrambled" | "solving";
 
 export type Day = [date: string, count: number];
 
@@ -10,7 +12,7 @@ export type Day = [date: string, count: number];
  */
 export const stage = {
   /** Shot per `[data-shot]` section on the current page, in scroll order. */
-  shots: ["cube"] as ShotId[],
+  shots: ["globe"] as ShotId[],
   /** Continuous position through `shots`: 1.4 is 40% of the way from shot 1 to shot 2. */
   position: 0,
   /** 0..1 progress through each `[data-shot]` section, by the viewport's middle. */
@@ -21,8 +23,10 @@ export const stage = {
   activeCheckpoint: -1,
   /** performance.now() when the last section was reached, to fire its burst once per visit. */
   burst: 0,
-  /** Letter indices from the hero name, each one a turn of the cube. */
-  cubeMoves: [] as number[],
+  /** The title-screen globe tours homes in order; hovering a place in the legend holds it there. */
+  globe: { focus: 0, hover: -1 },
+  /** The About cube: the timer button sends commands, the cube reports its phase and solve time. */
+  cube: { command: null as "scramble" | "solve" | null, phase: "solved" as CubePhase, solveStart: 0, solveEnd: 0 },
   /** The GitHub contribution calendar, once the landing page hands it over. */
   days: null as Day[] | null,
   version: 0,

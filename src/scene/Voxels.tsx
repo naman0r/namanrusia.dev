@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { DynamicDrawUsage, InstancedBufferAttribute, type InstancedMesh } from "three";
 import { stage, useStage } from "@/lib/stage";
-import { buildCity, buildShots, CARTS, GATES, type FrameCtx, type Shot } from "./shots";
+import { buildCity, buildShots, CARTS, GATES, rotation, type FrameCtx, type Shot } from "./shots";
 
 /** A shot placed in the world. `rot` is its row-major 3x3 orientation, which every voxel shares. */
 type Buf = { pos: Float32Array; col: Float32Array; scl: Float32Array; rot: Float32Array };
@@ -30,13 +30,8 @@ function place(shot: Shot, ctx: FrameCtx, out: Buf, tiltX: number, tiltY: number
   shot.animate?.(ctx, out.pos, out.col, out.scl);
 
   const p = shot.pose(ctx);
-  const cx = Math.cos(p.rx + tiltX);
-  const sx = Math.sin(p.rx + tiltX);
-  const cy = Math.cos(p.ry + tiltY);
-  const sy = Math.sin(p.ry + tiltY);
-  // R = Rx * Ry
   const r = out.rot;
-  r.set([cy, 0, sy, sx * sy, cx, -sx * cy, -cx * sy, sx, cx * cy]);
+  r.set(rotation(p.rx + tiltX, p.ry + tiltY));
   const pos = out.pos;
   for (let o = 0; o < t.n * 3; o += 3) {
     const x = pos[o] * p.s;
@@ -139,9 +134,10 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
     const ia = Math.floor(S.pos);
     const ib = Math.min(last, ia + 1);
     const mix = S.pos - ia;
-    const morphing = ib !== ia && mix > 1e-4;
     const A = shots[list[ia]];
     const B = shots[list[ib]];
+    // Neighbouring sections can share a shot (the globe spans the title and the bio); it just stays.
+    const morphing = A !== B && mix > 1e-4;
     // Each shot reads the scroll progress of its own section, so neither jumps mid-morph.
     const ctx = (i: number): FrameCtx => ({
       time: S.time,

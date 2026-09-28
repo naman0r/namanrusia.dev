@@ -24,13 +24,13 @@ export const profile = {
   ],
 } as const;
 
-/** Keycaps on the title screen; pressing the letter follows the link. */
-export const heroKeys: Record<string, { label: string; href: string }> = {
-  r: { label: "Resume", href: profile.resume },
-  e: { label: "Email", href: `mailto:${profile.email}` },
-  g: { label: "GitHub", href: profile.links.github },
-  l: { label: "LinkedIn", href: profile.links.linkedin },
-};
+/** Title-screen links; pressing the key opens the link. E copies the email. */
+export const heroLinks = [
+  { key: "r", label: "Resume", href: profile.resume, icon: "doc" },
+  { key: "g", label: "GitHub", href: profile.links.github, icon: "github" },
+  { key: "l", label: "LinkedIn", href: profile.links.linkedin, icon: "linkedin" },
+  { key: "x", label: "X", href: profile.links.x, icon: "x" },
+] as const;
 
 export const education = {
   school: "Northeastern University",

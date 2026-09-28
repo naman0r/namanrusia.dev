@@ -4,7 +4,7 @@ import { homes } from "@/content/profile";
 import { featured } from "@/content/projects";
 import { stage, type Day, type ShotId } from "@/lib/stage";
 import { ACCENT, HEAT, heatLevel } from "./palette";
-import { WORLD, WORLD_H, WORLD_W } from "./worldMap";
+import { CITIES, EARTH, EARTH_H, EARTH_W } from "./earth";
 
 type Rgb = [number, number, number];
 
@@ -22,6 +22,10 @@ const C = {
   bone: rgb("#eee7d7"),
   accent: rgb(ACCENT),
   deep: rgb("#1c3a82"),
+  sky: rgb("#9ec0ff"),
+  navy: rgb("#0f1c36"),
+  nightLand: rgb("#3b4a6b"),
+  lights: rgb("#ffe2a0"),
   white: rgb("#f1ebdc"),
   yellow: rgb("#ffd23f"),
   red: rgb("#e8402a"),
@@ -134,6 +138,15 @@ const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 const pose = (x: number, y: number, z: number, rx: number, ry: number, s: number): Pose => ({ x, y, z, rx, ry, s });
 
+/** Row-major Rx * Ry, the orientation every shot is placed with. */
+export function rotation(rx: number, ry: number) {
+  const cx = Math.cos(rx);
+  const sx = Math.sin(rx);
+  const cy = Math.cos(ry);
+  const sy = Math.sin(ry);
+  return [cy, 0, sy, sx * sy, cx, -sx * cy, -cx * sy, sx, cx * cy];
+}
+
 const CUBIE = 5;
 const CUBE_VOX = 0.2;
 const CUBE_EDGE = 3 * CUBIE;
@@ -186,66 +199,85 @@ function turn(p: Float32Array, m: Move, amount: number) {
   }
 }
 
-/** One turn per letter of NAMANRUSIA, so running a cursor across the name scrambles the cube. */
-const NAME_MOVES: Move[] = [
-  { axis: 0, layer: 1, dir: 1 },
-  { axis: 1, layer: 1, dir: -1 },
-  { axis: 2, layer: 1, dir: 1 },
-  { axis: 1, layer: -1, dir: 1 },
-  { axis: 0, layer: -1, dir: -1 },
-  { axis: 2, layer: -1, dir: -1 },
-  { axis: 1, layer: 0, dir: 1 },
-  { axis: 0, layer: 0, dir: -1 },
-  { axis: 2, layer: 0, dir: 1 },
-  { axis: 1, layer: 1, dir: 1 },
-];
+/** Every quarter turn a 3x3 has: 3 axes, 3 layers, 2 directions. */
+const MOVES: Move[] = [0, 1, 2].flatMap((axis) => [-1, 0, 1].flatMap((layer) => [1, -1].map((dir) => ({ axis, layer, dir }) as Move)));
 
-const TURN = 0.45;
+type Queued = Move & { dur: number; solve?: boolean };
 
-function heroCube(n: number): Shot {
+/**
+ * The About cube. Idle, it scrambles itself a little and solves it back. The timer button
+ * asks for a proper scramble, then a timed solve, which undoes the scramble in reverse.
+ * It keeps its own clock so a button press still plays out under reduced motion.
+ */
+function aboutCube(n: number): Shot {
   const target = buildCube(n);
   const baked = target.pos.slice();
   const r = rng(99);
-  const queue: (Move & { solve?: boolean })[] = [];
+  const queue: Queued[] = [];
   let history: Move[] = [];
-  let current: (Move & { solve?: boolean; t0: number }) | null = null;
+  let current: (Queued & { t0: number }) | null = null;
+  let clock = 0;
   let idleSince = 0;
-  let touched = false;
+  let engaged = false;
+  const cube = stage.cube;
+
+  const scramble = (count: number, dur: number) => {
+    let prev: Move | null = null;
+    for (let k = 0; k < count; k++) {
+      let m = MOVES[Math.floor(r() * MOVES.length)];
+      while (prev && m.axis === prev.axis && m.layer === prev.layer) m = MOVES[Math.floor(r() * MOVES.length)];
+      queue.push({ ...m, dur });
+      prev = m;
+    }
+  };
 
   return {
     target,
-    pose: (c) => (c.mobile ? pose(0, 1.9, -3, 0.5, 0.72, 0.8) : pose(4.3, 0.2, 0, 0.5, 0.72, 1.05)),
+    pose: (c) => (c.mobile ? pose(0, 2.2, -3, 0.5, 0.72, 0.75) : pose(4.1, 0.5, 0, 0.5, 0.72, 0.88)),
     tick(c) {
-      const t = c.time;
-      for (const k of stage.cubeMoves.splice(0)) {
-        if (queue.length < 4) queue.push(NAME_MOVES[k % NAME_MOVES.length]);
-        touched = true;
+      clock += c.dt;
+      // A command waits until the turn in flight lands; the fidgeting stops as soon as one arrives.
+      if (cube.command) engaged = true;
+      if (cube.command === "scramble" && !current && !queue.length) {
+        cube.command = null;
+        cube.phase = "scrambling";
+        scramble(22, 0.13);
+      } else if (cube.command === "solve" && cube.phase === "scrambled") {
+        cube.command = null;
+        queue.push(...history.reverse().map((m) => ({ ...m, dir: (m.dir * -1) as Move["dir"], dur: 0.2, solve: true })));
+        history = [];
+        cube.phase = "solving";
+        cube.solveStart = performance.now();
       }
-      if (current && t - current.t0 >= TURN) {
+
+      if (current && clock - current.t0 >= current.dur) {
         turn(baked, current, 1);
         if (!current.solve) history.push(current);
         current = null;
-        idleSince = t;
+        idleSince = clock;
       }
       if (current) return;
       const next = queue.shift();
       if (next) {
-        current = { ...next, t0: t };
+        current = { ...next, t0: clock };
         return;
       }
-      // Solve by undoing every turn in reverse. Someone else's scramble gets a moment to be admired.
-      const idle = t - idleSince;
-      if (history.length && idle > (touched ? 4 : 1.2)) {
-        queue.push(...history.reverse().map((m) => ({ ...m, dir: (m.dir * -1) as Move["dir"], solve: true })));
-        history = [];
-        touched = false;
-      } else if (!history.length && !c.reduced && idle > 2.4) {
-        for (let k = 0; k < 6; k++) queue.push(NAME_MOVES[Math.floor(r() * NAME_MOVES.length)]);
+      if (cube.phase === "scrambling") cube.phase = "scrambled";
+      if (cube.phase === "solving") {
+        cube.phase = "solved";
+        cube.solveEnd = performance.now();
       }
+      // Until someone presses the button, it fidgets: a few turns, then undoes them.
+      if (engaged || c.reduced) return;
+      const idle = clock - idleSince;
+      if (history.length && idle > 1.2) {
+        queue.push(...history.reverse().map((m) => ({ ...m, dir: (m.dir * -1) as Move["dir"], dur: 0.45, solve: true })));
+        history = [];
+      } else if (!history.length && idle > 2.4) scramble(5, 0.45);
     },
     animate(c, pos) {
       pos.set(baked);
-      if (current) turn(pos, current, ease(clamp01((c.time - current.t0) / TURN)));
+      if (current) turn(pos, current, ease(clamp01((clock - current.t0) / current.dur)));
       if (!c.reduced) spinY(pos, target.n, Math.sin(c.time * 0.3) * 0.25);
     },
   };
@@ -261,7 +293,9 @@ function shelfCube(n: number): Shot {
 }
 
 const GLOBE_R = 1.6;
-const ROUTE_STEPS = 56;
+const ROUTE_STEPS = 64;
+/** Seconds the tour lingers over each home before flying on. */
+const TOUR_HOLD = 4.5;
 
 function latLon(lat: number, lon: number, r: number): [number, number, number] {
   const la = (lat * Math.PI) / 180;
@@ -269,141 +303,255 @@ function latLon(lat: number, lon: number, r: number): [number, number, number] {
   return [r * Math.cos(la) * Math.sin(lo), r * Math.sin(la), r * Math.cos(la) * Math.cos(lo)];
 }
 
-/**
- * A Fibonacci sphere masked by real coastlines, with the places Naman has lived lit up and the
- * route between them arcing overhead.
- */
-function buildGlobe(n: number): Target {
-  const t = alloc(n);
-  const legs = homes.length - 1;
-  const sphere = n - legs * (ROUTE_STEPS + 1);
-  const golden = Math.PI * (3 - Math.sqrt(5));
-  const r = rng(7);
-  const ocean: number[] = [];
-  const land = sphere > 2000 ? 0.085 : 0.12;
+/** The point on Earth where the sun is overhead right now, as a unit vector. Good to a degree or so. */
+function sunNow(): [number, number, number] {
+  const now = new Date();
+  const day = (now.getTime() - Date.UTC(now.getUTCFullYear(), 0, 0)) / 86_400_000;
+  const declination = -23.44 * Math.cos(((2 * Math.PI) / 365) * (day + 10));
+  return latLon(declination, (12 - (now.getUTCHours() + now.getUTCMinutes() / 60)) * 15, 1);
+}
 
-  for (let i = 0; i < sphere; i++) {
-    const y = 1 - ((i + 0.5) / sphere) * 2;
+const G = { land: 0, home: 1, ocean: 2, air: 3, light: 4, route: 5, beacon: 6, satellite: 7 } as const;
+
+/**
+ * The title screen: Earth at 1° detail, lit by the real sun at this moment, so the night side
+ * shows its city lights. It tours the places Naman has lived, following the route between them.
+ */
+function globe(n: number): Shot {
+  const t = alloc(n);
+  const r = rng(7);
+  const legs = homes.length - 1;
+  const oceanN = Math.round(n * 0.14);
+  const airN = Math.round(n * 0.1);
+  const lightN = Math.min(CITIES.length, Math.round(n * 0.06));
+  const beaconN = homes.length * 5;
+  const landN = n - oceanN - airN - lightN - beaconN - legs * (ROUTE_STEPS + 1) - 16;
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  // Earth-fixed unit normal per voxel, for day and night.
+  const normal = new Float32Array(n * 3);
+  let i = 0;
+
+  // Land: a Fibonacci sphere dense enough that its land points alone fill the budget.
+  const candidates = Math.ceil(landN / 0.28);
+  const landSize = Math.sqrt((4 * Math.PI) / candidates) * GLOBE_R * 0.95;
+  for (let k = 0; k < candidates && i < landN; k++) {
+    const y = 1 - ((k + 0.5) / candidates) * 2;
     const rad = Math.sqrt(1 - y * y);
-    const th = golden * i;
-    const x = Math.cos(th) * rad;
-    const z = Math.sin(th) * rad;
+    const x = Math.cos(golden * k) * rad;
+    const z = Math.sin(golden * k) * rad;
     const lat = (Math.asin(y) * 180) / Math.PI;
     const lon = (Math.atan2(x, z) * 180) / Math.PI;
-    const row = Math.min(WORLD_H - 1, Math.floor(((90 - lat) / 180) * WORLD_H));
-    const col = Math.min(WORLD_W - 1, Math.floor(((lon + 180) / 360) * WORLD_W));
-    const cell = WORLD[row * WORLD_W + col];
+    const cell = EARTH[Math.min(EARTH_H - 1, Math.floor(90 - lat)) * EARTH_W + Math.min(EARTH_W - 1, Math.floor(lon + 180))];
+    if (cell === ".") continue;
+    put(t, i, x * GLOBE_R, y * GLOBE_R, z * GLOBE_R, C.bone, landSize);
+    normal.set([x, y, z], i * 3);
+    t.tag[i] = cell === "#" ? G.land : G.home;
+    // Ice toward the poles, a little stone everywhere else.
+    t.aux[i] = Math.abs(lat) > 62 ? 1 : r() > 0.8 ? 0.5 : 0;
+    i++;
+  }
+
+  // Ocean: a coarse shell of big dark voxels just under the land, so the far side stays hidden.
+  const oceanR = GLOBE_R * 0.92;
+  const oceanSize = Math.sqrt((4 * Math.PI) / oceanN) * oceanR * 0.95;
+  for (let k = 0; k < oceanN; k++, i++) {
+    const y = 1 - ((k + 0.5) / oceanN) * 2;
+    const rad = Math.sqrt(1 - y * y);
+    const [x, z] = [Math.cos(golden * k) * rad, Math.sin(golden * k) * rad];
+    put(t, i, x * oceanR, y * oceanR, z * oceanR, C.navy, oceanSize);
+    normal.set([x, y, z], i * 3);
+    t.tag[i] = G.ocean;
+  }
+
+  // Atmosphere: rings of voxels around the silhouette, re-aimed at the camera every frame.
+  for (let k = 0; k < airN; k++, i++) {
+    put(t, i, 0, 0, 0, C.accent, 0.05);
+    t.tag[i] = G.air;
+    t.group[i] = k % 3;
+    t.aux[i] = k / airN + r() * 0.002;
+  }
+
+  for (let k = 0; k < lightN; k++, i++) {
+    const [lat, lon, weight] = CITIES[k];
+    const [x, y, z] = latLon(lat, lon, GLOBE_R * 1.012);
+    put(t, i, x, y, z, C.lights, 0.018 + weight * 0.008);
+    normal.set([x / GLOBE_R, y / GLOBE_R, z / GLOBE_R], i * 3);
+    t.tag[i] = G.light;
     t.aux[i] = r();
-    if (cell === "U" || cell === "I") {
-      put(t, i, x * GLOBE_R, y * GLOBE_R, z * GLOBE_R, C.accent, land * 1.1);
-      t.tag[i] = TAG.home;
-    } else if (cell === "#") {
-      put(t, i, x * GLOBE_R, y * GLOBE_R, z * GLOBE_R, r() > 0.82 ? C.stone : C.bone, land, 0.85);
-    } else {
-      put(t, i, x * GLOBE_R, y * GLOBE_R, z * GLOBE_R, C.line, land * 0.38, 1.4);
-      ocean.push(i);
-    }
   }
 
-  // Singapore and Boston are too small for the 3° mask: light the nearest point instead.
-  for (const h of homes.slice(2)) {
-    const [hx, hy, hz] = latLon(h.lat, h.lon, GLOBE_R);
-    let best = 0;
-    let bestD = Infinity;
-    for (let i = 0; i < sphere; i++) {
-      const d = (t.pos[i * 3] - hx) ** 2 + (t.pos[i * 3 + 1] - hy) ** 2 + (t.pos[i * 3 + 2] - hz) ** 2;
-      if (d < bestD) {
-        bestD = d;
-        best = i;
-      }
-    }
-    put(t, best, hx, hy, hz, h.code === "BOS" ? C.white : C.accent, land * 1.8);
-    t.tag[best] = TAG.home;
-  }
-
-  // One satellite per country visited. Which 16 is never stated, so they orbit instead of pinning.
-  for (let k = 0; k < 16; k++) {
-    const i = ocean[Math.floor(((k + 0.5) / 16) * ocean.length)];
-    t.tag[i] = TAG.satellite;
-    t.group[i] = k;
-    t.aux[i] = k / 16;
-    put(t, i, 0, 0, 0, C.bone, land * 0.8);
-  }
-
-  // The route of a life so far: US, India, Singapore, Boston.
-  let i = sphere;
   for (let k = 0; k < legs; k++) {
     const a = latLon(homes[k].lat, homes[k].lon, 1);
     const b = latLon(homes[k + 1].lat, homes[k + 1].lon, 1);
-    for (let j = 0; j <= ROUTE_STEPS; j++) {
+    for (let j = 0; j <= ROUTE_STEPS; j++, i++) {
       const f = j / ROUTE_STEPS;
       const v = [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
       const len = Math.hypot(v[0], v[1], v[2]) || 1;
-      const lift = GLOBE_R * (1.04 + Math.sin(Math.PI * f) * 0.32);
-      put(t, i, (v[0] / len) * lift, (v[1] / len) * lift, (v[2] / len) * lift, C.deep, 0.05);
-      t.tag[i] = TAG.route;
-      t.aux[i] = (k + f) / legs;
-      i++;
+      const lift = GLOBE_R * (1.03 + Math.sin(Math.PI * f) * 0.3);
+      put(t, i, (v[0] / len) * lift, (v[1] / len) * lift, (v[2] / len) * lift, C.deep, 0.055);
+      t.tag[i] = G.route;
+      t.group[i] = k + 1;
+      t.aux[i] = f;
     }
   }
-  return t;
-}
 
-function globe(n: number): Shot {
-  const t = buildGlobe(n);
+  // A beacon rising out of each home.
+  homes.forEach((h, k) => {
+    for (let j = 0; j < 5; j++, i++) {
+      const [x, y, z] = latLon(h.lat, h.lon, GLOBE_R * (1.02 + j * 0.035));
+      put(t, i, x, y, z, h.code === "BOS" ? C.white : C.accent, 0.07 - j * 0.008);
+      t.tag[i] = G.beacon;
+      t.group[i] = k;
+      t.aux[i] = j;
+    }
+  });
+
+  // One satellite per country visited. Which 16 is never stated, so they orbit instead of pinning.
+  for (let k = 0; k < 16; k++, i++) {
+    put(t, i, 0, 0, 0, C.bone, 0.06);
+    t.tag[i] = G.satellite;
+    t.group[i] = k;
+  }
+  if (i < n) hideRest(t, i);
+
+  const tour = stage.globe;
+  let spin = -(homes[0].lon * Math.PI) / 180;
+  let tilt = 0.5;
+  let held = 0;
+  let clock = 0;
+  const dayLand: Rgb = [0, 0, 0];
+
   return {
     target: t,
-    pose: (c) => (c.mobile ? pose(0, 2.6, -3, 0.35, 0, 1.25) : pose(4.5, 0.5, -1, 0.32, 0, 1.3)),
+    pose: (c) => (c.mobile ? pose(0, 2.65, -2, tilt, 0, 0.8) : pose(4.3, 0.2, 0, tilt, 0, 1.6)),
+    tick(c) {
+      clock += c.dt;
+      if (tour.hover >= 0) {
+        tour.focus = tour.hover;
+        held = 0;
+      } else if (!c.reduced && (held += c.dt) > TOUR_HOLD) {
+        tour.focus = (tour.focus + 1) % homes.length;
+        held = 0;
+      }
+      const h = homes[tour.focus];
+      // Bring the home to the front, tipped toward the camera by its latitude, with a slow sway.
+      const goalSpin = (-h.lon * Math.PI) / 180 + (c.reduced ? 0 : Math.sin(clock * 0.3) * 0.12);
+      const d = Math.atan2(Math.sin(goalSpin - spin), Math.cos(goalSpin - spin));
+      const k = 1 - Math.exp(-c.dt * 2.2);
+      spin += d * k;
+      tilt += (0.12 + ((h.lat * Math.PI) / 180) * 0.7 - tilt) * k;
+    },
     animate(c, pos, col, scl) {
-      const a = c.time * 0.12 - 1.2;
-      const ca = Math.cos(a);
-      const sa = Math.sin(a);
-      const traveller = (c.time * 0.12) % 1;
-      for (let i = 0; i < t.n; i++) {
+      const [sx, sy, sz] = sunNow();
+      const cs = Math.cos(spin);
+      const ss = Math.sin(spin);
+      // The camera, seen from the globe's own frame (before the pose tilts it).
+      const vy = Math.sin(tilt);
+      const vz = Math.cos(tilt);
+      // The sun after the tour's spin, for the ocean's glint and the lit side of the atmosphere.
+      const sdx = sx * cs + sz * ss;
+      const sdz = -sx * ss + sz * cs;
+      let hx = sdx;
+      let hy = sy + vy;
+      let hz = sdz + vz;
+      const hl = Math.hypot(hx, hy, hz) || 1;
+      hx /= hl;
+      hy /= hl;
+      hz /= hl;
+      const pulse = (Math.sin(c.time * 3) + 1) / 2;
+      const traveller = (clock * 0.22) % 1;
+
+      for (let i = 0; i < n; i++) {
         const tag = t.tag[i];
         const o = i * 3;
-        if (tag === TAG.satellite) {
-          const k = t.group[i];
-          const ring = k % 2;
-          const ph = t.aux[i] * Math.PI * 2 + c.time * (0.35 + ring * 0.12) * (ring ? -1 : 1);
-          const R = GLOBE_R * (1.38 + ring * 0.16);
-          const tilt = ring ? 0.5 : -0.35;
-          const z = Math.sin(ph) * R;
-          pos[o] = Math.cos(ph) * R;
-          pos[o + 1] = z * Math.sin(tilt);
-          pos[o + 2] = z * Math.cos(tilt);
-          const blink = (Math.sin(c.time * 3 + k * 1.7) + 1) * 0.5;
-          const s = 0.7 + blink * 0.6;
-          scl[o] *= s;
-          scl[o + 1] *= s;
-          scl[o + 2] *= s;
+        if (scl[o] === 0) continue;
+
+        if (tag === G.air) {
+          // A circle in the plane facing the camera, so the halo always hugs the silhouette.
+          const layer = t.group[i];
+          const a = t.aux[i] * Math.PI * 2;
+          const rho = GLOBE_R * (1.035 + layer * 0.04);
+          const ca = Math.cos(a) * rho;
+          const sa = Math.sin(a) * rho;
+          pos[o] = ca;
+          pos[o + 1] = sa * vz;
+          pos[o + 2] = -sa * vy;
+          // Brighter on the side facing the sun.
+          const lit = 0.3 + 0.7 * Math.max(0, (ca * sdx + sa * vz * sy - sa * vy * sdz) / rho);
+          const fade = [1, 0.6, 0.3][layer];
+          for (let q = 0; q < 3; q++) {
+            col[o + q] = (layer ? C.accent[q] : C.sky[q]) * lit * fade * 1.4;
+            scl[o + q] = (0.05 - layer * 0.01) * (0.6 + lit * 0.4);
+          }
           continue;
         }
+        if (tag === G.satellite) {
+          const k = t.group[i];
+          const ring = k % 2;
+          const ph = (k / 16) * Math.PI * 2 + c.time * (0.3 + ring * 0.1) * (ring ? -1 : 1);
+          const R = GLOBE_R * (1.42 + ring * 0.14);
+          const incline = ring ? 0.5 : -0.35;
+          const z = Math.sin(ph) * R;
+          pos[o] = Math.cos(ph) * R;
+          pos[o + 1] = z * Math.sin(incline);
+          pos[o + 2] = z * Math.cos(incline);
+          const blink = 0.7 + ((Math.sin(c.time * 3 + k * 1.7) + 1) / 2) * 0.6;
+          for (let q = 0; q < 3; q++) scl[o + q] *= blink;
+          continue;
+        }
+
+        // Everything else is fixed to the Earth and turns with the tour.
         const x = pos[o];
         const z = pos[o + 2];
-        pos[o] = x * ca + z * sa;
-        pos[o + 2] = -x * sa + z * ca;
-        if (tag === TAG.home) {
-          const p = (Math.sin(c.time * 2.6 + t.aux[i] * 2) + 1) * 0.5;
-          const lift = 1 + p * 0.07;
+        pos[o] = x * cs + z * ss;
+        pos[o + 2] = -x * ss + z * cs;
+        const nx = normal[o];
+        const ny = normal[o + 1];
+        const nz = normal[o + 2];
+        const sun = nx * sx + ny * sy + nz * sz;
+        const day = clamp01((sun + 0.08) / 0.3);
+
+        if (tag === G.land || tag === G.home) {
+          const home = tag === G.home;
+          const base = home ? C.sky : t.aux[i] === 1 ? C.white : t.aux[i] === 0.5 ? C.stone : C.bone;
+          const shade = 0.5 + 0.5 * Math.max(0, sun);
+          const night = home ? C.deep : C.nightLand;
+          for (let q = 0; q < 3; q++) {
+            dayLand[q] = base[q] * shade;
+            col[o + q] = night[q] + (dayLand[q] - night[q]) * day;
+          }
+        } else if (tag === G.ocean) {
+          const ndx = nx * cs + nz * ss;
+          const ndz = -nx * ss + nz * cs;
+          const glint = Math.pow(Math.max(0, ndx * hx + ny * hy + ndz * hz), 60) * day;
+          for (let q = 0; q < 3; q++) col[o + q] = C.navy[q] * (0.15 + 0.85 * day) + C.sky[q] * glint * 0.9;
+        } else if (tag === G.light) {
+          const on = 1 - day;
+          const twinkle = 0.75 + 0.25 * Math.sin(c.time * 5 + t.aux[i] * 40);
+          for (let q = 0; q < 3; q++) {
+            col[o + q] *= 1.5 * twinkle;
+            scl[o + q] *= on > 0.1 ? on : 0;
+          }
+        } else if (tag === G.route) {
+          // The leg into the home on screen glows, and a light runs along it.
+          const active = t.group[i] === tour.focus;
+          let dist = traveller - t.aux[i];
+          if (dist < 0) dist += 1;
+          const head = active && dist < 0.12 ? 1 - dist / 0.12 : 0;
+          for (let q = 0; q < 3; q++) {
+            col[o + q] = (active ? C.accent[q] * 1.3 : col[o + q]) + (C.white[q] * 2 - col[o + q]) * head;
+            scl[o + q] *= 1 + head * 0.8 + (active ? 0.3 : 0);
+          }
+        } else if (tag === G.beacon) {
+          const focused = t.group[i] === tour.focus;
+          const rise = focused ? 1 + pulse * 0.6 : 0.7;
+          const lift = 1 + (t.aux[i] * 0.035 * (rise - 1)) / 1.02;
           pos[o] *= lift;
           pos[o + 1] *= lift;
           pos[o + 2] *= lift;
-          const glow = 1 + p * 0.9;
           for (let q = 0; q < 3; q++) {
-            scl[o + q] *= 1 + p * 0.5;
-            col[o + q] *= glow;
-          }
-        } else if (tag === TAG.route) {
-          // A light travels the route, leaving a short trail.
-          let d = traveller - t.aux[i];
-          if (d < 0) d += 1;
-          if (d < 0.08) {
-            const k = 1 - d / 0.08;
-            for (let q = 0; q < 3; q++) {
-              col[o + q] += (C.accent[q] * 2 - col[o + q]) * k;
-              scl[o + q] *= 1 + k * 1.2;
-            }
+            col[o + q] *= focused ? 1.4 + pulse * 0.6 : 1;
+            scl[o + q] *= focused ? 1.3 : 0.9;
           }
         }
       }
@@ -829,7 +977,7 @@ function lost(n: number): Shot {
 
 export function buildShots(n: number): Omit<Record<ShotId, Shot>, "city"> {
   return {
-    cube: heroCube(n),
+    cube: aboutCube(n),
     globe: globe(n),
     track: track(n),
     carts: carts(n),

@@ -14,7 +14,7 @@ export default function Scene() {
   const [env] = useState(() => {
     const mobile = window.matchMedia("(max-width: 767px)").matches;
     const weak = (navigator.hardwareConcurrency ?? 8) <= 4;
-    return { mobile, reduced: prefersReducedMotion(), count: mobile || weak ? 2000 : 3000 };
+    return { mobile, reduced: prefersReducedMotion(), count: mobile || weak ? 2200 : 5200 };
   });
 
   useEffect(() => {

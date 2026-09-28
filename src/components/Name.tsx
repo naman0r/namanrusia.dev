@@ -1,14 +1,6 @@
-"use client";
-
-import { prefersReducedMotion, stage } from "@/lib/stage";
-
 const WORDS = ["Naman", "Rusia"];
 
-function touch(i: number) {
-  if (!prefersReducedMotion()) stage.cubeMoves.push(i);
-}
-
-/** Each letter drops in like a sprite, hops when touched, and turns a layer of the hero cube. */
+/** Each letter drops in like a sprite and hops when touched. */
 export function Name() {
   return (
     <h1 id="top-title" className="font-display select-none text-[clamp(3.6rem,12.5vw,11rem)] leading-[0.84] text-bone">
@@ -24,8 +16,6 @@ export function Name() {
             return (
               <span
                 key={j}
-                onPointerEnter={(e) => e.pointerType === "mouse" && touch(i)}
-                onPointerDown={(e) => e.pointerType !== "mouse" && touch(i)}
                 className={`pixel-letter inline-block cursor-default transition-transform duration-150 ease-(--ease-step) hover:-translate-y-[0.08em] active:-translate-y-[0.08em] ${
                   w ? "hover:text-bone" : "hover:text-accent"
                 }`}

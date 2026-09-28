@@ -20,8 +20,8 @@ function hasWebGL() {
 export function SceneMount() {
   const [ready, setReady] = useState(false);
   const { section } = useStage();
-  // On phones text sits on top of the scene, so it steps back everywhere but the two title screens.
-  const titleScreen = usePathname() === "/" && (section === "top" || section === "contact" || section === "");
+  // On phones text sits on top of the scene, so it steps back except where the layout leaves it room.
+  const titleScreen = usePathname() === "/" && ["", "top", "about-cube", "contact"].includes(section);
 
   useEffect(() => {
     if (!hasWebGL()) return;

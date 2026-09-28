@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { heroKeys } from "@/content/profile";
+import { heroLinks } from "@/content/profile";
+import { copyEmail } from "./HeroLinks";
 
 const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
 
@@ -19,10 +20,11 @@ export function Shortcuts() {
         return;
       }
       // Single-letter shortcuts only on the title screen, where the keycaps are on show.
-      const key = heroKeys[e.key.toLowerCase()];
-      if (!key || location.pathname !== "/" || window.scrollY > window.innerHeight * 0.6) return;
-      if (key.href.startsWith("mailto:")) location.href = key.href;
-      else window.open(key.href, "_blank", "noopener");
+      if (location.pathname !== "/" || window.scrollY > window.innerHeight * 0.6) return;
+      const key = e.key.toLowerCase();
+      if (key === "e") copyEmail();
+      const link = heroLinks.find((l) => l.key === key);
+      if (link) window.open(link.href, "_blank", "noopener");
     };
     window.addEventListener("keydown", onKey);
 
