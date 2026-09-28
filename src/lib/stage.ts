@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-export type ShotId = "globe" | "cube" | "track" | "carts" | "city" | "monogram" | "skyline" | "library" | "monolith" | "lost";
+export type ShotId = "globe" | "cube" | "track" | "carts" | "terrain" | "city" | "monogram" | "skyline" | "library" | "monolith" | "lost";
 
 export type Day = [date: string, count: number];
 

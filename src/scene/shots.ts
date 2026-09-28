@@ -751,6 +751,68 @@ function monolith(n: number): Shot {
   };
 }
 
+// Experiment 1's green palette: the valleys sink into a green-black, the peaks catch the light.
+const TERRAIN_LEVELS: { h: number; c: Rgb; k: number }[] = [
+  { h: -0.25, c: rgb("#1d241d"), k: 1.6 },
+  { h: 0, c: rgb("#2e382f"), k: 1.3 },
+  { h: 0.22, c: C.moss, k: 1 },
+  { h: 0.48, c: C.lime, k: 0.85 },
+  { h: 99, c: C.bone, k: 1 },
+];
+
+/** Experiment 1's landscape behind the camera roll: rolling voxel hills with lime specks drifting up. */
+function terrain(n: number): Shot {
+  const t = alloc(n);
+  const g = Math.floor(Math.sqrt(n * 0.96));
+  const span = 7.5;
+  const r = rng(23);
+  let i = 0;
+  for (let gz = 0; gz < g; gz++) {
+    for (let gx = 0; gx < g; gx++) {
+      put(t, i++, (gx / (g - 1) - 0.5) * span, 0, (gz / (g - 1) - 0.5) * span, C.moss, (span / g) * 1.02);
+    }
+  }
+  for (; i < n; i++) {
+    put(t, i, (r() - 0.5) * span, 0.4 + r() * 1.8, (r() - 0.5) * span, C.lime, 0.035);
+    t.tag[i] = TAG.star;
+    t.aux[i] = r();
+  }
+
+  return {
+    target: t,
+    pose: (c) => (c.mobile ? pose(0, 2.8, -3, 0.6, 0.5, 0.85) : pose(3.4, -0.6, -0.8, 0.5, 0.6 + c.time * 0.02, 1.5)),
+    animate(c, pos, col, scl) {
+      const tt = c.time * 0.35;
+      const step = scl[0];
+      for (let i = 0; i < t.n; i++) {
+        const o = i * 3;
+        const x = pos[o];
+        const z = pos[o + 2];
+        if (t.tag[i] === TAG.star) {
+          const a = t.aux[i];
+          pos[o + 1] = 0.3 + ((a * 3 + c.time * 0.08 * (0.5 + a)) % 1) * 2.2;
+          pos[o] = x + Math.sin(c.time * 0.5 + a * 20) * 0.15;
+          continue;
+        }
+        const h =
+          0.42 * Math.sin(x * 0.85 + tt) * Math.cos(z * 0.75 - tt * 0.8) +
+          0.22 * Math.sin(x * 1.7 - z * 1.3 + tt * 1.3) +
+          0.1 * Math.sin(x * 3.3 + z * 2.7);
+        // Heights snap to whole voxels so the hills terrace instead of sliding.
+        pos[o + 1] = Math.round(h / step) * step;
+        let lv = TERRAIN_LEVELS[0];
+        for (const l of TERRAIN_LEVELS) {
+          lv = l;
+          if (h <= l.h) break;
+        }
+        col[o] = lv.c[0] * lv.k;
+        col[o + 1] = lv.c[1] * lv.k;
+        col[o + 2] = lv.c[2] * lv.k;
+      }
+    },
+  };
+}
+
 /** The GitHub contribution calendar as bars, one column per week. */
 export function buildCity(n: number, days: Day[] | null): Shot {
   const t = alloc(n);
@@ -994,6 +1056,7 @@ export function buildShots(n: number): Omit<Record<ShotId, Shot>, "city"> {
     cube: aboutCube(n),
     track: track(n),
     carts: carts(n),
+    terrain: terrain(n),
     monogram: monogram(n),
     skyline: skyline(n),
     library: library(n),
