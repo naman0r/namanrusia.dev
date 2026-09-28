@@ -51,7 +51,7 @@ export const education = {
   school: "Northeastern University",
   degree: "BS Computer Science and Business Administration",
   location: "Boston, MA",
-  graduation: "Apr 2028",
+  graduation: "May 2028",
   gpa: "3.8 / 4.0",
   honors: ["Dean's List"],
   courses: [

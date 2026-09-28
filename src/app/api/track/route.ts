@@ -57,7 +57,9 @@ function sameOrigin(req: NextRequest): boolean {
 
 function utmFrom(query: string | null) {
   if (!query) return {};
-  const params = new URLSearchParams(query.startsWith("?") ? query.slice(1) : query);
+  const params = new URLSearchParams(
+    query.startsWith("?") ? query.slice(1) : query
+  );
   return {
     utm_source: clip(params.get("utm_source"), 120),
     utm_medium: clip(params.get("utm_medium"), 120),
@@ -111,7 +113,9 @@ export async function POST(req: NextRequest) {
     return noContent();
   }
 
-  const incoming = Array.isArray(body?.events) ? (body.events as Incoming[]).slice(0, MAX_EVENTS) : [];
+  const incoming = Array.isArray(body?.events)
+    ? (body.events as Incoming[]).slice(0, MAX_EVENTS)
+    : [];
   if (incoming.length === 0) return noContent();
 
   // analyticsConfigured() above already checked this is set.

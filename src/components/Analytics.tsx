@@ -116,7 +116,11 @@ export function track(name: string, meta?: Record<string, unknown>) {
 
 function label(el: Element): string {
   const text =
-    el.getAttribute("aria-label") ?? el.getAttribute("title") ?? el.textContent ?? el.querySelector("img")?.getAttribute("alt") ?? "";
+    el.getAttribute("aria-label") ??
+    el.getAttribute("title") ??
+    el.textContent ??
+    el.querySelector("img")?.getAttribute("alt") ??
+    "";
   return text.replace(/\s+/g, " ").trim().slice(0, 80);
 }
 
