@@ -30,8 +30,8 @@ export default function ExperiencePage() {
           </p>
           <h1 className="font-display mt-3 text-[clamp(3rem,10vw,7.5rem)] text-bone">Experience</h1>
           <p className="mt-5 max-w-2xl text-lg text-dust">
-            {experience.length} teams and {roles} roles since {monthYear(TIMELINE_START)}: internships first, then the studio I co-founded,
-            then everything on campus. The skyline behind this page is the same timeline in voxels.
+            {experience.length} teams and {roles} roles since {monthYear(TIMELINE_START)}: internships first, then Sideband, where a few
+            friends and I build things together, then everything on campus. The skyline behind this page is the same timeline in voxels.
           </p>
         </header>
 

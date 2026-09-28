@@ -138,17 +138,17 @@ export const experience: Org[] = [
     location: "Boston, MA",
     logo: "/logos/sideband.png",
     color: "#b79cff",
-    impact: "Co-founded an independent software studio building display streaming, media pipelines and web products.",
-    note: "Independent software studio, four founders",
+    impact: "A few friends and I building cool stuff together: display streaming, media pipelines and web products.",
+    note: "A few friends building things together",
     roles: [
       {
-        title: "Co-Founder",
+        title: "Member",
         period: "Present",
         start: 2026.583,
         end: 2026.75,
         ongoing: true,
         points: [
-          "Independent studio (formerly Eternal Reverse) building display streaming, media pipelines, fitness software and web products, including EternalMonitor and Exerly.",
+          "A few friends and I building things together under one name (formerly Eternal Reverse): display streaming, media pipelines, fitness software and web products, including EternalMonitor and Exerly.",
           "Worked on the rebrand to Sideband and the new studio site at sideband.studio. TandemCode is mirrored in the studio's GitHub org.",
         ],
         tech: ["Next.js", "TypeScript", "Rust", "Swift"],

@@ -20,7 +20,7 @@ export function HomeLine() {
   );
 
   return (
-    <p className="label mb-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-dust md:mb-6">
+    <p className="label mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-dust md:mt-6">
       <span>Software engineer</span>
       <span className="text-line">/</span>
       {place(3, "Boston, MA")}

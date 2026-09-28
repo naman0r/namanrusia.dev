@@ -13,6 +13,8 @@ export type Project = {
   /** Sort key and archive year, as a decimal year. */
   when: number;
   featured?: boolean;
+  /** Three concrete claims for the landing-page card; the card also shows the first four of `stack`. */
+  highlights?: string[];
   kind: string;
   role?: string;
   team?: string;
@@ -41,25 +43,30 @@ export const projects: Project[] = [
     period: "Aug 2025 — present",
     when: 2026.73,
     featured: true,
+    highlights: [
+      "Shared editor with live cursors on a Yjs CRDT, relayed over WebSockets",
+      "Every submission judged in a locked-down container under gVisor",
+      "FastAPI, Postgres and the judge on AWS Lightsail; the web app on Vercel",
+    ],
     kind: "Full-stack web app, open source (Apache 2.0)",
     role: "Solo dev",
     team: "Solo project",
     stack: [
-      "React 19",
-      "Vite",
-      "TypeScript",
-      "Monaco",
-      "Yjs",
-      "Clerk",
+      "AWS Lightsail",
       "FastAPI",
-      "asyncpg",
+      "Yjs",
+      "gVisor",
       "WebSockets",
       "Postgres 17",
+      "asyncpg",
       "Docker",
-      "gVisor",
       "Caddy",
+      "React 19",
+      "TypeScript",
+      "Vite",
+      "Monaco",
+      "Clerk",
       "Vercel",
-      "AWS Lightsail",
     ],
     links: [
       { label: "tandemcode.space", href: "https://www.tandemcode.space/" },
@@ -135,10 +142,15 @@ export const projects: Project[] = [
     period: "Aug 2026 — present",
     when: 2026.72,
     featured: true,
+    highlights: [
+      "Watches 10 coding agents, from Claude Code to Codex, and cleans up the servers they leave behind",
+      "Guarded kills: tree-kill, confirmed SIGKILL and PID-reuse protection",
+      "Manages other Macs over your own SSH; nothing leaves your machines",
+    ],
     kind: "Local Next.js dev dashboard, macOS, MIT",
     role: "Creator",
     team: "Solo project",
-    stack: ["Next.js", "TypeScript", "Node 20", "lsof / ps", "launchctl", "SSH", "Docker API"],
+    stack: ["Next.js", "SSH", "Docker API", "launchctl", "lsof / ps", "TypeScript", "Node 20"],
     links: [
       { label: "trydockmaster.vercel.app", href: "https://trydockmaster.vercel.app/" },
       { label: "GitHub", href: "https://github.com/naman0r/dockmaster" },
@@ -194,7 +206,6 @@ export const projects: Project[] = [
     status: "Released",
     period: "Dec 2025",
     when: 2025.95,
-    featured: true,
     kind: "Open source CLI, DevOps / productivity",
     role: "Creator & engineer",
     team: "Weekend project",
@@ -241,10 +252,16 @@ export const projects: Project[] = [
     status: "Released",
     period: "Sep 2026",
     when: 2026.7,
+    featured: true,
+    highlights: [
+      "Answers cite the exact syllabus page or lecture slide they came from",
+      "The model looks things up itself through a read-only MCP server",
+      "Keyword search on SQLite FTS5, with optional local embeddings through Ollama",
+    ],
     kind: "Terminal app, MIT, Homebrew",
     role: "Creator",
     team: "Solo project",
-    stack: ["Python 3.11", "Textual", "HTTPX", "SQLite FTS5", "Canvas API", "Codex CLI", "OpenCode", "Ollama", "Homebrew"],
+    stack: ["Python 3.11", "MCP", "SQLite FTS5", "Ollama", "Textual", "HTTPX", "Canvas API", "Codex CLI", "OpenCode", "Homebrew"],
     links: [
       { label: "GitHub", href: "https://github.com/naman0r/canvas-buddy" },
       { label: "Homebrew tap", href: "https://github.com/naman0r/homebrew-tap" },
@@ -261,17 +278,22 @@ export const projects: Project[] = [
         },
         { title: "Home screen", body: "Upcoming work, what Canvas posted, moved or removed in the last week, and current grades." },
         {
+          title: "Library and planner",
+          body: "Each course laid out the way Canvas does, with a reader that jumps to PDF pages and slides, and a planner of work by day with overdue work first.",
+        },
+        {
           title: "Local and read-only",
           body: "Local storage, read-only Canvas access. Without a model you can still sync, browse, search and check deadlines.",
         },
         {
           title: "Installs with brew",
-          body: "Prebuilt Homebrew packages for Apple Silicon and Intel; no Python setup or repo clone. 0.3.0 is a personal-testing release; wider onboarding needs Canvas OAuth.",
+          body: "Prebuilt Homebrew packages for Apple Silicon and Intel; no Python setup or repo clone. 0.4.0 is a personal-testing release; wider onboarding needs Canvas OAuth.",
         },
       ],
     },
     architecture: [
       "Five runtime dependencies (Textual, HTTPX, Beautiful Soup, python-dotenv, pypdf). Search runs on SQLite FTS5 from the standard library; local embeddings through Ollama are optional.",
+      "The model can call six read-only tools: search, read a document, list documents and courses, deadlines and recent changes. Codex and OpenCode spawn them as a stdio MCP server, about 60 lines of JSON-RPC that opens SQLite read-only and never loads credentials.",
       "Courses sync three at a time, automatically on launch when the cache is more than six hours old. Unchanged files and embeddings are reused, snapshots update atomically, and failed endpoints keep their previous data.",
       "The Homebrew formula installs an isolated Python environment from checksummed prebuilt packages, with a pinned source release as the fallback.",
     ],
@@ -612,7 +634,6 @@ export const projects: Project[] = [
     kind: "Portfolio",
     stack: ["React", "Framer Motion", "GSAP", "PrimeReact", "JavaScript"],
     links: [
-      { label: "namanrusia.com", href: "https://namanrusia.com" },
       { label: "GitHub", href: "https://github.com/naman0r/personal-website" },
     ],
     image: "/projects/personal-website.png",

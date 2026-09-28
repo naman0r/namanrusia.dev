@@ -538,7 +538,7 @@ function track(n: number): Shot {
   const gateColors = experience.map((o) => rgb(o.color));
   return {
     target: t,
-    pose: (c) => (c.mobile ? pose(0, 2.9, -5, 1.0, lapAngle(c.local), 0.7) : pose(4.6, -0.2, -0.8, 0.95, lapAngle(c.local), 0.78)),
+    pose: (c) => (c.mobile ? pose(-0.6, 2.9, -5, 1.0, lapAngle(c.local), 0.6) : pose(4.6, -0.2, -0.8, 0.95, lapAngle(c.local), 0.78)),
     animate(c, pos, col, scl) {
       const lap = (c.time * 0.25) % 1;
       for (let i = 0; i < t.n; i++) {
@@ -609,7 +609,7 @@ function carts(n: number): Shot {
   let angle = 0;
   return {
     target: t,
-    pose: (c) => (c.mobile ? pose(0, 2, -6, 0.18, 0, 0.85) : pose(4.5, 0.1, -4, 0.34, 0, 1)),
+    pose: (c) => (c.mobile ? pose(-0.2, 2.7, -6, 0.18, 0, 0.62) : pose(4.5, 0.1, -4, 0.34, 0, 1)),
     tick(c) {
       const hovered = FEATURED.indexOf(stage.hoveredProject);
       const goal = hovered >= 0 ? -(hovered / count) * Math.PI * 2 : -clamp01(c.local * 1.15) * ((count - 1) / count) * Math.PI * 2;
@@ -676,7 +676,7 @@ function library(n: number): Shot {
   let focus = 0;
   return {
     target: t,
-    pose: (c) => (c.mobile ? pose(0, 2.4, -3, 0.12, 0, 0.8) : pose(4.4, 0, -1, 0.12, 0, 1.05)),
+    pose: (c) => (c.mobile ? pose(-0.15, 2.4, -3, 0.12, 0, 0.8) : pose(4.4, 0, -1, 0.12, 0, 1.05)),
     tick(c) {
       const hovered = SHELF.indexOf(stage.hoveredProject);
       const goal = hovered >= 0 ? hovered : clamp01(c.local * 1.1 - 0.05) * (SHELF.length - 1);
@@ -839,7 +839,7 @@ export function buildCity(n: number, days: Day[] | null): Shot {
   hideRest(t, i);
   return {
     target: t,
-    pose: (c) => (c.mobile ? pose(0, 3.2, -6, 0.8, -0.3, 0.7) : pose(0.4, -2.6, -3, 0.75, -0.35, 1.1)),
+    pose: (c) => (c.mobile ? pose(-0.9, 2.9, -6, 0.8, -0.3, 0.6) : pose(0.4, -2.6, -3, 0.75, -0.35, 1.1)),
   };
 }
 
@@ -976,7 +976,7 @@ function skyline(n: number): Shot {
   hideRest(t, i);
   return {
     target: t,
-    pose: (c) => (c.mobile ? pose(0, 3.2, -8, 0.6, -0.5, 0.75) : pose(5.6, 0.4, -3, 0.5, -0.9 + c.local * 0.5, 0.62)),
+    pose: (c) => (c.mobile ? pose(-0.7, 3.2, -8, 0.6, -0.5, 0.55) : pose(5.6, 0.4, -3, 0.5, -0.9 + c.local * 0.5, 0.62)),
   };
 }
 
@@ -1033,7 +1033,7 @@ function lost(n: number): Shot {
   }
   return {
     target: t,
-    pose: (c) => (c.mobile ? pose(0, 2.4, -3, 0.1, 0.3, 0.8) : pose(1.5, 2.3, -1, 0.1, 0.3, 1.05)),
+    pose: (c) => (c.mobile ? pose(0, 2.4, -3, 0.1, 0.3, 0.66) : pose(1.5, 2.3, -1, 0.1, 0.3, 1.05)),
     animate(c, pos) {
       const a = c.time * 0.03;
       const ca = Math.cos(a);
