@@ -1,155 +1,131 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 
-:root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-}
+@theme {
+  --color-ink: #0c0b0a;
+  --color-coal: #151311;
+  --color-line: #2a2622;
+  --color-bone: #eee7d7;
+  --color-dust: #8e8577;
+  --color-accent: #4f8bff;
+  --color-accent-deep: #1c3a82;
+  --color-live: #7fe08a;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-mono);
-  --font-mono: var(--font-geist-mono);
-  --color-desk: var(--desk);
-  --color-ink: var(--ink);
-  --color-pane: var(--pane);
-  --color-paper: var(--paper);
-}
+  --font-display: var(--font-departure), ui-monospace, monospace;
+  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-departure), ui-monospace, monospace;
 
-/* /more is light-first with optional dark mode. Tokens live on body so the overscroll
-   area matches; light-dark() follows color-scheme, which the menubar toggle pins. */
-body:has([data-more]) {
-  color-scheme: light dark;
-  --desk: light-dark(#cccccc, #131313);
-  --ink: light-dark(#000, #ededed);
-  --pane: light-dark(#fff, #1d1d1f);
-  --chrome: light-dark(#f0f0f0, #3a3a3c);
-  --chrome-edge: light-dark(#d6d5d7, #2b2b2d);
-  --paper: light-dark(#fffdf3, #26241a);
-  --paper-chrome: light-dark(#f6efc9, #4a4530);
-  --paper-chrome-edge: light-dark(#e9dfa9, #3a3625);
-  --glint: light-dark(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.08));
-  background: var(--desk);
-  cursor: auto;
-}
-:root[data-theme="light"] body:has([data-more]) {
-  color-scheme: light;
-}
-:root[data-theme="dark"] body:has([data-more]) {
-  color-scheme: dark;
-}
-/* The site-wide dot cursors don't fit the desk; fall back to the system ones there. */
-[data-more] a,
-[data-more] a *,
-[data-more] button,
-[data-more] button * {
-  cursor: pointer !important;
-}
-[data-more] .cursor-grab,
-[data-more] .cursor-grab * {
-  cursor: grab !important;
-}
-[data-more] .cursor-grab:active,
-[data-more] .cursor-grab:active * {
-  cursor: grabbing !important;
-}
-:root:has([data-more]) {
-  scroll-behavior: smooth;
+  --ease-step: steps(4, end);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono",
-    Consolas, "Liberation Mono", Menlo, monospace;
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="%23ffffff" stroke="%23000000" stroke-width="1"/></svg>')
-      12 12,
-    auto;
+@layer base {
+  html {
+    background: var(--color-ink);
+    color: var(--color-bone);
+    color-scheme: dark;
+    scrollbar-color: var(--color-line) var(--color-ink);
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.625;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  /* Lenis owns smooth scrolling; native smooth scroll fights it. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
 }
 
-/* Custom text selection colors */
-::selection {
-  background-color: rgb(255, 255, 255); /* Red accent with opacity */
-  color: #000000;
+@utility font-display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0;
+  line-height: 0.9;
 }
 
-::-moz-selection {
-  background-color: rgba(
-    236,
-    19,
-    19,
-    0.3
-  ); /* Red accent with opacity for Firefox */
-  color: #ffffff;
+/* Small uppercase pixel labels: dates, kickers, tags. */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-/* Custom cursor styles */
-* {
-  cursor: inherit;
+@utility pixelated {
+  image-rendering: pixelated;
 }
 
-/* Special cursor for Link elements and interactive elements */
-a,
-a *,
-button,
-button *,
-[role="button"],
-[role="button"] *,
-input[type="submit"],
-input[type="button"],
-.cursor-pointer,
-.cursor-pointer * {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="%23ec1313" stroke="%23ffffff" stroke-width="2"/><circle cx="12" cy="12" r="1" fill="%23ffffff"/></svg>')
-      12 12,
-    pointer !important;
+@utility dot-grid {
+  background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+  background-size: 16px 16px;
 }
 
-/* Special cursor for text inputs */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="search"],
-textarea,
-[contenteditable="true"] {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="11" y="6" width="2" height="12" fill="%23ffffff" stroke="%23000000" stroke-width="1"/></svg>')
-      12 12,
-    text !important;
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
 }
 
-/* Special cursor for resize handles */
-.resize-handle,
-[style*="cursor: nw-resize"],
-[style*="cursor: ne-resize"],
-[style*="cursor: sw-resize"],
-[style*="cursor: se-resize"],
-[style*="cursor: n-resize"],
-[style*="cursor: s-resize"],
-[style*="cursor: e-resize"],
-[style*="cursor: w-resize"] {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M8 8L16 16M16 8L8 16" stroke="%23ffffff" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="2" fill="%23ffffff" stroke="%23000000" stroke-width="1"/></svg>')
-      12 12,
-    auto !important;
+.blink {
+  animation: blink 1s steps(1, end) infinite;
 }
 
-/* Disable cursor on disabled elements */
-:disabled,
-[aria-disabled="true"] {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="%23666666" stroke-width="2"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>')
-      12 12,
-    not-allowed !important;
+@keyframes letter-drop {
+  0% {
+    transform: translateY(-0.6em);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(0.06em);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-/* Special cursor for draggable elements */
-[draggable="true"],
-.cursor-grab {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="8" cy="8" r="2" fill="%23ffffff" stroke="%23000000" stroke-width="1"/><circle cx="16" cy="8" r="2" fill="%23ffffff" stroke="%23000000" stroke-width="1"/><circle cx="8" cy="16" r="2" fill="%23ffffff" stroke="%23000000" stroke-width="1"/><circle cx="16" cy="16" r="2" fill="%23ffffff" stroke="%23000000" stroke-width="1"/></svg>')
-      12 12,
-    grab !important;
+.pixel-letter {
+  animation: letter-drop 420ms steps(5, end) both;
 }
 
-.cursor-grabbing {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="8" cy="8" r="2" fill="%23ec1313" stroke="%23ffffff" stroke-width="1"/><circle cx="16" cy="8" r="2" fill="%23ec1313" stroke="%23ffffff" stroke-width="1"/><circle cx="8" cy="16" r="2" fill="%23ec1313" stroke="%23ffffff" stroke-width="1"/><circle cx="16" cy="16" r="2" fill="%23ec1313" stroke="%23ffffff" stroke-width="1"/></svg>')
-      12 12,
-    grabbing !important;
+.scene canvas {
+  image-rendering: pixelated;
+}
+
+@keyframes party {
+  to {
+    filter: hue-rotate(360deg) saturate(1.6);
+  }
+}
+
+.party .scene {
+  animation: party 2.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
