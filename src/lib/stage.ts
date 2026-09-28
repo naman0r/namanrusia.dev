@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-export type ShotId = "globe" | "cube" | "track" | "carts" | "city" | "monogram" | "skyline" | "shelf" | "lost";
+export type ShotId = "globe" | "peel" | "cube" | "track" | "carts" | "city" | "monogram" | "skyline" | "shelf" | "lost";
 
 export type CubePhase = "solved" | "scrambling" | "scrambled" | "solving";
 
@@ -23,8 +23,8 @@ export const stage = {
   activeCheckpoint: -1,
   /** performance.now() when the last section was reached, to fire its burst once per visit. */
   burst: 0,
-  /** The title-screen globe tours homes in order; hovering a place in the legend holds it there. */
-  globe: { focus: 0, hover: -1 },
+  /** The title-screen globe: pointer drag deltas since the last frame, and the home being pointed at. */
+  globe: { dragging: false, dx: 0, dy: 0, hover: -1 },
   /** The About cube: the timer button sends commands, the cube reports its phase and solve time. */
   cube: { command: null as "scramble" | "solve" | null, phase: "solved" as CubePhase, solveStart: 0, solveEnd: 0 },
   /** The GitHub contribution calendar, once the landing page hands it over. */

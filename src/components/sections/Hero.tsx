@@ -1,7 +1,8 @@
 import { BostonClock } from "@/components/Clock";
-import { Name } from "@/components/Name";
-import { GlobeLegend } from "@/components/GlobeLegend";
+import { GlobeDrag } from "@/components/GlobeDrag";
 import { HeroLinks } from "@/components/HeroLinks";
+import { HomeLine } from "@/components/HomeLine";
+import { Name } from "@/components/Name";
 import { profile } from "@/content/profile";
 
 export function Hero() {
@@ -10,12 +11,13 @@ export function Hero() {
       id="top"
       data-shot="globe"
       aria-labelledby="top-title"
-      className="relative flex min-h-[100svh] flex-col px-4 pb-8 pt-24 md:px-8"
+      className="relative flex min-h-[100svh] flex-col px-4 pb-8 pt-20 md:px-8 md:pt-24"
     >
+      <GlobeDrag />
       <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col">
-        <div className="label flex items-start justify-between gap-4 text-dust">
+        <div className="label relative hidden items-start justify-between gap-4 text-dust md:flex">
           <p>
-            <span className="text-accent">P1</span> · {profile.handle}
+            <span className="text-lime">P1</span> · {profile.handle}
           </p>
           <p className="text-right">
             Boston{" "}
@@ -25,32 +27,33 @@ export function Hero() {
           </p>
         </div>
 
-        {/* On phones the scene owns the top of the screen, so the copy starts below it. */}
-        <div className="mt-auto max-w-[900px] pt-[33svh] md:pt-16">
-          <GlobeLegend />
-          <p className="label mb-6 inline-flex items-center gap-2.5 bg-coal px-3 py-1.5 normal-case tracking-normal text-bone">
-            <span className="blink size-2 bg-live" aria-hidden />
-            {profile.status}
-          </p>
-
+        {/* On phones the globe owns the top of the screen and the copy sits at the bottom. */}
+        <div className="relative mt-auto max-w-[900px] md:my-auto md:py-10">
+          <HomeLine />
           <Name />
-
-          <p className="mt-8 max-w-xl text-xl leading-snug text-bone md:text-2xl">{profile.thesis}</p>
-          <p className="mt-4 max-w-xl text-dust">{profile.intro}</p>
-
+          <p className="mt-7 max-w-xl text-lg leading-snug text-bone md:text-xl">
+            Software engineer on <strong className="font-semibold text-lime">backend, cloud, and systems</strong>. CS + Business at
+            Northeastern. Previously a software engineering intern at Sonos and Philips Healthcare.
+          </p>
+          <p className="mt-4 font-mono text-sm text-dust [@media(max-height:720px)]:max-md:hidden">&ldquo;{profile.motto}&rdquo;</p>
           <HeroLinks />
+          <p className="label mt-5 flex items-center gap-2.5 text-[11px] normal-case tracking-normal text-bone md:mt-6">
+            <span className="blink size-2 shrink-0 bg-lime" aria-hidden />
+            <span className="md:hidden">Open to Spring + Summer 2027 co-ops</span>
+            <span className="max-md:hidden">{profile.status}</span>
+          </p>
         </div>
 
-        <dl className="mt-14 grid grid-cols-2 gap-x-6 gap-y-6 border-t-2 border-line bg-ink/80 pt-6 lg:grid-cols-4">
-          {profile.glance.map((g) => (
+        <dl className="relative mt-10 hidden grid-cols-4 gap-x-6 border-t-2 border-line bg-ink/80 pt-6 md:grid">
+          {profile.glance.map((g, i) => (
             <div key={g.label}>
-              <dt className="label text-accent">{g.label}</dt>
+              <dt className={`label ${["text-lime", "text-accent", "text-coin", "text-lime"][i]}`}>{g.label}</dt>
               <dd className="mt-2 text-sm leading-relaxed text-bone/80">{g.value}</dd>
             </div>
           ))}
         </dl>
 
-        <a href="#about" className="label mt-8 self-start text-dust hover:text-bone">
+        <a href="#about" className="label relative mt-8 hidden self-start text-dust hover:text-bone md:block">
           Press <span className="text-bone">↓</span> to start<span className="blink">_</span>
         </a>
       </div>

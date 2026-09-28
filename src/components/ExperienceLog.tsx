@@ -110,7 +110,7 @@ export function ExperienceLog() {
                             </h3>
                             <span className="label text-[10px] text-dust">
                               {r.period}
-                              {r.ongoing ? <span className="ml-2 bg-live px-1 text-ink">Now</span> : <> · {months(r)} mo</>}
+                              {r.ongoing ? <span className="ml-2 bg-lime px-1 text-ink">Now</span> : <> · {months(r)} mo</>}
                             </span>
                           </div>
                           <ul className="mt-2 space-y-1.5 text-[15px] leading-relaxed text-bone/80">

@@ -8,7 +8,8 @@
   --color-dust: #8e8577;
   --color-accent: #4f8bff;
   --color-accent-deep: #1c3a82;
-  --color-live: #7fe08a;
+  --color-lime: #c8f03c;
+  --color-coin: #ffd23f;
 
   --font-display: var(--font-departure), ui-monospace, monospace;
   --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;

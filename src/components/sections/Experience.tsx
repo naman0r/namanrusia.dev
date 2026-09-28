@@ -82,7 +82,7 @@ export function Experience() {
                     </span>
                     <span className="label whitespace-nowrap text-right text-xs text-dust max-sm:hidden">
                       {period}
-                      {o.roles.some((r) => r.ongoing) && <span className="ml-2 bg-live px-1 text-ink">Now</span>}
+                      {o.roles.some((r) => r.ongoing) && <span className="ml-2 bg-lime px-1 text-ink">Now</span>}
                     </span>
                   </Link>
                 </li>

@@ -4,7 +4,7 @@ import { homes } from "@/content/profile";
 import { featured } from "@/content/projects";
 import { stage, type Day, type ShotId } from "@/lib/stage";
 import { ACCENT, HEAT, heatLevel } from "./palette";
-import { CITIES, EARTH, EARTH_H, EARTH_W } from "./earth";
+import { EARTH, EARTH_H, EARTH_W } from "./earth";
 
 type Rgb = [number, number, number];
 
@@ -22,10 +22,9 @@ const C = {
   bone: rgb("#eee7d7"),
   accent: rgb(ACCENT),
   deep: rgb("#1c3a82"),
-  sky: rgb("#9ec0ff"),
-  navy: rgb("#0f1c36"),
-  nightLand: rgb("#3b4a6b"),
-  lights: rgb("#ffe2a0"),
+  lime: rgb("#c8f03c"),
+  moss: rgb("#4f6b2a"),
+  coin: rgb("#ffd23f"),
   white: rgb("#f1ebdc"),
   yellow: rgb("#ffd23f"),
   red: rgb("#e8402a"),
@@ -293,9 +292,7 @@ function shelfCube(n: number): Shot {
 }
 
 const GLOBE_R = 1.6;
-const ROUTE_STEPS = 64;
-/** Seconds the tour lingers over each home before flying on. */
-const TOUR_HOLD = 4.5;
+const ROUTE_STEPS = 48;
 
 function latLon(lat: number, lon: number, r: number): [number, number, number] {
   const la = (lat * Math.PI) / 180;
@@ -303,83 +300,42 @@ function latLon(lat: number, lon: number, r: number): [number, number, number] {
   return [r * Math.cos(la) * Math.sin(lo), r * Math.sin(la), r * Math.cos(la) * Math.cos(lo)];
 }
 
-/** The point on Earth where the sun is overhead right now, as a unit vector. Good to a degree or so. */
-function sunNow(): [number, number, number] {
-  const now = new Date();
-  const day = (now.getTime() - Date.UTC(now.getUTCFullYear(), 0, 0)) / 86_400_000;
-  const declination = -23.44 * Math.cos(((2 * Math.PI) / 365) * (day + 10));
-  return latLon(declination, (12 - (now.getUTCHours() + now.getUTCMinutes() / 60)) * 15, 1);
-}
+const G = { land: 0, home: 1, ocean: 2, route: 3, beacon: 4, satellite: 5 } as const;
 
-const G = { land: 0, home: 1, ocean: 2, air: 3, light: 4, route: 5, beacon: 6, satellite: 7 } as const;
-
-/**
- * The title screen: Earth at 1° detail, lit by the real sun at this moment, so the night side
- * shows its city lights. It tours the places Naman has lived, following the route between them.
- */
-function globe(n: number): Shot {
+/** A chunky voxel Earth: a Fibonacci sphere where land is lime, the countries Naman lived in are blue. */
+function buildGlobe(n: number) {
   const t = alloc(n);
   const r = rng(7);
   const legs = homes.length - 1;
-  const oceanN = Math.round(n * 0.14);
-  const airN = Math.round(n * 0.1);
-  const lightN = Math.min(CITIES.length, Math.round(n * 0.06));
-  const beaconN = homes.length * 5;
-  const landN = n - oceanN - airN - lightN - beaconN - legs * (ROUTE_STEPS + 1) - 16;
+  const beaconN = homes.length * 4;
+  const sphere = n - legs * (ROUTE_STEPS + 1) - beaconN - 16;
   const golden = Math.PI * (3 - Math.sqrt(5));
-  // Earth-fixed unit normal per voxel, for day and night.
-  const normal = new Float32Array(n * 3);
+  const size = Math.sqrt((4 * Math.PI) / sphere) * GLOBE_R * 0.9;
   let i = 0;
 
-  // Land: a Fibonacci sphere dense enough that its land points alone fill the budget.
-  const candidates = Math.ceil(landN / 0.28);
-  const landSize = Math.sqrt((4 * Math.PI) / candidates) * GLOBE_R * 0.95;
-  for (let k = 0; k < candidates && i < landN; k++) {
-    const y = 1 - ((k + 0.5) / candidates) * 2;
+  for (; i < sphere; i++) {
+    const y = 1 - ((i + 0.5) / sphere) * 2;
     const rad = Math.sqrt(1 - y * y);
-    const x = Math.cos(golden * k) * rad;
-    const z = Math.sin(golden * k) * rad;
+    const x = Math.cos(golden * i) * rad;
+    const z = Math.sin(golden * i) * rad;
     const lat = (Math.asin(y) * 180) / Math.PI;
     const lon = (Math.atan2(x, z) * 180) / Math.PI;
     const cell = EARTH[Math.min(EARTH_H - 1, Math.floor(90 - lat)) * EARTH_W + Math.min(EARTH_W - 1, Math.floor(lon + 180))];
-    if (cell === ".") continue;
-    put(t, i, x * GLOBE_R, y * GLOBE_R, z * GLOBE_R, C.bone, landSize);
-    normal.set([x, y, z], i * 3);
-    t.tag[i] = cell === "#" ? G.land : G.home;
-    // Ice toward the poles, a little stone everywhere else.
-    t.aux[i] = Math.abs(lat) > 62 ? 1 : r() > 0.8 ? 0.5 : 0;
-    i++;
-  }
-
-  // Ocean: a coarse shell of big dark voxels just under the land, so the far side stays hidden.
-  const oceanR = GLOBE_R * 0.92;
-  const oceanSize = Math.sqrt((4 * Math.PI) / oceanN) * oceanR * 0.95;
-  for (let k = 0; k < oceanN; k++, i++) {
-    const y = 1 - ((k + 0.5) / oceanN) * 2;
-    const rad = Math.sqrt(1 - y * y);
-    const [x, z] = [Math.cos(golden * k) * rad, Math.sin(golden * k) * rad];
-    put(t, i, x * oceanR, y * oceanR, z * oceanR, C.navy, oceanSize);
-    normal.set([x, y, z], i * 3);
-    t.tag[i] = G.ocean;
-  }
-
-  // Atmosphere: rings of voxels around the silhouette, re-aimed at the camera every frame.
-  for (let k = 0; k < airN; k++, i++) {
-    put(t, i, 0, 0, 0, C.accent, 0.05);
-    t.tag[i] = G.air;
-    t.group[i] = k % 3;
-    t.aux[i] = k / airN + r() * 0.002;
-  }
-
-  for (let k = 0; k < lightN; k++, i++) {
-    const [lat, lon, weight] = CITIES[k];
-    const [x, y, z] = latLon(lat, lon, GLOBE_R * 1.012);
-    put(t, i, x, y, z, C.lights, 0.018 + weight * 0.008);
-    normal.set([x / GLOBE_R, y / GLOBE_R, z / GLOBE_R], i * 3);
-    t.tag[i] = G.light;
+    const roll = r();
     t.aux[i] = r();
+    if (cell === "U" || cell === "I") {
+      put(t, i, x * GLOBE_R, y * GLOBE_R, z * GLOBE_R, C.accent, size * 1.05);
+      t.tag[i] = G.home;
+    } else if (cell === "#") {
+      put(t, i, x * GLOBE_R, y * GLOBE_R, z * GLOBE_R, roll > 0.82 ? C.bone : roll > 0.68 ? C.moss : C.lime, size, 0.92);
+      t.tag[i] = G.land;
+    } else {
+      put(t, i, x * GLOBE_R, y * GLOBE_R, z * GLOBE_R, C.line, size * 0.36, 1.5);
+      t.tag[i] = G.ocean;
+    }
   }
 
+  // The route of a life so far: US, India, Singapore, Boston.
   for (let k = 0; k < legs; k++) {
     const a = latLon(homes[k].lat, homes[k].lon, 1);
     const b = latLon(homes[k + 1].lat, homes[k + 1].lon, 1);
@@ -387,174 +343,171 @@ function globe(n: number): Shot {
       const f = j / ROUTE_STEPS;
       const v = [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
       const len = Math.hypot(v[0], v[1], v[2]) || 1;
-      const lift = GLOBE_R * (1.03 + Math.sin(Math.PI * f) * 0.3);
-      put(t, i, (v[0] / len) * lift, (v[1] / len) * lift, (v[2] / len) * lift, C.deep, 0.055);
+      const lift = GLOBE_R * (1.04 + Math.sin(Math.PI * f) * 0.3);
+      put(t, i, (v[0] / len) * lift, (v[1] / len) * lift, (v[2] / len) * lift, C.deep, 0.06);
       t.tag[i] = G.route;
-      t.group[i] = k + 1;
-      t.aux[i] = f;
+      t.aux[i] = (k + f) / legs;
     }
   }
 
-  // A beacon rising out of each home.
+  // A stubby beacon on each home; Boston's is white.
   homes.forEach((h, k) => {
-    for (let j = 0; j < 5; j++, i++) {
-      const [x, y, z] = latLon(h.lat, h.lon, GLOBE_R * (1.02 + j * 0.035));
-      put(t, i, x, y, z, h.code === "BOS" ? C.white : C.accent, 0.07 - j * 0.008);
+    for (let j = 0; j < 4; j++, i++) {
+      const [x, y, z] = latLon(h.lat, h.lon, GLOBE_R * (1.03 + j * 0.05));
+      put(t, i, x, y, z, h.code === "BOS" ? C.white : C.coin, 0.085 - j * 0.012);
       t.tag[i] = G.beacon;
       t.group[i] = k;
-      t.aux[i] = j;
     }
   });
 
   // One satellite per country visited. Which 16 is never stated, so they orbit instead of pinning.
   for (let k = 0; k < 16; k++, i++) {
-    put(t, i, 0, 0, 0, C.bone, 0.06);
+    put(t, i, 0, 0, 0, k % 4 ? C.bone : C.coin, 0.07);
     t.tag[i] = G.satellite;
     t.group[i] = k;
   }
-  if (i < n) hideRest(t, i);
+  return t;
+}
 
-  const tour = stage.globe;
-  let spin = -(homes[0].lon * Math.PI) / 180;
-  let tilt = 0.5;
-  let held = 0;
+/**
+ * The title screen. The globe drifts on its own, spins where you drag it, and turns a home to
+ * face you when you point at its name. A scan line sweeps pole to pole, flashing the land it
+ * crosses. The About story then peels it apart into shells; both share one spin.
+ */
+function globeShots(n: number): { globe: Shot; peel: Shot } {
+  const t = buildGlobe(n);
+  const g = stage.globe;
+  let spin = (homes[0].lon * -Math.PI) / 180;
+  let tilt = 0.35;
+  let velocity = 0.12;
   let clock = 0;
-  const dayLand: Rgb = [0, 0, 0];
+  let lastTick = 0;
 
-  return {
-    target: t,
-    pose: (c) => (c.mobile ? pose(0, 2.65, -2, tilt, 0, 0.8) : pose(4.3, 0.2, 0, tilt, 0, 1.6)),
-    tick(c) {
-      clock += c.dt;
-      if (tour.hover >= 0) {
-        tour.focus = tour.hover;
-        held = 0;
-      } else if (!c.reduced && (held += c.dt) > TOUR_HOLD) {
-        tour.focus = (tour.focus + 1) % homes.length;
-        held = 0;
+  const turnGlobe = (c: FrameCtx) => {
+    // Globe and peel share this state; mid-morph both tick in the same frame, so count it once.
+    const now = performance.now();
+    if (now - lastTick < 2) return;
+    lastTick = now;
+    clock += c.dt;
+    const dt = c.dt;
+    if (g.dragging) {
+      // Follow the pointer exactly, and remember how fast it moved for the fling.
+      const d = g.dx * 0.008;
+      spin += d;
+      tilt = Math.max(-0.9, Math.min(1.3, tilt + g.dy * 0.006));
+      velocity = dt > 0 ? d / dt : velocity;
+    } else if (g.hover >= 0) {
+      const goal = (-homes[g.hover].lon * Math.PI) / 180;
+      spin += Math.atan2(Math.sin(goal - spin), Math.cos(goal - spin)) * (1 - Math.exp(-dt * 3));
+      tilt += (0.2 + (homes[g.hover].lat * Math.PI) / 180 / 1.6 - tilt) * (1 - Math.exp(-dt * 3));
+      velocity = 0;
+    } else {
+      // A fling coasts, then settles back into a slow drift; the tilt drifts home too.
+      const drift = c.reduced ? 0 : 0.12;
+      velocity += (drift - velocity) * (1 - Math.exp(-dt * 1.2));
+      spin += velocity * dt;
+      tilt += (0.35 - tilt) * (1 - Math.exp(-dt * 0.8));
+    }
+    g.dx = 0;
+    g.dy = 0;
+  };
+
+  const place = (c: FrameCtx, pos: Float32Array, col: Float32Array, scl: Float32Array, peel: number) => {
+    const cs = Math.cos(spin);
+    const ss = Math.sin(spin);
+    const scan = Math.sin(clock * 0.45) * GLOBE_R;
+    const traveller = (clock * 0.16) % 1;
+    const pulse = (Math.sin(clock * 3) + 1) / 2;
+    for (let i = 0; i < t.n; i++) {
+      const tag = t.tag[i];
+      const o = i * 3;
+      if (tag === G.satellite) {
+        const k = t.group[i];
+        const ring = k % 2;
+        const ph = (k / 16) * Math.PI * 2 + clock * (0.35 + ring * 0.12) * (ring ? -1 : 1);
+        const R = GLOBE_R * (1.4 + ring * 0.16 + peel * 0.5);
+        const incline = ring ? 0.5 : -0.35;
+        const z = Math.sin(ph) * R;
+        pos[o] = Math.cos(ph) * R;
+        pos[o + 1] = z * Math.sin(incline);
+        pos[o + 2] = z * Math.cos(incline);
+        const blink = 0.7 + ((Math.sin(clock * 3 + k * 1.7) + 1) / 2) * 0.6;
+        for (let q = 0; q < 3; q++) scl[o + q] *= blink;
+        continue;
       }
-      const h = homes[tour.focus];
-      // Bring the home to the front, tipped toward the camera by its latitude, with a slow sway.
-      const goalSpin = (-h.lon * Math.PI) / 180 + (c.reduced ? 0 : Math.sin(clock * 0.3) * 0.12);
-      const d = Math.atan2(Math.sin(goalSpin - spin), Math.cos(goalSpin - spin));
-      const k = 1 - Math.exp(-c.dt * 2.2);
-      spin += d * k;
-      tilt += (0.12 + ((h.lat * Math.PI) / 180) * 0.7 - tilt) * k;
-    },
-    animate(c, pos, col, scl) {
-      const [sx, sy, sz] = sunNow();
-      const cs = Math.cos(spin);
-      const ss = Math.sin(spin);
-      // The camera, seen from the globe's own frame (before the pose tilts it).
-      const vy = Math.sin(tilt);
-      const vz = Math.cos(tilt);
-      // The sun after the tour's spin, for the ocean's glint and the lit side of the atmosphere.
-      const sdx = sx * cs + sz * ss;
-      const sdz = -sx * ss + sz * cs;
-      let hx = sdx;
-      let hy = sy + vy;
-      let hz = sdz + vz;
-      const hl = Math.hypot(hx, hy, hz) || 1;
-      hx /= hl;
-      hy /= hl;
-      hz /= hl;
-      const pulse = (Math.sin(c.time * 3) + 1) / 2;
-      const traveller = (clock * 0.22) % 1;
+      let x = pos[o];
+      let y = pos[o + 1];
+      let z = pos[o + 2];
+      if (peel) {
+        // Four shells lift off at different heights and turn against each other.
+        const layer = Math.floor(t.aux[i] * 4);
+        const f = 1 + peel * (0.08 + layer * 0.16);
+        const a = clock * 0.14 * (layer % 2 ? 1 : -1) * (1 + layer * 0.4) + layer;
+        const [ca, sa] = [Math.cos(a), Math.sin(a)];
+        [x, z] = [x * ca + z * sa, -x * sa + z * ca];
+        x *= f;
+        y *= f;
+        z *= f;
+      }
+      pos[o] = x * cs + z * ss;
+      pos[o + 1] = y;
+      pos[o + 2] = -x * ss + z * cs;
 
-      for (let i = 0; i < n; i++) {
-        const tag = t.tag[i];
-        const o = i * 3;
-        if (scl[o] === 0) continue;
-
-        if (tag === G.air) {
-          // A circle in the plane facing the camera, so the halo always hugs the silhouette.
-          const layer = t.group[i];
-          const a = t.aux[i] * Math.PI * 2;
-          const rho = GLOBE_R * (1.035 + layer * 0.04);
-          const ca = Math.cos(a) * rho;
-          const sa = Math.sin(a) * rho;
-          pos[o] = ca;
-          pos[o + 1] = sa * vz;
-          pos[o + 2] = -sa * vy;
-          // Brighter on the side facing the sun.
-          const lit = 0.3 + 0.7 * Math.max(0, (ca * sdx + sa * vz * sy - sa * vy * sdz) / rho);
-          const fade = [1, 0.6, 0.3][layer];
-          for (let q = 0; q < 3; q++) {
-            col[o + q] = (layer ? C.accent[q] : C.sky[q]) * lit * fade * 1.4;
-            scl[o + q] = (0.05 - layer * 0.01) * (0.6 + lit * 0.4);
-          }
-          continue;
-        }
-        if (tag === G.satellite) {
-          const k = t.group[i];
-          const ring = k % 2;
-          const ph = (k / 16) * Math.PI * 2 + c.time * (0.3 + ring * 0.1) * (ring ? -1 : 1);
-          const R = GLOBE_R * (1.42 + ring * 0.14);
-          const incline = ring ? 0.5 : -0.35;
-          const z = Math.sin(ph) * R;
-          pos[o] = Math.cos(ph) * R;
-          pos[o + 1] = z * Math.sin(incline);
-          pos[o + 2] = z * Math.cos(incline);
-          const blink = 0.7 + ((Math.sin(c.time * 3 + k * 1.7) + 1) / 2) * 0.6;
-          for (let q = 0; q < 3; q++) scl[o + q] *= blink;
-          continue;
-        }
-
-        // Everything else is fixed to the Earth and turns with the tour.
-        const x = pos[o];
-        const z = pos[o + 2];
-        pos[o] = x * cs + z * ss;
-        pos[o + 2] = -x * ss + z * cs;
-        const nx = normal[o];
-        const ny = normal[o + 1];
-        const nz = normal[o + 2];
-        const sun = nx * sx + ny * sy + nz * sz;
-        const day = clamp01((sun + 0.08) / 0.3);
-
-        if (tag === G.land || tag === G.home) {
-          const home = tag === G.home;
-          const base = home ? C.sky : t.aux[i] === 1 ? C.white : t.aux[i] === 0.5 ? C.stone : C.bone;
-          const shade = 0.5 + 0.5 * Math.max(0, sun);
-          const night = home ? C.deep : C.nightLand;
-          for (let q = 0; q < 3; q++) {
-            dayLand[q] = base[q] * shade;
-            col[o + q] = night[q] + (dayLand[q] - night[q]) * day;
-          }
-        } else if (tag === G.ocean) {
-          const ndx = nx * cs + nz * ss;
-          const ndz = -nx * ss + nz * cs;
-          const glint = Math.pow(Math.max(0, ndx * hx + ny * hy + ndz * hz), 60) * day;
-          for (let q = 0; q < 3; q++) col[o + q] = C.navy[q] * (0.15 + 0.85 * day) + C.sky[q] * glint * 0.9;
-        } else if (tag === G.light) {
-          const on = 1 - day;
-          const twinkle = 0.75 + 0.25 * Math.sin(c.time * 5 + t.aux[i] * 40);
-          for (let q = 0; q < 3; q++) {
-            col[o + q] *= 1.5 * twinkle;
-            scl[o + q] *= on > 0.1 ? on : 0;
-          }
-        } else if (tag === G.route) {
-          // The leg into the home on screen glows, and a light runs along it.
-          const active = t.group[i] === tour.focus;
-          let dist = traveller - t.aux[i];
-          if (dist < 0) dist += 1;
-          const head = active && dist < 0.12 ? 1 - dist / 0.12 : 0;
-          for (let q = 0; q < 3; q++) {
-            col[o + q] = (active ? C.accent[q] * 1.3 : col[o + q]) + (C.white[q] * 2 - col[o + q]) * head;
-            scl[o + q] *= 1 + head * 0.8 + (active ? 0.3 : 0);
-          }
-        } else if (tag === G.beacon) {
-          const focused = t.group[i] === tour.focus;
-          const rise = focused ? 1 + pulse * 0.6 : 0.7;
-          const lift = 1 + (t.aux[i] * 0.035 * (rise - 1)) / 1.02;
+      if (tag === G.land || tag === G.home) {
+        // The scan line: a band of latitude that flashes yellow and lifts as it passes.
+        const band = Math.max(0, 1 - Math.abs(y - scan) / 0.14) * (1 - peel);
+        if (band > 0) {
+          const lift = 1 + band * 0.05;
           pos[o] *= lift;
           pos[o + 1] *= lift;
           pos[o + 2] *= lift;
-          for (let q = 0; q < 3; q++) {
-            col[o + q] *= focused ? 1.4 + pulse * 0.6 : 1;
-            scl[o + q] *= focused ? 1.3 : 0.9;
-          }
+          for (let q = 0; q < 3; q++) col[o + q] += (C.coin[q] * 1.4 - col[o + q]) * band;
+        }
+        if (peel && tag === G.land) {
+          const shade = Math.floor(t.aux[i] * 4) % 2 ? C.lime : C.moss;
+          for (let q = 0; q < 3; q++) col[o + q] += (shade[q] - col[o + q]) * peel;
+        }
+      } else if (tag === G.route) {
+        let d = traveller - t.aux[i];
+        if (d < 0) d += 1;
+        const head = d < 0.1 ? 1 - d / 0.1 : 0;
+        for (let q = 0; q < 3; q++) {
+          col[o + q] = C.accent[q] * 1.2 + (C.coin[q] * 1.8 - C.accent[q] * 1.2) * head;
+          scl[o + q] *= (1 + head * 0.9) * (1 - peel);
+        }
+      } else if (tag === G.beacon) {
+        const lit = g.hover === t.group[i] ? 1 : pulse * 0.4;
+        for (let q = 0; q < 3; q++) {
+          col[o + q] *= 1 + lit;
+          scl[o + q] *= (1 + lit * 0.4) * (1 - peel);
+        }
+      } else if (tag === G.ocean && peel) {
+        for (let q = 0; q < 3; q++) {
+          col[o + q] += (C.stone[q] * 0.6 - col[o + q]) * peel;
+          scl[o + q] *= 1 + peel * 1.2;
         }
       }
+    }
+  };
+
+  return {
+    globe: {
+      target: t,
+      // Short phones get a smaller globe so it clears the copy below it.
+      pose: (c) =>
+        c.mobile
+          ? innerHeight < 720
+            ? pose(0.4, 3.1, -1.5, tilt, 0, 0.82)
+            : pose(0.4, 2.75, -1.5, tilt, 0, 1.05)
+          : pose(4.2, -0.1, 0, tilt, 0, 1.6),
+      tick: turnGlobe,
+      animate: (c, pos, col, scl) => place(c, pos, col, scl, 0),
+    },
+    peel: {
+      target: t,
+      pose: (c) => (c.mobile ? pose(0, 2.4, -3, 0.5, 0, 0.9) : pose(4.6, -0.1, -1.5, 0.5, 0, 1.15)),
+      tick: turnGlobe,
+      animate: (c, pos, col, scl) => place(c, pos, col, scl, 1),
     },
   };
 }
@@ -800,7 +753,7 @@ function monogram(n: number): Shot {
             (cx - 8 + 0.5) * cell + (sx - (q - 1) / 2) * v,
             (cy - 3) * cell + (sy - (q - 1) / 2) * v,
             -sz * v,
-            front ? C.bone : sz === 1 ? C.accent : C.deep,
+            front ? C.bone : sz === 1 ? C.accent : C.lime,
             v * 0.96,
           );
           t.tag[i] = front ? TAG.front : TAG.base;
@@ -811,7 +764,7 @@ function monogram(n: number): Shot {
     }
   }
   const r = rng(31);
-  const sparks = [C.accent, C.bone, C.stone, C.accent];
+  const sparks = [C.accent, C.lime, C.coin, C.bone];
   for (; i < n; i++) {
     const a = r() * Math.PI * 2;
     const rad = 2.7 + (r() - 0.5) * 0.9;
@@ -977,8 +930,8 @@ function lost(n: number): Shot {
 
 export function buildShots(n: number): Omit<Record<ShotId, Shot>, "city"> {
   return {
+    ...globeShots(n),
     cube: aboutCube(n),
-    globe: globe(n),
     track: track(n),
     carts: carts(n),
     monogram: monogram(n),

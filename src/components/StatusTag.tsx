@@ -1,7 +1,7 @@
 import type { Status } from "@/content/projects";
 
 const styles: Record<Status, string> = {
-  Live: "bg-live text-ink",
+  Live: "bg-lime text-ink",
   Released: "bg-bone text-ink",
   "In progress": "bg-accent text-ink",
   Shipped: "border border-current",

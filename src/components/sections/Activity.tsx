@@ -41,7 +41,7 @@ export function Activity({ days }: { days: Day[] }) {
   return (
     <Section id="activity" shot="city" className="pb-28 pt-28 md:pb-[50vh] md:pt-40">
       <ActivityScene days={days} />
-      <Heading id="activity" index="04" title="Activity" kicker="Live from GitHub" />
+      <Heading id="activity" index="04" title="Activity" kicker="Live from GitHub" tone="lime" />
       <dl className="grid grid-cols-2 gap-6 bg-ink/85 lg:grid-cols-4">
         {stats.map((s) => (
           <div key={s.label}>

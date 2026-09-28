@@ -10,7 +10,15 @@ export function Projects() {
   const [lead, ...rest] = featured;
   return (
     <Section id="projects" shot="carts" className="py-28 md:py-40">
-      <Heading id="projects" index="03" title="Projects" kicker="Level select" href="/projects" cta={`All ${projects.length} projects`} />
+      <Heading
+        id="projects"
+        index="03"
+        title="Projects"
+        kicker="Level select"
+        href="/projects"
+        cta={`All ${projects.length} projects`}
+        tone="coin"
+      />
 
       <article className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
         <HeroCartridge project={lead} />

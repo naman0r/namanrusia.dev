@@ -7,6 +7,7 @@ export const profile = {
   resume: "/resume.pdf",
   status: "Open to Spring 2027 and Summer 2027 co-ops and internships",
   // From the note on the old /more page.
+  motto: "I think the best software feels obsessed over.",
   thesis: "I like building things end to end, and I think the best software feels obsessed over.",
   intro:
     "CS + Business at Northeastern. Shipped iOS features at Sonos and hospital deployment automation at Philips. Co-founder at Sideband. After hours I build developer tools like Dockmaster, Canvas Buddy and Git Interviewer.",

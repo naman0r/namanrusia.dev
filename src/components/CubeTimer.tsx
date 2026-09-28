@@ -48,7 +48,7 @@ export function CubeTimer() {
         <span>3x3</span>
       </p>
       <div className="p-4">
-        <span ref={display} className="font-display block text-5xl tabular-nums text-bone">
+        <span ref={display} className="font-display block text-5xl tabular-nums text-coin">
           0:00.00
         </span>
         <p className="mt-3 min-h-12 text-sm text-dust" aria-live="polite">

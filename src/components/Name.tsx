@@ -3,7 +3,7 @@ const WORDS = ["Naman", "Rusia"];
 /** Each letter drops in like a sprite and hops when touched. */
 export function Name() {
   return (
-    <h1 id="top-title" className="font-display select-none text-[clamp(3.6rem,12.5vw,11rem)] leading-[0.84] text-bone">
+    <h1 id="top-title" className="font-display select-none text-[clamp(4.2rem,15vw,11.5rem)] leading-[0.84] text-bone">
       <span className="sr-only">Naman Rusia</span>
       {WORDS.map((word, w) => (
         <span

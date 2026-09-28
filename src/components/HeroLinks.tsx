@@ -122,7 +122,7 @@ export function HeroLinks() {
 
   const [resume, ...socials] = heroLinks;
   return (
-    <div className="mt-10 flex flex-wrap items-center gap-3">
+    <div className="mt-7 flex flex-wrap items-center gap-3 md:mt-10">
       <a href={resume.href} target="_blank" aria-keyshortcuts="R" className={`${BUTTON} ${TONES.accent}`}>
         <PixelIcon name="doc" />
         {resume.label}

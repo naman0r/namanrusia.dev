@@ -214,7 +214,7 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
 
       // In transit, each voxel swings out on its own arc and tumbles.
       if (arc > 0) {
-        const swing = arc * (0.8 + delay * 1.4);
+        const swing = arc * (0.5 + delay * 0.9);
         px += seed[i * 5 + 1] * swing;
         py += seed[i * 5 + 2] * swing;
         pz += seed[i * 5 + 3] * swing;
