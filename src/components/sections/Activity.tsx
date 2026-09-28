@@ -7,22 +7,11 @@ import { HEAT, heatLevel } from "@/scene/palette";
 const fmt = (iso: string, opts: Intl.DateTimeFormatOptions) =>
   new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { timeZone: "UTC", ...opts });
 
-function longestStreak(days: Day[]) {
-  let best = 0;
-  let run = 0;
-  for (const [, n] of days) {
-    run = n > 0 ? run + 1 : 0;
-    best = Math.max(best, run);
-  }
-  return best;
-}
-
 export function Activity({ days }: { days: Day[] }) {
   const first = new Date(`${days[0][0]}T00:00:00Z`).getUTCDay();
   const cells: (Day | null)[] = [...Array<null>(first).fill(null), ...days];
   const weeks = Math.ceil(cells.length / 7);
   const total = days.reduce((a, [, n]) => a + n, 0);
-  const busiest = days.reduce((a, b) => (b[1] > a[1] ? b : a));
   // A month label over the first week column that starts in that month.
   const months: { col: number; label: string }[] = [];
   for (let w = 0; w < weeks; w++) {
@@ -34,8 +23,6 @@ export function Activity({ days }: { days: Day[] }) {
   const stats = [
     { value: total.toLocaleString("en-US"), label: "contributions in the last year", tone: "text-accent" },
     { value: String(days.filter(([, n]) => n > 0).length), label: "days with at least one", tone: "text-bone" },
-    { value: `${longestStreak(days)}d`, label: "longest streak", tone: "text-bone" },
-    { value: String(busiest[1]), label: `on ${fmt(busiest[0], { month: "short", day: "numeric" })}, the busiest day`, tone: "text-bone" },
   ];
 
   return (
