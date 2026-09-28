@@ -33,7 +33,7 @@ export function GlobeDrag() {
       onPointerUp={release}
       onPointerCancel={release}
     >
-      <span className="label absolute right-4 top-3 text-[10px] text-dust opacity-70 transition-opacity group-active:opacity-0 md:bottom-48 md:right-8 md:top-auto">
+      <span className="label absolute left-4 top-3 text-[10px] text-dust opacity-70 transition-opacity group-active:opacity-0 md:bottom-48 md:left-auto md:right-8 md:top-auto">
         ⟲ drag to spin
       </span>
     </div>

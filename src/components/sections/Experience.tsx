@@ -44,11 +44,11 @@ export function Experience() {
 
   return (
     <Section id="experience" shot="track" className="py-28 md:py-40">
-      <Heading id="experience" index="02" title="Experience" kicker="Timing tower" href="/experience" cta="Full timeline" />
+      <Heading id="experience" index="02" title="Experience" href="/experience" cta="Full timeline" />
       <div className="lg:w-[62%]">
         <div className="border-2 border-bone bg-ink shadow-[6px_6px_0_0_var(--color-coal)]">
           <p className="label flex justify-between bg-bone px-4 py-1.5 text-[10px] text-ink">
-            <span>Pos · Team · Role</span>
+            <span>Where · Role</span>
             <span>{experience.length} teams</span>
           </p>
           <ol ref={list} onPointerLeave={() => setHovered(null)}>
@@ -61,11 +61,10 @@ export function Experience() {
                     onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(i)}
                     onFocus={() => setHovered(i)}
                     onBlur={() => setHovered(null)}
-                    className={`grid grid-cols-[2.25rem_4px_1fr] items-center gap-x-3 px-3 py-3 transition-colors sm:grid-cols-[2.75rem_4px_2.25rem_1fr_auto] sm:gap-x-4 sm:px-4 ${
+                    className={`grid grid-cols-[4px_1fr] items-center gap-x-3 px-3 py-3 transition-colors sm:grid-cols-[4px_2.25rem_1fr_auto] sm:gap-x-4 sm:px-4 ${
                       active === i ? "bg-coal" : ""
                     }`}
                   >
-                    <span className={`font-display text-lg tabular-nums ${active === i ? "text-accent" : "text-bone"}`}>P{i + 1}</span>
                     <span className="h-9 w-1" style={{ background: o.color }} aria-hidden />
                     {o.logo && (
                       <span className="relative hidden size-9 bg-bone sm:block">
@@ -90,7 +89,7 @@ export function Experience() {
             })}
           </ol>
           <p className="label flex gap-3 border-t-2 border-bone bg-coal px-4 py-3 text-[11px] normal-case tracking-normal">
-            <span className="shrink-0 text-accent">Radio · {org.code}</span>
+            <span className="shrink-0 text-accent">{org.org}</span>
             <span className="text-bone/85">{org.impact}</span>
           </p>
         </div>

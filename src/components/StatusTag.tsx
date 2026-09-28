@@ -9,5 +9,5 @@ const styles: Record<Status, string> = {
 };
 
 export function StatusTag({ status }: { status: Status }) {
-  return <span className={`label px-1.5 py-px text-[10px] leading-4 ${styles[status]}`}>{status}</span>;
+  return <span className={`label whitespace-nowrap px-1.5 py-px text-[10px] leading-4 ${styles[status]}`}>{status}</span>;
 }

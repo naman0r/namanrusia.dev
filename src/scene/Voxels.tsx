@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { DynamicDrawUsage, InstancedBufferAttribute, type InstancedMesh } from "three";
 import { stage, useStage } from "@/lib/stage";
-import { buildCity, buildShots, CARTS, GATES, rotation, type FrameCtx, type Shot } from "./shots";
+import { buildCity, buildShots, GATES, PROJECTS, rotation, type FrameCtx, type Shot } from "./shots";
 
 /** A shot placed in the world. `rot` is its row-major 3x3 orientation, which every voxel shares. */
 type Buf = { pos: Float32Array; col: Float32Array; scl: Float32Array; rot: Float32Array };
@@ -76,7 +76,7 @@ function makeSim(count: number) {
     pos: 0,
     tiltX: 0,
     tiltY: 0,
-    hover: new Float32Array(CARTS),
+    hover: new Float32Array(PROJECTS),
     gate: new Float32Array(GATES),
     rot: new Float32Array(9),
   };
@@ -125,7 +125,7 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
     if (Math.abs(goal - S.pos) < 1e-4) S.pos = goal;
 
     const k8 = 1 - Math.exp(-dt * 8);
-    for (let c = 0; c < CARTS; c++) S.hover[c] += ((stage.hoveredProject === c ? 1 : 0) - S.hover[c]) * k8;
+    for (let c = 0; c < PROJECTS; c++) S.hover[c] += ((stage.hoveredProject === c ? 1 : 0) - S.hover[c]) * k8;
     for (let g = 0; g < GATES; g++) S.gate[g] += ((stage.activeCheckpoint === g ? 1 : 0) - S.gate[g]) * k8;
     const k3 = reduced ? 0 : 1 - Math.exp(-dt * 3);
     S.tiltX += (stage.pointer.y * 0.12 - S.tiltX) * k3;
@@ -136,7 +136,6 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
     const mix = S.pos - ia;
     const A = shots[list[ia]];
     const B = shots[list[ib]];
-    // Neighbouring sections can share a shot (the globe spans the title and the bio); it just stays.
     const morphing = A !== B && mix > 1e-4;
     // Each shot reads the scroll progress of its own section, so neither jumps mid-morph.
     const ctx = (i: number): FrameCtx => ({

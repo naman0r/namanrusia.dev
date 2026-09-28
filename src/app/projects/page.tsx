@@ -19,14 +19,14 @@ export default function ProjectsIndex() {
   );
 
   return (
-    <main id="main" data-shot="shelf" className="px-4 pb-24 pt-24 md:px-8">
-      <div className="mx-auto max-w-[1100px]">
+    <main id="main" data-shot="library" className="px-4 pb-24 pt-24 md:px-8">
+      <div className="mx-auto max-w-[1400px]">
         <Link href="/" className="label text-dust hover:text-bone">
           ← Home
         </Link>
         <header className="mt-10">
           <p className="label text-dust">
-            <span className="text-accent">03</span> · All levels
+            <span className="text-coin">03</span> · Everything I&apos;ve built
           </p>
           <h1 className="font-display mt-3 text-[clamp(3rem,10vw,7.5rem)] text-bone">Projects</h1>
           <p className="mt-5 max-w-2xl text-lg text-dust">
@@ -35,7 +35,7 @@ export default function ProjectsIndex() {
         </header>
 
         {[...byYear].map(([year, list]) => (
-          <section key={year} aria-labelledby={`y${year}`} className="mt-16">
+          <section key={year} aria-labelledby={`y${year}`} className="mt-16 lg:w-[60%]">
             <h2 id={`y${year}`} className="label mb-3 flex items-baseline justify-between text-accent">
               <span>{year}</span>
               <span className="text-dust">{list.length} projects</span>

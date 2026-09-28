@@ -1,4 +1,4 @@
-import { Continue } from "@/components/Continue";
+import { TerminalButton } from "@/components/Terminal";
 import { profile } from "@/content/profile";
 
 const links = [
@@ -20,7 +20,7 @@ export function Contact() {
     >
       <div className="mx-auto w-full max-w-[1400px]">
         <p className="label text-dust">
-          <span className="text-accent">05</span> · Thanks for playing
+          <span className="text-accent">06</span> · Contact
         </p>
         <h2 id="contact-title" className="mt-4 max-w-3xl text-2xl leading-tight text-bone md:text-5xl">
           Recruiting for Spring or Summer 2027, building something, or just want to talk Clash Royale? Write to me.
@@ -47,13 +47,15 @@ export function Contact() {
       </div>
 
       <footer className="mx-auto mt-12 flex w-full max-w-[1400px] flex-wrap items-end justify-between gap-6 border-t-2 border-line pt-6 md:mt-32">
-        <Continue />
-        <p className="label max-w-md text-[10px] leading-relaxed text-dust">
+        <a href="#top" className="label text-dust hover:text-bone">
+          Back to top ↑
+        </a>
+        <p className="label text-[10px] leading-relaxed text-dust">
           Built from scratch by Naman in Boston ·{" "}
           <a href={profile.links.source} target="_blank" rel="noreferrer" className="text-bone hover:text-accent">
             source
           </a>{" "}
-          · press <kbd className="bg-coal px-1 text-bone">~</kbd> for a terminal
+          · <TerminalButton />
         </p>
       </footer>
     </section>

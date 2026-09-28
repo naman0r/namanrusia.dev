@@ -40,7 +40,7 @@ export function Heading({
   id: string;
   index: string;
   title: string;
-  kicker: string;
+  kicker?: string;
   href?: string;
   cta?: string;
   tone?: keyof typeof TONES;
@@ -50,7 +50,8 @@ export function Heading({
     <header className="mb-10 flex flex-wrap items-end justify-between gap-x-8 gap-y-5 md:mb-14">
       <div>
         <p className="label mb-3 text-dust">
-          <span className={t.text}>{index}</span> · {kicker}
+          <span className={t.text}>{index}</span>
+          {kicker && <> · {kicker}</>}
         </p>
         <h2 id={`${id}-title`} className="font-display text-[clamp(2.75rem,7vw,5.5rem)] text-bone">
           {href ? (

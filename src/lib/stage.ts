@@ -1,8 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-export type ShotId = "globe" | "peel" | "cube" | "track" | "carts" | "city" | "monogram" | "skyline" | "shelf" | "lost";
-
-export type CubePhase = "solved" | "scrambling" | "scrambled" | "solving";
+export type ShotId = "globe" | "cube" | "track" | "carts" | "photos" | "city" | "monogram" | "skyline" | "library" | "monolith" | "lost";
 
 export type Day = [date: string, count: number];
 
@@ -19,14 +17,17 @@ export const stage = {
   locals: [] as number[],
   section: "",
   pointer: { x: 0, y: 0 },
+  /** Index into `projects` of the row or card under the pointer. */
   hoveredProject: -1,
+  /** Slug of the project page being viewed, for its cartridge. */
+  project: "",
+  /** Index into `photos` of the polaroid under the pointer, for the mosaic. */
+  photo: -1,
   activeCheckpoint: -1,
   /** performance.now() when the last section was reached, to fire its burst once per visit. */
   burst: 0,
   /** The title-screen globe: pointer drag deltas since the last frame, and the home being pointed at. */
   globe: { dragging: false, dx: 0, dy: 0, hover: -1 },
-  /** The About cube: the timer button sends commands, the cube reports its phase and solve time. */
-  cube: { command: null as "scramble" | "solve" | null, phase: "solved" as CubePhase, solveStart: 0, solveEnd: 0 },
   /** The GitHub contribution calendar, once the landing page hands it over. */
   days: null as Day[] | null,
   version: 0,

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PixelPlaceholder } from "@/components/PixelPlaceholder";
+import { ProjectFocus } from "@/components/ProjectFocus";
 import { StatusTag } from "@/components/StatusTag";
 import { getProject, neighbors, projects } from "@/content/projects";
 
@@ -132,7 +133,8 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
   ];
 
   return (
-    <main id="main" data-shot="shelf" className="px-4 pb-16 pt-24 md:px-8">
+    <main id="main" data-shot="monolith" className="px-4 pb-16 pt-24 md:px-8">
+      <ProjectFocus slug={p.slug} />
       <div className="mx-auto max-w-[1200px]">
         <nav aria-label="Breadcrumb" className="label flex items-center justify-between text-dust">
           <Link href="/projects" className="hover:text-bone">

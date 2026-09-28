@@ -8,9 +8,6 @@ export const profile = {
   status: "Open to Spring 2027 and Summer 2027 co-ops and internships",
   // From the note on the old /more page.
   motto: "I like building cool stuff and working on interesting problems",
-  thesis: "Hello",
-  intro:
-    "CS + Business at Northeastern. Shipped iOS features at Sonos and hospital deployment automation at Philips. Co-founder at Sideband. After hours I build developer tools like Dockmaster, Canvas Buddy and Git Interviewer.",
   links: {
     github: "https://github.com/naman0r",
     linkedin: "https://linkedin.com/in/namanrusia",
@@ -31,7 +28,7 @@ export const profile = {
     {
       label: "Education",
       value:
-        "Computer Science and Finance at Northeaster University, graduating in May 2028",
+        "Computer Science and Finance at Northeastern University, graduating in May 2028",
     },
     { label: "Focus", value: "Backend, cloud, systems and novel problems" },
   ],
@@ -87,8 +84,6 @@ export const about = {
     "I got into software during my first semester of college. Since then, I've worked at startups, Philips, and Sonos, and a lot of side projects. Lately, I've been interested in backend systems and tools that make building software easier.",
     "At school, I run TAMID's software engineering track, teach, and build software for nonprofits through Code4Community. Outside of that, I like playing guitar, music, lifting, and Clash Royale.",
   ],
-  offline: "",
-  funFacts: [],
 };
 
 // Captions are the file names from the old /more page.

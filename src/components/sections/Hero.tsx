@@ -1,4 +1,3 @@
-import { BostonClock } from "@/components/Clock";
 import { GlobeDrag } from "@/components/GlobeDrag";
 import { HeroLinks } from "@/components/HeroLinks";
 import { HomeLine } from "@/components/HomeLine";
@@ -15,20 +14,8 @@ export function Hero() {
     >
       <GlobeDrag />
       <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col">
-        <div className="label relative hidden items-start justify-between gap-4 text-dust md:flex">
-          <p>
-            <span className="text-lime">P1</span> · {profile.handle}
-          </p>
-          <p className="text-right">
-            Boston{" "}
-            <span className="text-bone">
-              <BostonClock />
-            </span>
-          </p>
-        </div>
-
         {/* On phones the globe owns the top of the screen and the copy sits at the bottom. */}
-        <div className="relative mt-auto max-w-[900px] md:my-auto md:py-10">
+        <div data-globe-floor className="relative mt-auto max-w-[900px] md:my-auto md:py-10">
           <HomeLine />
           <Name />
           <p className="mt-7 max-w-xl text-lg leading-snug text-bone md:text-xl">
@@ -52,10 +39,6 @@ export function Hero() {
             </div>
           ))}
         </dl>
-
-        <a href="#about" className="label relative mt-8 hidden self-start text-dust hover:text-bone md:block">
-          Press <span className="text-bone">↓</span> to start<span className="blink">_</span>
-        </a>
       </div>
     </section>
   );

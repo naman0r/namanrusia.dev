@@ -47,7 +47,7 @@ export function Nav() {
   const home = pathname === "/";
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 border-b-2 border-line bg-ink/95">
+    <header className="fixed inset-x-0 top-0 z-40 border-b-2 border-line bg-ink">
       <nav aria-label="Primary" className="mx-auto flex h-14 max-w-[1400px] items-center gap-3 px-4 sm:gap-6 md:px-8">
         <Link href="/" className="group flex items-center gap-3" aria-label="Naman Rusia, home">
           <span className="font-display grid size-8 place-items-center bg-accent text-sm text-ink shadow-[3px_3px_0_0_var(--color-bone)] transition-transform duration-150 ease-(--ease-step) group-hover:-translate-y-0.5">

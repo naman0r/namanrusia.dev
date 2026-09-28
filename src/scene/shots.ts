@@ -1,7 +1,7 @@
 import { Color } from "three";
 import { experience, roleEnd, TIMELINE_END, TIMELINE_START } from "@/content/experience";
-import { homes } from "@/content/profile";
-import { featured } from "@/content/projects";
+import { homes, photos } from "@/content/profile";
+import { featured, projects } from "@/content/projects";
 import { stage, type Day, type ShotId } from "@/lib/stage";
 import { ACCENT, HEAT, heatLevel } from "./palette";
 import { EARTH, EARTH_H, EARTH_W } from "./earth";
@@ -133,6 +133,7 @@ function spinY(pos: Float32Array, n: number, angle: number) {
   }
 }
 
+const smoothstep01 = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 const pose = (x: number, y: number, z: number, rx: number, ry: number, s: number): Pose => ({ x, y, z, rx, ry, s });
@@ -201,13 +202,9 @@ function turn(p: Float32Array, m: Move, amount: number) {
 /** Every quarter turn a 3x3 has: 3 axes, 3 layers, 2 directions. */
 const MOVES: Move[] = [0, 1, 2].flatMap((axis) => [-1, 0, 1].flatMap((layer) => [1, -1].map((dir) => ({ axis, layer, dir }) as Move)));
 
-type Queued = Move & { dur: number; solve?: boolean };
+type Queued = Move & { solve?: boolean };
 
-/**
- * The About cube. Idle, it scrambles itself a little and solves it back. The timer button
- * asks for a proper scramble, then a timed solve, which undoes the scramble in reverse.
- * It keeps its own clock so a button press still plays out under reduced motion.
- */
+/** The About cube: a few turns, a pause, then it solves itself by undoing them. */
 function aboutCube(n: number): Shot {
   const target = buildCube(n);
   const baked = target.pos.slice();
@@ -215,79 +212,45 @@ function aboutCube(n: number): Shot {
   const queue: Queued[] = [];
   let history: Move[] = [];
   let current: (Queued & { t0: number }) | null = null;
-  let clock = 0;
   let idleSince = 0;
-  let engaged = false;
-  const cube = stage.cube;
-
-  const scramble = (count: number, dur: number) => {
-    let prev: Move | null = null;
-    for (let k = 0; k < count; k++) {
-      let m = MOVES[Math.floor(r() * MOVES.length)];
-      while (prev && m.axis === prev.axis && m.layer === prev.layer) m = MOVES[Math.floor(r() * MOVES.length)];
-      queue.push({ ...m, dur });
-      prev = m;
-    }
-  };
+  const TURN = 0.45;
 
   return {
     target,
-    pose: (c) => (c.mobile ? pose(0, 2.2, -3, 0.5, 0.72, 0.75) : pose(4.1, 0.5, 0, 0.5, 0.72, 0.88)),
+    pose: (c) => (c.mobile ? pose(0, 2.3, -3, 0.5, 0.72, 0.75) : pose(4.3, 0.3, 0, 0.5, 0.72, 0.95)),
     tick(c) {
-      clock += c.dt;
-      // A command waits until the turn in flight lands; the fidgeting stops as soon as one arrives.
-      if (cube.command) engaged = true;
-      if (cube.command === "scramble" && !current && !queue.length) {
-        cube.command = null;
-        cube.phase = "scrambling";
-        scramble(22, 0.13);
-      } else if (cube.command === "solve" && cube.phase === "scrambled") {
-        cube.command = null;
-        queue.push(...history.reverse().map((m) => ({ ...m, dir: (m.dir * -1) as Move["dir"], dur: 0.2, solve: true })));
-        history = [];
-        cube.phase = "solving";
-        cube.solveStart = performance.now();
-      }
-
-      if (current && clock - current.t0 >= current.dur) {
+      const t = c.time;
+      if (current && t - current.t0 >= TURN) {
         turn(baked, current, 1);
         if (!current.solve) history.push(current);
         current = null;
-        idleSince = clock;
+        idleSince = t;
       }
       if (current) return;
       const next = queue.shift();
       if (next) {
-        current = { ...next, t0: clock };
+        current = { ...next, t0: t };
         return;
       }
-      if (cube.phase === "scrambling") cube.phase = "scrambled";
-      if (cube.phase === "solving") {
-        cube.phase = "solved";
-        cube.solveEnd = performance.now();
-      }
-      // Until someone presses the button, it fidgets: a few turns, then undoes them.
-      if (engaged || c.reduced) return;
-      const idle = clock - idleSince;
+      const idle = t - idleSince;
       if (history.length && idle > 1.2) {
-        queue.push(...history.reverse().map((m) => ({ ...m, dir: (m.dir * -1) as Move["dir"], dur: 0.45, solve: true })));
+        queue.push(...history.reverse().map((m) => ({ ...m, dir: (m.dir * -1) as Move["dir"], solve: true })));
         history = [];
-      } else if (!history.length && idle > 2.4) scramble(5, 0.45);
+      } else if (!history.length && idle > 2.4) {
+        let prev: Move | null = null;
+        for (let k = 0; k < 6; k++) {
+          let m = MOVES[Math.floor(r() * MOVES.length)];
+          while (prev && m.axis === prev.axis && m.layer === prev.layer) m = MOVES[Math.floor(r() * MOVES.length)];
+          queue.push(m);
+          prev = m;
+        }
+      }
     },
     animate(c, pos) {
       pos.set(baked);
-      if (current) turn(pos, current, ease(clamp01((clock - current.t0) / current.dur)));
+      if (current) turn(pos, current, ease(clamp01((c.time - current.t0) / TURN)));
       if (!c.reduced) spinY(pos, target.n, Math.sin(c.time * 0.3) * 0.25);
     },
-  };
-}
-
-function shelfCube(n: number): Shot {
-  const target = buildCube(n);
-  return {
-    target,
-    pose: (c) => (c.mobile ? pose(2.6, 4.2, -3, 0.5, 0.7, 0.45) : pose(6.2, 2.2, -1, 0.5, 0.7, 0.5)),
-    animate: (c, pos) => spinY(pos, target.n, c.time * 0.25),
   };
 }
 
@@ -372,22 +335,17 @@ function buildGlobe(n: number) {
 /**
  * The title screen. The globe drifts on its own, spins where you drag it, and turns a home to
  * face you when you point at its name. A scan line sweeps pole to pole, flashing the land it
- * crosses. The About story then peels it apart into shells; both share one spin.
+ * crosses.
  */
-function globeShots(n: number): { globe: Shot; peel: Shot } {
+function globe(n: number): Shot {
   const t = buildGlobe(n);
   const g = stage.globe;
   let spin = (homes[0].lon * -Math.PI) / 180;
   let tilt = 0.35;
   let velocity = 0.12;
   let clock = 0;
-  let lastTick = 0;
 
   const turnGlobe = (c: FrameCtx) => {
-    // Globe and peel share this state; mid-morph both tick in the same frame, so count it once.
-    const now = performance.now();
-    if (now - lastTick < 2) return;
-    lastTick = now;
     clock += c.dt;
     const dt = c.dt;
     if (g.dragging) {
@@ -412,7 +370,7 @@ function globeShots(n: number): { globe: Shot; peel: Shot } {
     g.dy = 0;
   };
 
-  const place = (c: FrameCtx, pos: Float32Array, col: Float32Array, scl: Float32Array, peel: number) => {
+  const place = (c: FrameCtx, pos: Float32Array, col: Float32Array, scl: Float32Array) => {
     const cs = Math.cos(spin);
     const ss = Math.sin(spin);
     const scan = Math.sin(clock * 0.45) * GLOBE_R;
@@ -425,7 +383,7 @@ function globeShots(n: number): { globe: Shot; peel: Shot } {
         const k = t.group[i];
         const ring = k % 2;
         const ph = (k / 16) * Math.PI * 2 + clock * (0.35 + ring * 0.12) * (ring ? -1 : 1);
-        const R = GLOBE_R * (1.4 + ring * 0.16 + peel * 0.5);
+        const R = GLOBE_R * (1.4 + ring * 0.16);
         const incline = ring ? 0.5 : -0.35;
         const z = Math.sin(ph) * R;
         pos[o] = Math.cos(ph) * R;
@@ -435,27 +393,16 @@ function globeShots(n: number): { globe: Shot; peel: Shot } {
         for (let q = 0; q < 3; q++) scl[o + q] *= blink;
         continue;
       }
-      let x = pos[o];
-      let y = pos[o + 1];
-      let z = pos[o + 2];
-      if (peel) {
-        // Four shells lift off at different heights and turn against each other.
-        const layer = Math.floor(t.aux[i] * 4);
-        const f = 1 + peel * (0.08 + layer * 0.16);
-        const a = clock * 0.14 * (layer % 2 ? 1 : -1) * (1 + layer * 0.4) + layer;
-        const [ca, sa] = [Math.cos(a), Math.sin(a)];
-        [x, z] = [x * ca + z * sa, -x * sa + z * ca];
-        x *= f;
-        y *= f;
-        z *= f;
-      }
+      const x = pos[o];
+      const y = pos[o + 1];
+      const z = pos[o + 2];
       pos[o] = x * cs + z * ss;
       pos[o + 1] = y;
       pos[o + 2] = -x * ss + z * cs;
 
       if (tag === G.land || tag === G.home) {
         // The scan line: a band of latitude that flashes yellow and lifts as it passes.
-        const band = Math.max(0, 1 - Math.abs(y - scan) / 0.14) * (1 - peel);
+        const band = Math.max(0, 1 - Math.abs(y - scan) / 0.14);
         if (band > 0) {
           const lift = 1 + band * 0.05;
           pos[o] *= lift;
@@ -463,52 +410,53 @@ function globeShots(n: number): { globe: Shot; peel: Shot } {
           pos[o + 2] *= lift;
           for (let q = 0; q < 3; q++) col[o + q] += (C.coin[q] * 1.4 - col[o + q]) * band;
         }
-        if (peel && tag === G.land) {
-          const shade = Math.floor(t.aux[i] * 4) % 2 ? C.lime : C.moss;
-          for (let q = 0; q < 3; q++) col[o + q] += (shade[q] - col[o + q]) * peel;
-        }
       } else if (tag === G.route) {
         let d = traveller - t.aux[i];
         if (d < 0) d += 1;
         const head = d < 0.1 ? 1 - d / 0.1 : 0;
         for (let q = 0; q < 3; q++) {
           col[o + q] = C.accent[q] * 1.2 + (C.coin[q] * 1.8 - C.accent[q] * 1.2) * head;
-          scl[o + q] *= (1 + head * 0.9) * (1 - peel);
+          scl[o + q] *= 1 + head * 0.9;
         }
       } else if (tag === G.beacon) {
         const lit = g.hover === t.group[i] ? 1 : pulse * 0.4;
         for (let q = 0; q < 3; q++) {
           col[o + q] *= 1 + lit;
-          scl[o + q] *= (1 + lit * 0.4) * (1 - peel);
-        }
-      } else if (tag === G.ocean && peel) {
-        for (let q = 0; q < 3; q++) {
-          col[o + q] += (C.stone[q] * 0.6 - col[o + q]) * peel;
-          scl[o + q] *= 1 + peel * 1.2;
+          scl[o + q] *= 1 + lit * 0.4;
         }
       }
     }
   };
 
+  // On phones the copy sits under the globe and wraps to a different height on every screen, so the
+  // globe is fitted to the gap between the nav and the copy rather than to the screen.
+  let copy: Element | null = null;
+  let floor = 0;
+  const watch = new ResizeObserver(() => {
+    if (copy) floor = copy.getBoundingClientRect().top + scrollY;
+  });
+  const phonePose = () => {
+    if (!copy?.isConnected) {
+      copy = document.querySelector("[data-globe-floor]");
+      watch.disconnect();
+      if (copy) {
+        watch.observe(copy);
+        watch.observe(copy.closest("section")!);
+      }
+    }
+    const top = 64;
+    const bottom = floor || innerHeight / 2;
+    // Pixels per world unit at the globe's depth: camera at z = 12 with a 40° vertical fov, globe at z = -1.5.
+    const unit = innerHeight / (2 * 13.5 * Math.tan(Math.PI / 9));
+    const r = Math.min((bottom - top) * 0.46, innerWidth * 0.44);
+    return pose(0.4, (innerHeight - top - bottom) / 2 / unit, -1.5, tilt, 0, r / (GLOBE_R * unit));
+  };
+
   return {
-    globe: {
-      target: t,
-      // Short phones get a smaller globe so it clears the copy below it.
-      pose: (c) =>
-        c.mobile
-          ? innerHeight < 720
-            ? pose(0.4, 3.1, -1.5, tilt, 0, 0.82)
-            : pose(0.4, 2.75, -1.5, tilt, 0, 1.05)
-          : pose(4.2, -0.1, 0, tilt, 0, 1.6),
-      tick: turnGlobe,
-      animate: (c, pos, col, scl) => place(c, pos, col, scl, 0),
-    },
-    peel: {
-      target: t,
-      pose: (c) => (c.mobile ? pose(0, 2.4, -3, 0.5, 0, 0.9) : pose(4.6, -0.1, -1.5, 0.5, 0, 1.15)),
-      tick: turnGlobe,
-      animate: (c, pos, col, scl) => place(c, pos, col, scl, 1),
-    },
+    target: t,
+    pose: (c) => (c.mobile ? phonePose() : pose(4.2, -0.1, 0, tilt, 0, 1.6)),
+    tick: turnGlobe,
+    animate: place,
   };
 }
 
@@ -622,39 +570,40 @@ function track(n: number): Shot {
   };
 }
 
+/** Voxels for one game cartridge, W x H x 2, centered in its own plane with the label facing +z. */
+function cartridge(W: number, H: number, v: number, body: Rgb, emit: (x: number, y: number, z: number, c: Rgb, label: boolean) => void) {
+  for (let x = 0; x < W; x++) {
+    for (let y = 0; y < H; y++) {
+      // The clipped top-right corner every cartridge has.
+      if (y >= H - 2 && x >= W - 2) continue;
+      for (let d = 0; d < 2; d++) {
+        const label = d === 0 && x >= 1 && x <= W - 2 && y >= Math.round(H * 0.28) && y <= H - 3;
+        const grip = d === 0 && y <= 1 && x % 2 === 1;
+        emit((x - (W - 1) / 2) * v, (y - (H - 1) / 2) * v, -d * v, label ? (y === H - 3 ? body : C.bone) : grip ? C.plastic : body, label);
+      }
+    }
+  }
+}
+
 const CART_RING = 3.1;
-export const CARTS = featured.length;
+export const PROJECTS = projects.length;
+const FEATURED = featured.map((p) => projects.indexOf(p));
 
 /** One cartridge per featured project in a ring that turns with scroll, or swings the hovered one to the front. */
 function carts(n: number): Shot {
   const t = alloc(n);
-  const W = 9;
-  const H = 11;
-  const v = 0.17;
+  const count = FEATURED.length;
   let i = 0;
   featured.forEach((p, k) => {
-    const body = rgb(p.color);
-    const angle = (k / CARTS) * Math.PI * 2;
+    const angle = (k / count) * Math.PI * 2;
     const ca = Math.cos(angle);
     const sa = Math.sin(angle);
-    for (let x = 0; x < W; x++) {
-      for (let y = 0; y < H; y++) {
-        // The clipped top-right corner every cartridge has.
-        if (y >= H - 2 && x >= W - 2) continue;
-        for (let d = 0; d < 2; d++) {
-          const label = d === 0 && x >= 1 && x <= W - 2 && y >= 3 && y <= H - 3;
-          const grip = d === 0 && y <= 1 && x % 2 === 1;
-          const c = label ? (y === H - 3 ? body : C.bone) : grip ? C.plastic : body;
-          const lx = (x - (W - 1) / 2) * v;
-          const ly = (y - (H - 1) / 2) * v;
-          const lz = CART_RING - d * v;
-          put(t, i, lx * ca + lz * sa, ly, -lx * sa + lz * ca, c, v * 0.92);
-          t.tag[i] = label ? TAG.label : TAG.base;
-          t.group[i] = k;
-          i++;
-        }
-      }
-    }
+    cartridge(9, 11, 0.17, rgb(p.color), (x, y, z, c, label) => {
+      put(t, i, x * ca + (CART_RING + z) * sa, y, -x * sa + (CART_RING + z) * ca, c, 0.16);
+      t.tag[i] = label ? TAG.label : TAG.base;
+      t.group[i] = FEATURED[k];
+      i++;
+    });
   });
   hideRest(t, i);
 
@@ -663,8 +612,8 @@ function carts(n: number): Shot {
     target: t,
     pose: (c) => (c.mobile ? pose(0, 2, -6, 0.18, 0, 0.85) : pose(4.5, 0.1, -4, 0.34, 0, 1)),
     tick(c) {
-      const hovered = stage.hoveredProject;
-      const goal = hovered >= 0 ? -(hovered / CARTS) * Math.PI * 2 : -clamp01(c.local * 1.15) * ((CARTS - 1) / CARTS) * Math.PI * 2;
+      const hovered = FEATURED.indexOf(stage.hoveredProject);
+      const goal = hovered >= 0 ? -(hovered / count) * Math.PI * 2 : -clamp01(c.local * 1.15) * ((count - 1) / count) * Math.PI * 2;
       // Take the short way round to a hovered cartridge.
       let d = goal - angle;
       if (hovered >= 0) d = Math.atan2(Math.sin(d), Math.cos(d));
@@ -673,7 +622,7 @@ function carts(n: number): Shot {
     animate(c, pos, col, scl) {
       spinY(pos, t.n, angle);
       let any = 0;
-      for (let k = 0; k < CARTS; k++) any = Math.max(any, c.hover[k]);
+      for (const k of FEATURED) any = Math.max(any, c.hover[k]);
       for (let i = 0; i < t.n; i++) {
         const k = t.group[i];
         if (k < 0) continue;
@@ -686,6 +635,216 @@ function carts(n: number): Shot {
           col[o + q] *= dim * glow;
           scl[o + q] *= 1 + h * 0.08;
         }
+      }
+    },
+  };
+}
+
+// The /projects list order, newest first; the spiral stacks them the same way.
+const SHELF = [...projects].sort((a, b) => b.when - a.when).map((p) => projects.indexOf(p));
+const SPIRAL_STEP = 0.72;
+const SPIRAL_RISE = 0.9;
+
+/**
+ * Every project as a cartridge on a tall spiral. Scrolling the list winds the spiral so the
+ * projects you're reading face you; pointing at one pulls its cartridge out and lights it.
+ */
+function library(n: number): Shot {
+  const t = alloc(n);
+  // As big as the voxel budget allows, same size on screen either way.
+  const [W, H] = [
+    [9, 11],
+    [7, 9],
+    [5, 7],
+  ].find(([w, h]) => SHELF.length * w * h * 2 <= n * 0.95) ?? [5, 7];
+  const v = 1.35 / W;
+  let i = 0;
+  SHELF.forEach((p, k) => {
+    const angle = k * SPIRAL_STEP;
+    const ca = Math.cos(angle);
+    const sa = Math.sin(angle);
+    const lift = -k * SPIRAL_RISE;
+    cartridge(W, H, v, rgb(projects[p].color), (x, y, z, c, label) => {
+      put(t, i, x * ca + (2.6 + z) * sa, y + lift, -x * sa + (2.6 + z) * ca, c, v * 0.92);
+      t.tag[i] = label ? TAG.label : TAG.base;
+      t.group[i] = p;
+      t.aux[i] = k;
+      i++;
+    });
+  });
+  hideRest(t, i);
+
+  let focus = 0;
+  return {
+    target: t,
+    pose: (c) => (c.mobile ? pose(0, 2.4, -3, 0.12, 0, 0.8) : pose(4.4, 0, -1, 0.12, 0, 1.05)),
+    tick(c) {
+      const hovered = SHELF.indexOf(stage.hoveredProject);
+      const goal = hovered >= 0 ? hovered : clamp01(c.local * 1.1 - 0.05) * (SHELF.length - 1);
+      focus += (goal - focus) * (1 - Math.exp(-c.dt * 4));
+    },
+    animate(c, pos, col, scl) {
+      // Wind the spiral so the focused cartridge faces the camera at eye level.
+      spinY(pos, t.n, -focus * SPIRAL_STEP + Math.sin(c.time * 0.4) * 0.08);
+      for (let i = 0; i < t.n; i++) {
+        const k = t.group[i];
+        if (k < 0) continue;
+        const o = i * 3;
+        const h = c.hover[k];
+        const near = Math.max(0, 1 - Math.abs(t.aux[i] - focus) / 3);
+        pos[o + 1] += focus * SPIRAL_RISE;
+        const out = 1 + h * 0.25;
+        pos[o] *= out;
+        pos[o + 2] *= out;
+        const glow = (0.35 + near * 0.75) * (t.tag[i] === TAG.label ? 1 + h : 1 + h * 0.4);
+        for (let q = 0; q < 3; q++) {
+          col[o + q] *= glow;
+          scl[o + q] *= 0.85 + near * 0.15 + h * 0.1;
+        }
+      }
+    },
+  };
+}
+
+/** A project page's own cartridge, big and slowly turning, in that project's color. */
+function monolith(n: number): Shot {
+  const t = alloc(n);
+  const v = 0.14;
+  let i = 0;
+  cartridge(16, 20, v, C.bone, (x, y, z, c, label) => {
+    put(t, i, x, y, z + v / 2, c, v * 0.94);
+    t.tag[i] = label ? TAG.label : TAG.front;
+    // 0 marks body voxels, which take the project's color.
+    t.aux[i] = c === C.bone && !label ? 0 : 1;
+    i++;
+  });
+  // Dust drifting around it.
+  const r = rng(13);
+  for (; i < n; i++) {
+    const a = r() * Math.PI * 2;
+    const rad = 2.6 + r() * 3;
+    put(t, i, Math.cos(a) * rad, (r() - 0.5) * 5, Math.sin(a) * rad, r() > 0.8 ? C.stone : C.dust, 0.025 + r() * 0.03);
+    t.tag[i] = TAG.star;
+  }
+
+  const body: Rgb = [0, 0, 0];
+  let slug: string | null = null;
+  return {
+    target: t,
+    pose: (c) => (c.mobile ? pose(0, 2.4, -3, 0.15, c.time * 0.3, 0.7) : pose(4.9, 0.4, -0.5, 0.15, c.time * 0.3, 1.05)),
+    tick() {
+      if (slug === stage.project) return;
+      slug = stage.project;
+      const p = projects.find((q) => q.slug === slug);
+      body.splice(0, 3, ...rgb(p?.color ?? ACCENT));
+    },
+    animate(c, pos, col) {
+      for (let i = 0; i < t.n; i++) {
+        const o = i * 3;
+        if (t.tag[i] === TAG.star) {
+          pos[o + 1] += Math.sin(c.time * 0.5 + i) * 0.08;
+          continue;
+        }
+        if (t.aux[i] === 0) for (let q = 0; q < 3; q++) col[o + q] = body[q];
+        pos[o + 1] += Math.sin(c.time * 1.2) * 0.06;
+      }
+    },
+  };
+}
+
+// What the camera-roll mosaic cycles through when nobody is pointing at a photo: the scenic ones.
+const SCENIC = ["/photos/the-pru.jpeg", "/photos/deck-12.jpeg", "/photos/rank-1-of-521.jpg", "/photos/strava-harvard-bridge.png"].map(
+  (src) => photos.findIndex((p) => p.src === src),
+);
+
+/**
+ * The camera roll as voxels: whichever photo you point at is rebuilt as a relief mosaic, and it
+ * wipes across to the next one. Photos load small (96px) through the image optimizer, on demand.
+ */
+function mosaic(n: number): Shot {
+  const t = alloc(n);
+  const cols = n >= 3000 ? 64 : 48;
+  const rows = (cols * 3) / 4;
+  const v = 0.1;
+  for (let i = 0; i < n; i++) {
+    const gx = i % cols;
+    const gy = Math.floor(i / cols);
+    put(t, i, (gx - (cols - 1) / 2) * v, ((rows - 1) / 2 - gy) * v, 0, C.dust, i < cols * rows ? v * 0.9 : 0);
+  }
+
+  const loaded = new Map<number, { col: Float32Array; z: Float32Array; on: Float32Array }>();
+  const loading = new Set<number>();
+  const load = (k: number) => {
+    if (k < 0 || loading.has(k)) return;
+    loading.add(k);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = cols;
+      canvas.height = rows;
+      const g = canvas.getContext("2d")!;
+      // Landscape photos cover-crop to 4:3; portrait ones fit whole, or Layla becomes just a nose.
+      const scale = img.height > img.width ? rows / img.height : Math.max(cols / img.width, rows / img.height);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      g.drawImage(img, (cols - w) / 2, (rows - h) / 2, w, h);
+      const data = g.getImageData(0, 0, cols, rows).data;
+      const col = new Float32Array(cols * rows * 3);
+      const z = new Float32Array(cols * rows);
+      const on = new Float32Array(cols * rows);
+      for (let p = 0; p < cols * rows; p++) {
+        const [r, gg, b] = [data[p * 4] / 255, data[p * 4 + 1] / 255, data[p * 4 + 2] / 255];
+        col.set([r ** 2.2 * 1.25, gg ** 2.2 * 1.25, b ** 2.2 * 1.25], p * 3);
+        z[p] = (0.2126 * r + 0.7152 * gg + 0.0722 * b - 0.5) * 0.7;
+        on[p] = data[p * 4 + 3] > 127 ? 1 : 0;
+      }
+      loaded.set(k, { col, z, on });
+    };
+    img.src = `/_next/image?url=${encodeURIComponent(photos[k].src)}&w=96&q=75`;
+  };
+
+  let clock = 0;
+  let cycle = 0;
+  let cycledAt = 0;
+  let cur = -1;
+  let prev = -1;
+  let since = 0;
+  return {
+    target: t,
+    pose: (c) => (c.mobile ? pose(0, 2.6, -2, 0.1, -0.2, 0.62) : pose(4.3, 1, -1, 0.12, -0.35 + Math.sin(c.time * 0.3) * 0.08, 1)),
+    tick(c) {
+      clock += c.dt;
+      if (stage.photo < 0 && clock - cycledAt > 5) {
+        cycle++;
+        cycledAt = clock;
+      }
+      const want = stage.photo >= 0 ? stage.photo : SCENIC[cycle % SCENIC.length];
+      load(want);
+      load(SCENIC[(cycle + 1) % SCENIC.length]);
+      if (want !== cur && loaded.has(want)) {
+        prev = cur;
+        cur = want;
+        since = clock;
+      }
+    },
+    animate(c, pos, col, scl) {
+      const a = loaded.get(prev);
+      const b = loaded.get(cur);
+      for (let p = 0; p < cols * rows && p < t.n; p++) {
+        const o = p * 3;
+        // A wipe from left to right, each column a beat behind the last.
+        const f = b ? smoothstep01((clock - since) * 1.8 - ((p % cols) / cols) * 0.9) : 0;
+        const za = a ? a.z[p] : 0;
+        const zb = b ? b.z[p] : 0;
+        pos[o + 2] = za + (zb - za) * f + Math.sin(f * Math.PI) * 0.4;
+        for (let q = 0; q < 3; q++) {
+          const ca = a ? a.col[o + q] : col[o + q] * (0.6 + 0.4 * Math.sin(c.time * 2 + p * 0.05));
+          const cb = b ? b.col[o + q] : ca;
+          col[o + q] = ca + (cb - ca) * f;
+        }
+        const oa = a ? a.on[p] : 1;
+        const size = v * 0.9 * (oa + ((b ? b.on[p] : oa) - oa) * f) * (1 + Math.sin(f * Math.PI) * 0.4);
+        scl[o] = scl[o + 1] = scl[o + 2] = size;
       }
     },
   };
@@ -930,13 +1089,15 @@ function lost(n: number): Shot {
 
 export function buildShots(n: number): Omit<Record<ShotId, Shot>, "city"> {
   return {
-    ...globeShots(n),
+    globe: globe(n),
     cube: aboutCube(n),
     track: track(n),
     carts: carts(n),
     monogram: monogram(n),
     skyline: skyline(n),
-    shelf: shelfCube(n),
+    library: library(n),
+    monolith: monolith(n),
+    photos: mosaic(n),
     lost: lost(n),
   };
 }
