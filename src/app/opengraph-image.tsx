@@ -14,7 +14,7 @@ const RAD = Math.PI / 180;
 // Turned so Boston and India are both on the near side, with the route between them across the middle.
 const LON0 = 2;
 const LAT0 = 24;
-const R = 250;
+const R = 160;
 const BOX = 1000;
 
 const hex = (c: string) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
@@ -66,11 +66,11 @@ function globe() {
     const [x, y, z] = view(lat, lon);
     if (z < -0.05) continue;
     const k = lambert(x, y, z);
-    if (cell === "U" || cell === "I") square(x, y, z, s * 1.05, shade(ACCENT, k), 3);
+    if (cell === "U" || cell === "I") square(x, y, z, s * 1.05, shade(ACCENT, k), 2);
     else if (cell === "#") {
       const band = Math.max(0, 1 - Math.abs(wy - scan) / 0.07);
       const base = band > 0.3 ? "#ffd23f" : roll > 0.82 ? "#eee7d7" : roll > 0.68 ? "#4f6b2a" : "#c8f03c";
-      square(x, y, z, s, shade(base, k * 0.92), 3);
+      square(x, y, z, s, shade(base, k * 0.92), 2);
     } else square(x, y, z, s * 0.36, shade("#2a2622", 1.5 * k), 0);
   }
 
@@ -83,16 +83,16 @@ function globe() {
       const v = a.map((c, q) => c + (b[q] - c) * f);
       const lift = (1.04 + Math.sin(Math.PI * f) * 0.3) / Math.hypot(v[0], v[1], v[2]);
       const [x, y, z] = v.map((c) => c * lift);
-      if (!visible(x, y, z)) continue;
+      if (z < 0) continue;
       const head = leg === 0 && Math.abs(f - 0.62) < 0.05;
-      square(x, y, z + 2, head ? 9 : 5, head ? "#ffd23f" : ACCENT);
+      square(x, y, z + 2, head ? 6 : 4, head ? "#ffd23f" : ACCENT);
     }
   }
 
   homes.forEach((h) => {
     for (let j = 0; j < 4; j++) {
       const [x, y, z] = view(h.lat, h.lon, 1.03 + j * 0.05);
-      if (z > 0) square(x, y, z + 1, 12 - j * 2, h.code === "BOS" ? "#f1ebdc" : "#ffd23f");
+      if (z > 0) square(x, y, z + 1, 8 - j * 1.5, h.code === "BOS" ? "#f1ebdc" : "#ffd23f");
     }
   });
 
@@ -106,7 +106,7 @@ function globe() {
     const y = y0 * Math.cos(tilt) - z0 * Math.sin(tilt);
     const z = y0 * Math.sin(tilt) + z0 * Math.cos(tilt);
     // Left of the planet is the text column; a satellite there reads as a stray pixel in the copy.
-    if (visible(x, y, z) && x > -1.05) square(x, y, z, 8, k % 4 ? "#eee7d7" : "#ffd23f");
+    if (visible(x, y, z) && x > -1.05) square(x, y, z, 5, k % 4 ? "#eee7d7" : "#ffd23f");
   }
 
   const body = shapes
@@ -135,7 +135,7 @@ export default async function Image() {
         border: "12px solid #2a2622",
       }}
     >
-      <img src={globe()} width={BOX} height={BOX} style={{ position: "absolute", left: 420, top: -160 }} alt="" />
+      <img src={globe()} width={BOX} height={BOX} style={{ position: "absolute", left: 410, top: -185 }} alt="" />
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", padding: 64, width: "100%" }}>
         <div style={{ display: "flex", fontSize: 24, color: ACCENT }}>Open to Spring + Summer 2027 co-ops</div>
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 560 }}>
