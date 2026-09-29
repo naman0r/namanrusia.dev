@@ -17,12 +17,6 @@ const LAT0 = 24;
 const R = 160;
 const BOX = 1000;
 
-const hex = (c: string) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
-const shade = (c: string, k: number) =>
-  `rgb(${hex(c)
-    .map((v) => Math.round(Math.min(255, v * k)))
-    .join(",")})`;
-
 /** Unit-sphere position in view space: x right, y up, z toward the viewer. */
 function view(lat: number, lon: number, r = 1) {
   const la = lat * RAD;
@@ -47,8 +41,6 @@ function globe() {
   };
   // Drawn behind the planet unless it clears the silhouette.
   const visible = (x: number, y: number, z: number) => z >= 0 || Math.hypot(x, y) > 1;
-  const light = [-0.45, 0.55, 0.7];
-  const lambert = (x: number, y: number, z: number) => 0.35 + 0.75 * Math.max(0, x * light[0] + y * light[1] + z * light[2]);
 
   let seed = 7;
   const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
@@ -65,13 +57,12 @@ function globe() {
     const roll = rand();
     const [x, y, z] = view(lat, lon);
     if (z < -0.05) continue;
-    const k = lambert(x, y, z);
-    if (cell === "U" || cell === "I") square(x, y, z, s * 1.05, shade(ACCENT, k), 2);
+    // Flat colors: lighting across a flat projection reads as a gradient, not depth.
+    if (cell === "U" || cell === "I") square(x, y, z, s * 1.05, ACCENT, 2);
     else if (cell === "#") {
       const band = Math.max(0, 1 - Math.abs(wy - scan) / 0.07);
-      const base = band > 0.3 ? "#ffd23f" : roll > 0.82 ? "#eee7d7" : roll > 0.68 ? "#4f6b2a" : "#c8f03c";
-      square(x, y, z, s, shade(base, k * 0.92), 2);
-    } else square(x, y, z, s * 0.36, shade("#2a2622", 1.5 * k), 0);
+      square(x, y, z, s, band > 0.3 ? "#ffd23f" : roll > 0.82 ? "#eee7d7" : roll > 0.68 ? "#4f6b2a" : "#c8f03c", 2);
+    } else square(x, y, z, s * 0.36, "#3f3933");
   }
 
   // US, India, Singapore, Boston, lifted off the surface like the scene's arcs.
