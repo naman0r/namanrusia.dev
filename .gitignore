@@ -24,3 +24,7 @@ npm-debug.log*
 me.md
 public/gallery/
 .worktrees/
+
+# written by `next dev` when a coding agent starts it
+AGENTS.md
+CLAUDE.md

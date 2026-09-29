@@ -222,9 +222,22 @@ export const experience: Org[] = [
     location: "Boston, MA",
     logo: "/logos/c4c.jpg",
     color: "#e8402a",
-    impact: "Pro-bono software for Boston nonprofits: Boston Health Care for the Homeless Program and 826 Boston.",
+    impact: "Pro-bono software for Blue Hill Observatory, Boston Health Care for the Homeless Program and 826 Boston.",
     note: "Pro-bono software consultancy",
     roles: [
+      {
+        title: "Software Developer, Blue Hill Observatory",
+        period: "Sep 2026 — Present",
+        start: 2026.667,
+        end: 2026.75,
+        ongoing: true,
+        points: [
+          "Early days on a new app for Blue Hill Observatory that imports its daily weather-observation spreadsheets into PostgreSQL on AWS RDS.",
+          "Drafted the initial database schema: uploads, daily, hourly and scheduled observations, historical daily records and an audit log.",
+        ],
+        tech: ["TypeScript", "NestJS", "React", "PostgreSQL", "TypeORM", "AWS"],
+        link: "https://github.com/Code-4-Community/bho",
+      },
       {
         title: "Software Developer, BHCHP",
         period: "May — Aug 2026",
