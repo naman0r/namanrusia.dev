@@ -25,7 +25,7 @@ export function ProjectCard({ project: p }: { project: Project }) {
         {p.video ? (
           <video src={p.video} poster={p.image} autoPlay muted loop playsInline className="absolute inset-0 size-full object-cover" aria-hidden />
         ) : p.image ? (
-          <Image src={p.image} alt="" fill sizes="(min-width: 640px) 320px, 100vw" className="object-cover object-top" />
+          <Image src={p.image} alt="" fill sizes="(min-width: 640px) 320px, 100vw" className="object-cover object-left-top" />
         ) : (
           <PixelPlaceholder seed={p.slug} color={p.color} label={p.title} />
         )}

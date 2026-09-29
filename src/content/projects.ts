@@ -156,6 +156,7 @@ export const projects: Project[] = [
       { label: "GitHub", href: "https://github.com/naman0r/dockmaster" },
     ],
     image: "/projects/dockmaster-harbor.webp",
+    video: "/projects/dockmaster-film.mp4",
     gallery: [
       { src: "/projects/dockmaster-harbor.webp", caption: "Harbor: one live card per module plus system vitals" },
       { src: "/projects/dockmaster-ports.webp", caption: "Ports: every listening dev server, with a guarded stop" },
@@ -266,6 +267,7 @@ export const projects: Project[] = [
       { label: "GitHub", href: "https://github.com/naman0r/canvas-buddy" },
       { label: "Homebrew tap", href: "https://github.com/naman0r/homebrew-tap" },
     ],
+    image: "/projects/canvas-buddy-ask.gif",
     color: "#3ccf7e",
     problem: [
       'Finding one policy or deadline means opening a dozen Canvas tabs. Canvas Buddy keeps a local cache of your classes and lets you ask things like "When is the midterm? Cite the syllabus."',
