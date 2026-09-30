@@ -82,7 +82,7 @@ export const about = {
   paragraphs: [
     "I'm Naman. I grew up in India and Singapore, and now live in Boston, where I study Computer Science and Business at Northeastern.",
     "I got into software during my first semester of college. Since then, I've worked at startups, Philips, and Sonos, and a lot of side projects. Lately, I've been interested in backend systems and tools that make building software easier.",
-    "At school, I run TAMID's software engineering track, teach, and build software for nonprofits through Code4Community. Outside of that, I like playing guitar, music, lifting, and Clash Royale.",
+    "At school, Director of Software Engineering at TAMID, and developer at Code4Community (pro bono Software for non profits). Outside of that, I like playing guitar, music, lifting, and Clash Royale.",
   ],
 };
 
