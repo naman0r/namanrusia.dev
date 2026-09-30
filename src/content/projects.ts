@@ -1,4 +1,9 @@
-export type Status = "Live" | "Shipped" | "In progress" | "Released" | "Archived";
+export type Status =
+  | "Live"
+  | "Shipped"
+  | "In progress"
+  | "Released"
+  | "Archived";
 
 export type Feature = { title: string; body: string };
 
@@ -74,7 +79,12 @@ export const projects: Project[] = [
     ],
     image: "/projects/tandemcode.png",
     video: "/projects/tandemcode-loop.mp4",
-    gallery: [{ src: "/projects/tandemcode-mascot.png", caption: "The mascot, which is also the README logo" }],
+    gallery: [
+      {
+        src: "/projects/tandemcode-mascot.png",
+        caption: "The mascot, which is also the README logo",
+      },
+    ],
     color: "#4f8bff",
     problem: [
       "As an underclassman it's hard to find peers who want to do mock interviews or practice DSA in a pair. TandemCode is a place to find a partner at your level and actually practice together.",
@@ -99,8 +109,14 @@ export const projects: Project[] = [
           title: "Complexity estimates",
           body: "An accepted run can be rerun on growing inputs to estimate its time complexity, measured as CPU time from outside the program and fitted to a power of n.",
         },
-        { title: "Replay", body: "The code as it was typed, the chat and every run, played back after the room closes." },
-        { title: "Problems by pull request", body: "Each problem is a SQL migration, so contributing one is a PR." },
+        {
+          title: "Replay",
+          body: "The code as it was typed, the chat and every run, played back after the room closes.",
+        },
+        {
+          title: "Problems by pull request",
+          body: "Each problem is a SQL migration, so contributing one is a PR.",
+        },
       ],
     },
     architecture: [
@@ -143,25 +159,51 @@ export const projects: Project[] = [
     when: 2026.72,
     featured: true,
     highlights: [
-      "Watches 10 coding agents, from Claude Code to Codex, and cleans up the servers they leave behind",
+      "A workhorse productivity and observability tool for serious developers.",
+      "Watches your agents, from Claude Code to Codex, and cleans up the servers they leave behind",
       "Guarded kills: tree-kill, confirmed SIGKILL and PID-reuse protection",
       "Manages other Macs over your own SSH; nothing leaves your machines",
     ],
     kind: "Local Next.js dev dashboard, macOS, MIT",
     role: "Creator",
     team: "Solo project",
-    stack: ["Next.js", "SSH", "Docker API", "launchctl", "lsof / ps", "TypeScript", "Node 20"],
+    stack: [
+      "Next.js",
+      "SSH",
+      "Docker API",
+      "launchctl",
+      "lsof / ps",
+      "TypeScript",
+      "Node 20",
+    ],
     links: [
-      { label: "trydockmaster.vercel.app", href: "https://trydockmaster.vercel.app/" },
+      {
+        label: "trydockmaster.vercel.app",
+        href: "https://trydockmaster.vercel.app/",
+      },
       { label: "GitHub", href: "https://github.com/naman0r/dockmaster" },
     ],
     image: "/projects/dockmaster-harbor.webp",
     video: "/projects/dockmaster-film.mp4",
     gallery: [
-      { src: "/projects/dockmaster-harbor.webp", caption: "Harbor: one live card per module plus system vitals" },
-      { src: "/projects/dockmaster-ports.webp", caption: "Ports: every listening dev server, with a guarded stop" },
-      { src: "/projects/dockmaster-repos.webp", caption: "Repos: dirty files, ahead/behind and stale branches under your dev root" },
-      { src: "/projects/dockmaster-receipt.webp", caption: "Receipt: the last seven days of agent work as a shareable image" },
+      {
+        src: "/projects/dockmaster-harbor.webp",
+        caption: "Harbor: one live card per module plus system vitals",
+      },
+      {
+        src: "/projects/dockmaster-ports.webp",
+        caption: "Ports: every listening dev server, with a guarded stop",
+      },
+      {
+        src: "/projects/dockmaster-repos.webp",
+        caption:
+          "Repos: dirty files, ahead/behind and stale branches under your dev root",
+      },
+      {
+        src: "/projects/dockmaster-receipt.webp",
+        caption:
+          "Receipt: the last seven days of agent work as a shareable image",
+      },
     ],
     color: "#5ec8ff",
     problem: [
@@ -190,7 +232,10 @@ export const projects: Project[] = [
           title: "Receipt",
           body: "The last seven days as a shareable receipt: sessions per agent, tokens, lines changed, cost, and what Dockmaster stopped, removed and reclaimed.",
         },
-        { title: "Remote Macs", body: "Works on a homelab over your own SSH. Nothing leaves your machines." },
+        {
+          title: "Remote Macs",
+          body: "Works on a homelab over your own SSH. Nothing leaves your machines.",
+        },
       ],
     },
     architecture: [
@@ -201,7 +246,8 @@ export const projects: Project[] = [
   {
     slug: "git-interviewer",
     title: "Git Interviewer",
-    tagline: "A pre-commit hook that interviews you about your code before letting you commit.",
+    tagline:
+      "A pre-commit hook that interviews you about your code before letting you commit.",
     summary:
       "Before each commit it reads your staged diff, asks interview-style questions in a persona of your choice, and won't let the commit through without a real answer.",
     status: "Released",
@@ -212,7 +258,10 @@ export const projects: Project[] = [
     team: "Weekend project",
     stack: ["Python", "Git hooks", "PyPI", "Rich", "OpenAI API"],
     links: [
-      { label: "PyPI v1.0.0", href: "https://pypi.org/project/git-interviewer/1.0.0/" },
+      {
+        label: "PyPI v1.0.0",
+        href: "https://pypi.org/project/git-interviewer/1.0.0/",
+      },
       { label: "GitHub", href: "https://github.com/naman0r/git-interviewer" },
     ],
     image: "/projects/git-interviewer.png",
@@ -223,10 +272,22 @@ export const projects: Project[] = [
     built: {
       intro: "Pick who's grilling you:",
       features: [
-        { title: "Nice", body: "Supportive engineer who wants clarity and understanding." },
-        { title: "Grumpy", body: "Tired senior dev who has seen too much. Very picky." },
-        { title: "Systems", body: "Asks about architecture, scaling, risk and tradeoffs." },
-        { title: "Founder", body: "Focuses on product impact and iteration speed." },
+        {
+          title: "Nice",
+          body: "Supportive engineer who wants clarity and understanding.",
+        },
+        {
+          title: "Grumpy",
+          body: "Tired senior dev who has seen too much. Very picky.",
+        },
+        {
+          title: "Systems",
+          body: "Asks about architecture, scaling, risk and tradeoffs.",
+        },
+        {
+          title: "Founder",
+          body: "Focuses on product impact and iteration speed.",
+        },
       ],
     },
     architecture: [
@@ -247,7 +308,8 @@ export const projects: Project[] = [
   {
     slug: "canvas-buddy",
     title: "Canvas Buddy",
-    tagline: "Ask questions about your Canvas classes from a small terminal app.",
+    tagline:
+      "Ask questions about your Canvas classes from a small terminal app.",
     summary:
       "A terminal app that syncs your Canvas courses locally, answers questions with links back to the source, and shows syllabi, assignments, grades and files without a dozen tabs.",
     status: "Released",
@@ -262,10 +324,24 @@ export const projects: Project[] = [
     kind: "Terminal app, MIT, Homebrew",
     role: "Creator",
     team: "Solo project",
-    stack: ["Python 3.11", "MCP", "SQLite FTS5", "Ollama", "Textual", "HTTPX", "Canvas API", "Codex CLI", "OpenCode", "Homebrew"],
+    stack: [
+      "Python 3.11",
+      "MCP",
+      "SQLite FTS5",
+      "Ollama",
+      "Textual",
+      "HTTPX",
+      "Canvas API",
+      "Codex CLI",
+      "OpenCode",
+      "Homebrew",
+    ],
     links: [
       { label: "GitHub", href: "https://github.com/naman0r/canvas-buddy" },
-      { label: "Homebrew tap", href: "https://github.com/naman0r/homebrew-tap" },
+      {
+        label: "Homebrew tap",
+        href: "https://github.com/naman0r/homebrew-tap",
+      },
     ],
     image: "/projects/canvas-buddy-ask.gif",
     color: "#3ccf7e",
@@ -278,7 +354,10 @@ export const projects: Project[] = [
           title: "Answers with sources",
           body: "Uses your existing Codex or OpenCode CLI login, or a local Ollama model. Replies stream in and link back to the Canvas source.",
         },
-        { title: "Home screen", body: "Upcoming work, what Canvas posted, moved or removed in the last week, and current grades." },
+        {
+          title: "Home screen",
+          body: "Upcoming work, what Canvas posted, moved or removed in the last week, and current grades.",
+        },
         {
           title: "Library and planner",
           body: "Each course laid out the way Canvas does, with a reader that jumps to PDF pages and slides, and a planner of work by day with overdue work first.",
@@ -311,7 +390,14 @@ export const projects: Project[] = [
     when: 2026.68,
     kind: "macOS menu bar app, Apache 2.0",
     role: "Creator",
-    stack: ["Swift 6", "Strict concurrency", "Accessibility API", "Vision / OCR", "Foundation Models", "EventKit"],
+    stack: [
+      "Swift 6",
+      "Strict concurrency",
+      "Accessibility API",
+      "Vision / OCR",
+      "Foundation Models",
+      "EventKit",
+    ],
     links: [{ label: "GitHub", href: "https://github.com/naman0r/Peel" }],
     color: "#e8402a",
     problem: [
@@ -319,8 +405,14 @@ export const projects: Project[] = [
     ],
     built: {
       features: [
-        { title: "Lift and drag", body: "Screen capture, segmentation, hover overlays and transparent PNG drags." },
-        { title: "Tables to CSV", body: "Semantic-first table extraction with CSV drags, and a radial action shelf." },
+        {
+          title: "Lift and drag",
+          body: "Screen capture, segmentation, hover overlays and transparent PNG drags.",
+        },
+        {
+          title: "Tables to CSV",
+          body: "Semantic-first table extraction with CSV drags, and a radial action shelf.",
+        },
         {
           title: "Events to Calendar",
           body: "Extracts text, uses Foundation Models guided generation with deterministic date cross-checks, and opens an editable EventKit confirmation.",
@@ -343,14 +435,19 @@ export const projects: Project[] = [
     kind: "MCP server",
     role: "Creator",
     stack: ["Python", "MCP", "Markdown", "Git"],
-    links: [{ label: "GitHub", href: "https://github.com/naman0r/open-brain-mcp" }],
+    links: [
+      { label: "GitHub", href: "https://github.com/naman0r/open-brain-mcp" },
+    ],
     color: "#b79cff",
     problem: [
       "The vault is the single source of truth: plain markdown in git, hand-editable, with no database and no embeddings. Grep's failure mode is \"no match\", which is legible; vector search's is silent bad recall, which isn't acceptable when the output is a document you're about to send.",
     ],
     built: {
       features: [
-        { title: "Four tools", body: "list_projects, search_context, read_note and write_note." },
+        {
+          title: "Four tools",
+          body: "list_projects, search_context, read_note and write_note.",
+        },
         {
           title: "Containment",
           body: "Every path is resolved and must land inside the vault. Traversal, absolute paths and symlink escapes are refused.",
@@ -359,7 +456,10 @@ export const projects: Project[] = [
           title: "Quarantine",
           body: "Writes only land under generated/ or _inbox/, checked on the resolved path. Curated notes are read-only through MCP.",
         },
-        { title: "Auto-commit", body: "Each write can be committed, so a bad write is one git revert away." },
+        {
+          title: "Auto-commit",
+          body: "Each write can be committed, so a bad write is one git revert away.",
+        },
       ],
     },
   },
@@ -374,8 +474,17 @@ export const projects: Project[] = [
     when: 2025.85,
     kind: "CS4100 final project (group 8), Northeastern",
     team: "Group project",
-    stack: ["Python", "Q-learning", "OpenCV", "PyAutoGUI", "Matplotlib", "BlueStacks"],
-    links: [{ label: "GitHub", href: "https://github.com/naman0r/CS4100-CR-bot" }],
+    stack: [
+      "Python",
+      "Q-learning",
+      "OpenCV",
+      "PyAutoGUI",
+      "Matplotlib",
+      "BlueStacks",
+    ],
+    links: [
+      { label: "GitHub", href: "https://github.com/naman0r/CS4100-CR-bot" },
+    ],
     color: "#4f8bff",
     problem: [
       "Group 8's final project for CS4100 (Foundations of AI) at Northeastern, Fall 2025: an agent that learns to play Clash Royale on an Android emulator, using only what it can see on screen.",
@@ -410,7 +519,16 @@ export const projects: Project[] = [
     period: "Mar 2025 — present",
     when: 2025.2,
     kind: "Full-stack AI platform",
-    stack: ["Next.js", "TypeScript", "RAG", "Vector database", "Tailwind", "Supabase", "Flask / FastAPI", "Google Cloud"],
+    stack: [
+      "Next.js",
+      "TypeScript",
+      "RAG",
+      "Vector database",
+      "Tailwind",
+      "Supabase",
+      "Flask / FastAPI",
+      "Google Cloud",
+    ],
     links: [
       { label: "axiomai.space", href: "https://www.axiomai.space" },
       { label: "GitHub", href: "https://github.com/naman0r/axiomai" },
@@ -422,13 +540,22 @@ export const projects: Project[] = [
     ],
     built: {
       features: [
-        { title: "AI study videos", body: "Turns notes into video explanations so complex topics are easier to understand." },
+        {
+          title: "AI study videos",
+          body: "Turns notes into video explanations so complex topics are easier to understand.",
+        },
         {
           title: "Google Calendar sync",
           body: "Assignments, deadlines and study sessions on your calendar, with reminders and time blocking.",
         },
-        { title: "Mind maps", body: "Generated from your notes to show how concepts connect." },
-        { title: "RAG search", body: "Ask questions about your study material in natural language and get answers from your own notes." },
+        {
+          title: "Mind maps",
+          body: "Generated from your notes to show how concepts connect.",
+        },
+        {
+          title: "RAG search",
+          body: "Ask questions about your study material in natural language and get answers from your own notes.",
+        },
       ],
     },
     architecture: [
@@ -446,9 +573,22 @@ export const projects: Project[] = [
     period: "Mar 2025",
     when: 2025.19,
     kind: "Full-stack web app + Chrome extension",
-    stack: ["React", "Tailwind", "Flask", "Supabase", "Firebase", "JWT", "Chrome Extension API", "Vercel", "Railway"],
+    stack: [
+      "React",
+      "Tailwind",
+      "Flask",
+      "Supabase",
+      "Firebase",
+      "JWT",
+      "Chrome Extension API",
+      "Vercel",
+      "Railway",
+    ],
     links: [
-      { label: "mindfulmomentum.vercel.app", href: "https://mindfulmomentum.vercel.app/" },
+      {
+        label: "mindfulmomentum.vercel.app",
+        href: "https://mindfulmomentum.vercel.app/",
+      },
       { label: "GitHub", href: "https://github.com/naman0r/mindfulmomentum" },
     ],
     image: "/projects/mindfulmomentum.png",
@@ -458,10 +598,22 @@ export const projects: Project[] = [
     ],
     built: {
       features: [
-        { title: "Habit tracking", body: "Adapts to your schedule with personalized insights to help build routines." },
-        { title: "Journaling", body: "Secure journaling with prompts and mood tracking." },
-        { title: "Chrome extension", body: "Focus mode blocks distracting sites; tasks sync across devices." },
-        { title: "Secure by default", body: "JWT auth, encrypted storage and secure API endpoints." },
+        {
+          title: "Habit tracking",
+          body: "Adapts to your schedule with personalized insights to help build routines.",
+        },
+        {
+          title: "Journaling",
+          body: "Secure journaling with prompts and mood tracking.",
+        },
+        {
+          title: "Chrome extension",
+          body: "Focus mode blocks distracting sites; tasks sync across devices.",
+        },
+        {
+          title: "Secure by default",
+          body: "JWT auth, encrypted storage and secure API endpoints.",
+        },
       ],
     },
     architecture: [
@@ -481,8 +633,17 @@ export const projects: Project[] = [
     kind: "Hardware + software, Forge",
     role: "Software lead",
     team: "Team BackBuddy at Forge",
-    stack: ["React Native", "Expo", "Arduino", "Arduino IoT", "Bluetooth HC-05", "Firebase"],
-    links: [{ label: "GitHub", href: "https://github.com/naman0r/backbuddy-app" }],
+    stack: [
+      "React Native",
+      "Expo",
+      "Arduino",
+      "Arduino IoT",
+      "Bluetooth HC-05",
+      "Firebase",
+    ],
+    links: [
+      { label: "GitHub", href: "https://github.com/naman0r/backbuddy-app" },
+    ],
     image: "/projects/backbuddy-app.png",
     color: "#ff8fb8",
     problem: [
@@ -490,10 +651,22 @@ export const projects: Project[] = [
     ],
     built: {
       features: [
-        { title: "Chair attachment", body: "Arduino-based, fits any chair, uses pressure sensors to detect posture." },
-        { title: "Pressure bladders", body: "Inflate and deflate to gently correct posture when you slouch." },
-        { title: "Mobile app", body: "React Native over Bluetooth to track progress, set goals and tune sensitivity." },
-        { title: "Feedback loop", body: "Learns your sitting patterns and adapts." },
+        {
+          title: "Chair attachment",
+          body: "Arduino-based, fits any chair, uses pressure sensors to detect posture.",
+        },
+        {
+          title: "Pressure bladders",
+          body: "Inflate and deflate to gently correct posture when you slouch.",
+        },
+        {
+          title: "Mobile app",
+          body: "React Native over Bluetooth to track progress, set goals and tune sensitivity.",
+        },
+        {
+          title: "Feedback loop",
+          body: "Learns your sitting patterns and adapts.",
+        },
       ],
     },
     architecture: [
@@ -512,7 +685,12 @@ export const projects: Project[] = [
     when: 2026.3,
     kind: "Data dashboard",
     stack: ["React", "Vite", "FastAPI", "Python", "yfinance"],
-    links: [{ label: "GitHub", href: "https://github.com/naman0r/market-sentiment-visualizer" }],
+    links: [
+      {
+        label: "GitHub",
+        href: "https://github.com/naman0r/market-sentiment-visualizer",
+      },
+    ],
     color: "#ff8fb8",
     architecture: [
       "A React (Vite) front end with a sentiment gauge, sparkline cards and an 11-ETF sector heatmap, over a FastAPI backend. The backend exists because browsers block direct calls to most financial endpoints (CORS), so it fetches server-side and proxies.",
@@ -546,7 +724,10 @@ export const projects: Project[] = [
     team: "Oasis group 11",
     stack: ["Selenium", "React", "Firebase", "Flask", "Supabase"],
     links: [
-      { label: "nutrition-oasis.vercel.app", href: "https://nutrition-oasis.vercel.app/" },
+      {
+        label: "nutrition-oasis.vercel.app",
+        href: "https://nutrition-oasis.vercel.app/",
+      },
       { label: "GitHub", href: "https://github.com/Oasis-NEU/sp25-group-11" },
     ],
     image: "/projects/nutrition.png",
@@ -563,7 +744,12 @@ export const projects: Project[] = [
     when: 2025.18,
     kind: "Internal tool",
     stack: ["Supabase", "React", "Flask", "Slack webhooks"],
-    links: [{ label: "GitHub", href: "https://github.com/naman0r/ama-consulting-project" }],
+    links: [
+      {
+        label: "GitHub",
+        href: "https://github.com/naman0r/ama-consulting-project",
+      },
+    ],
     image: "/projects/ama.png",
     color: "#5ec8ff",
   },
@@ -577,7 +763,12 @@ export const projects: Project[] = [
     when: 2025.29,
     kind: "Full-stack web app",
     stack: ["Docker", "Flask", "React", "TypeScript", "MySQL"],
-    links: [{ label: "GitHub", href: "https://github.com/IpDaniel/tanews/tree/naman" }],
+    links: [
+      {
+        label: "GitHub",
+        href: "https://github.com/IpDaniel/tanews/tree/naman",
+      },
+    ],
     image: "/projects/tanews.png",
     color: "#e8402a",
   },
@@ -585,13 +776,16 @@ export const projects: Project[] = [
     slug: "studybuddy",
     title: "StudyBuddy",
     tagline: "University study group connector.",
-    summary: "Connects university students with each other to form study groups.",
+    summary:
+      "Connects university students with each other to form study groups.",
     status: "Shipped",
     period: "Spring 2025",
     when: 2025.28,
     kind: "Full-stack web app",
     stack: ["Streamlit", "MySQL", "Docker", "Flask"],
-    links: [{ label: "GitHub", href: "https://github.com/Arshayp/studybuddy-2" }],
+    links: [
+      { label: "GitHub", href: "https://github.com/Arshayp/studybuddy-2" },
+    ],
     image: "/projects/studybuddy.png",
     color: "#ffd23f",
   },
@@ -599,7 +793,8 @@ export const projects: Project[] = [
     slug: "car2drvr",
     title: "Car2Drvr",
     tagline: "AI car recommendation platform.",
-    summary: "Tailored recommendations for which car to buy based on your needs, with a price range so you don't overpay.",
+    summary:
+      "Tailored recommendations for which car to buy based on your needs, with a price range so you don't overpay.",
     status: "Live",
     period: "Jan 2025",
     when: 2025.05,
@@ -616,7 +811,8 @@ export const projects: Project[] = [
     slug: "mindmapr",
     title: "MindMapr",
     tagline: "AI-powered study tool.",
-    summary: "Generates easy-to-understand visualizations from students' study notes. Authentication and a MongoDB database.",
+    summary:
+      "Generates easy-to-understand visualizations from students' study notes. Authentication and a MongoDB database.",
     status: "Archived",
     period: "Jan — Mar 2025",
     when: 2025.1,
@@ -629,7 +825,8 @@ export const projects: Project[] = [
     slug: "personal-website",
     title: "Personal Website v1",
     tagline: "The first portfolio.",
-    summary: "An interactive portfolio built with React and a lot of animation.",
+    summary:
+      "An interactive portfolio built with React and a lot of animation.",
     status: "Archived",
     period: "Dec 2024",
     when: 2024.95,
@@ -645,15 +842,22 @@ export const projects: Project[] = [
     slug: "donow",
     title: "DoNow!",
     tagline: "To-do list as a Chrome extension.",
-    summary: "A smart, simple to-do list that lives in a Chrome extension. Published on the Chrome Web Store.",
+    summary:
+      "A smart, simple to-do list that lives in a Chrome extension. Published on the Chrome Web Store.",
     status: "Released",
     period: "Nov 2024",
     when: 2024.88,
     kind: "Chrome extension",
     stack: ["HTML", "CSS", "JavaScript"],
     links: [
-      { label: "Chrome Web Store", href: "https://chromewebstore.google.com/detail/donow-to-do-list/ledniccgbjopheokhlcpaajlblopaegf" },
-      { label: "GitHub", href: "https://github.com/naman0r/doNow_chrome_extension" },
+      {
+        label: "Chrome Web Store",
+        href: "https://chromewebstore.google.com/detail/donow-to-do-list/ledniccgbjopheokhlcpaajlblopaegf",
+      },
+      {
+        label: "GitHub",
+        href: "https://github.com/naman0r/doNow_chrome_extension",
+      },
     ],
     image: "/projects/donow-pic.png",
     color: "#e8402a",
