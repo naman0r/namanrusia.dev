@@ -88,25 +88,6 @@
   animation: blink 1s steps(1, end) infinite;
 }
 
-@keyframes letter-drop {
-  0% {
-    transform: translateY(-0.6em);
-    opacity: 0;
-  }
-  60% {
-    transform: translateY(0.06em);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.pixel-letter {
-  animation: letter-drop 420ms steps(5, end) both;
-}
-
 .scene canvas {
   image-rendering: pixelated;
 }
