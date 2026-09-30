@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { profile } from "@/content/profile";
-import { useStage } from "@/lib/stage";
+import { prefersReducedMotion, stage, useStage, type ShotId } from "@/lib/stage";
+import { ACCENT, HEAT } from "@/scene/palette";
 
 // Experience and Projects are real pages, so they get real links everywhere, phones included.
 const LINKS = [
@@ -41,6 +42,223 @@ function Progress() {
   );
 }
 
+const COLS = 13;
+const ROWS = 9;
+/** Rows of room above and below the glyph for pixels arcing between shapes. */
+const PAD = 2;
+/** CSS px per grid cell: a 2px pixel and a 1px gutter. */
+const CELL = 3;
+
+const INK: Record<string, string> = {
+  b: "#eee7d7",
+  s: "#6b6356",
+  a: ACCENT,
+  d: HEAT[1],
+  t: HEAT[3],
+  l: HEAT[4],
+  y: HEAT[5],
+  m: "#4f6b2a",
+  g: "#1fbf6a",
+  r: "#e8402a",
+  o: "#ff7a1a",
+  // The rest are the org colors from the experience timeline.
+  e: "#3ccf7e",
+  v: "#b79cff",
+  c: "#5ec8ff",
+  p: "#ff8fb8",
+  n: "#9fe870",
+};
+
+// Experience's timeline: one bar per org, in its color, roughly where it sits in time.
+const TIMELINE = [
+  "..........bb.",
+  "........aaa..",
+  "..eeeee......",
+  "...yyy.......",
+  "...........vv",
+  "..ccccccccccc",
+  "......rrrrrrr",
+  "ppppp........",
+  "..nnn........",
+];
+
+// One small icon per scene shot, so the bar echoes whatever the big scene is morphing into.
+const SHAPES: Record<ShotId, string[]> = {
+  globe: [
+    "....aaaaa....",
+    "...allaaaa...",
+    "..aalllaaaa..",
+    "..allllaayyyy",
+    "..aayyyyyal..",
+    "yyyyllaaaaa..",
+    "..aaaallaaa..",
+    "...aaalaaa...",
+    "....aaaaa....",
+  ],
+  cube: [
+    "......b......",
+    "....bbbbb....",
+    "..bbbbbbbbb..",
+    "abbbbbbbbbbbd",
+    "aaabbbbbbbddd",
+    "aaaaabbbddddd",
+    "aaaaaabdddddd",
+    ".aaaaaaddddd.",
+    "...aaaaddd...",
+  ],
+  track: TIMELINE,
+  skyline: TIMELINE,
+  carts: [
+    "..bbbbbbbbb..",
+    "..baaaaaaab..",
+    "..bayyyyyab..",
+    "..bayrrryab..",
+    "..baaaaaaab..",
+    "..bbbbbbbbb..",
+    "..b.b.b.b.b..",
+    "...y.y.y.y...",
+    ".............",
+  ],
+  terrain: [
+    "..........yy.",
+    "..........yy.",
+    "....b........",
+    "...bmb....b..",
+    "..mmmmm..bmb.",
+    ".mmgmmmmmmmmm",
+    "mmgggmmgggmmm",
+    "aaaaaaaaaaaaa",
+    "dadaddadaddad",
+  ],
+  city: [
+    ".......y.....",
+    "..l....y.....",
+    "..l....y..t..",
+    "..l.a..y..t..",
+    "t.l.a.ty..t.a",
+    "t.lda.tyl.tda",
+    "tdldaatylatda",
+    "tdldaatylatda",
+    "sssssssssssss",
+  ],
+  // Contact's scene spells NR, but the badge beside this already does, so it gets an envelope.
+  monogram: [
+    "bbbbbbbbbbbbb",
+    "baa.......aab",
+    "b..aa...aa..b",
+    "b....rrr....b",
+    "b.....r.....b",
+    "b...........b",
+    "b.sssss.....b",
+    "b.sss.......b",
+    "bbbbbbbbbbbbb",
+  ],
+  library: [
+    ".............",
+    "....y......a.",
+    "..g.y.p..b.a.",
+    "a.g.ytp..boa.",
+    "arg.ytpl.boav",
+    "arg.ytpl.boav",
+    "arg.ytpl.boav",
+    "arg.ytpl.boav",
+    "sssssssssssss",
+  ],
+  monolith: [
+    "..b.........b",
+    ".....add.....",
+    "b....add.....",
+    ".....add..b..",
+    ".....add.....",
+    ".....add.....",
+    ".....add.....",
+    "sssssssssssss",
+    ".............",
+  ],
+  lost: [
+    "....yyyy.....",
+    "...yy..yy....",
+    ".......yy....",
+    "......yy.....",
+    ".....yy......",
+    ".....yy......",
+    ".............",
+    ".....yy......",
+    ".............",
+  ],
+};
+
+type Px = [x: number, y: number, r: number, g: number, b: number];
+
+const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+const lit = Object.fromEntries(
+  Object.entries(SHAPES).map(([id, rows]) => {
+    const pts = rows.flatMap((row, y) =>
+      [...row].flatMap((c, x) => (c === "." ? [] : [[x, y + PAD, ...rgb(INK[c])] as Px])),
+    );
+    // Pairing pixels in angle order makes every morph swirl instead of sliding sideways.
+    const angle = ([x, y]: Px) => Math.atan2(y - PAD - (ROWS - 1) / 2, x - (COLS - 1) / 2);
+    return [id, pts.sort((a, b) => angle(a) - angle(b))];
+  }),
+) as Record<ShotId, Px[]>;
+const N = Math.max(...Object.values(lit).map((p) => p.length));
+/** Every shape stretched to N pixels; smaller shapes stack a few pixels on one cell. */
+const GLYPHS = Object.fromEntries(
+  Object.entries(lit).map(([id, pts]) => [id, Array.from({ length: N }, (_, i) => pts[Math.floor((i * pts.length) / N)])]),
+) as Record<ShotId, Px[]>;
+
+/**
+ * A pixel sprite scrubbed by the same scroll position as the scene: its pixels swarm from one
+ * shot's icon to the next, trading colors on the way, with a slow scan across it at rest.
+ */
+function Sprite() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = ref.current!;
+    const dpr = window.devicePixelRatio;
+    canvas.width = COLS * CELL * dpr;
+    canvas.height = (ROWS + PAD * 2) * CELL * dpr;
+    const ctx = canvas.getContext("2d")!;
+    ctx.scale(dpr, dpr);
+    const still = prefersReducedMotion();
+    // Drawn pixels chase the scrubbed ones, which smooths page changes where shots swap outright.
+    const drawn = GLYPHS[stage.shots[0]].map((p) => [...p]);
+    let raf = 0;
+    const tick = (time: number) => {
+      const last = stage.shots.length - 1;
+      const i = Math.min(Math.floor(stage.position), last);
+      const f = stage.position - i;
+      const from = GLYPHS[stage.shots[i]];
+      const to = GLYPHS[stage.shots[Math.min(i + 1, last)]];
+      const scan = still ? -1 : Math.floor(time / 70) % 50;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let k = 0; k < N; k++) {
+        const seed = ((k * 37) % N) / N;
+        // Staggered departures, and each pixel arcs up or down on the way.
+        const t = Math.min(1, Math.max(0, f * 1.6 - seed * 0.6));
+        const e = t * t * (3 - 2 * t);
+        const p = drawn[k];
+        for (let j = 0; j < 5; j++) {
+          const target = from[k][j] + (to[k][j] - from[k][j]) * e + (j === 1 ? Math.sin(Math.PI * t) * (seed * 2 - 1) * 1.8 : 0);
+          p[j] += (target - p[j]) * 0.18;
+        }
+        // The scan lifts each column toward white as it passes.
+        const lift = Math.round(p[0]) === scan ? 0.5 : 0;
+        const [r, g, b] = [p[2], p[3], p[4]].map((v) => Math.round(v + (255 - v) * lift));
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(Math.round(p[0] * CELL), Math.round(p[1] * CELL), CELL - 1, CELL - 1);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return (
+    <canvas ref={ref} aria-hidden style={{ width: COLS * CELL, height: (ROWS + PAD * 2) * CELL }} />
+  );
+}
+
 export function Nav() {
   const pathname = usePathname();
   const { section } = useStage();
@@ -55,6 +273,11 @@ export function Nav() {
           </span>
           <span className="label hidden text-bone lg:inline">{profile.name}</span>
         </Link>
+
+        {/* Phones have no gap to fill: the badge sits right against the links. */}
+        <div className="max-sm:hidden">
+          <Sprite />
+        </div>
 
         <ul className="ml-auto flex items-center gap-0.5 sm:gap-1">
           {LINKS.map((l, i) => {
