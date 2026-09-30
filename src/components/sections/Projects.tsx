@@ -6,7 +6,14 @@ import { featured, projects } from "@/content/projects";
 export function Projects() {
   return (
     <Section id="projects" shot="carts" className="py-28 md:py-40">
-      <Heading id="projects" index="03" title="Projects" href="/projects" cta={`All ${projects.length} projects`} tone="coin" />
+      <Heading
+        id="projects"
+        index="03"
+        title="Projects"
+        href="/projects"
+        cta={`All ${projects.length} projects`}
+        tone="coin"
+      />
       <div className="space-y-5 lg:w-[62%]">
         {featured.map((p) => (
           <ProjectCard key={p.slug} project={p} />
@@ -17,7 +24,7 @@ export function Projects() {
           Browse all {projects.length} projects
         </CtaLink>
         <p className="text-sm text-dust">
-          {projects.length - featured.length} more, from a Clash Royale RL bot to a Chrome extension on the Web Store.
+          view more cool things and software I've built
         </p>
       </div>
     </Section>

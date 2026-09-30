@@ -7,7 +7,7 @@ export const profile = {
   resume: "/resume.pdf",
   status: "Open to Spring 2027 and Summer 2027 co-ops and internships",
   // From the note on the old /more page.
-  motto: "I like building cool stuff and working on interesting problems",
+  motto: "I like Building, Iterating and shipping software to effect impact",
   links: {
     github: "https://github.com/naman0r",
     linkedin: "https://linkedin.com/in/namanrusia",
@@ -82,7 +82,7 @@ export const about = {
   paragraphs: [
     "I'm Naman. I grew up in India and Singapore, and now live in Boston, where I study Computer Science and Business at Northeastern.",
     "I got into software during my first semester of college. Since then, I've worked at startups, Philips, and Sonos, and a lot of side projects. Lately, I've been interested in backend systems and tools that make building software easier.",
-    "At school, I run TAMID's software engineering track, teach, and build software for nonprofits through Code4Community. Outside of that, I like playing guitar, music, lifting, and Clash Royale.",
+    "At school, Director of Software Engineering at TAMID, and developer at Code4Community (pro bono Software for non profits). Outside of that, I like playing guitar, music, lifting, and Clash Royale.",
   ],
 };
 
@@ -90,14 +90,14 @@ export const about = {
 export const photos = [
   {
     src: "/photos/skydiving.jpg",
-    name: "13000ft.jpg",
+    name: "8500.jpg",
     alt: "Naman tandem skydiving",
     w: 1600,
     h: 736,
   },
   {
     src: "/photos/hk.jpeg",
-    name: "the-peak.jpeg",
+    name: "hk.jpeg",
     alt: "Naman at The Peak in Hong Kong, the skyline behind",
     w: 1024,
     h: 768,
@@ -111,42 +111,42 @@ export const photos = [
   },
   {
     src: "/photos/big-buddha.jpg",
-    name: "big-buddha.jpg",
+    name: "hk2.jpg",
     alt: "Naman at the gate below the Big Buddha in Hong Kong",
     w: 1600,
     h: 1200,
   },
   {
     src: "/photos/rank-1-of-521.jpg",
-    name: "rank-1-of-521.png",
+    name: "slitherio.png",
     alt: "A slither.io leaderboard showing rank 1 of 521",
     w: 1600,
     h: 736,
   },
   {
     src: "/photos/mom.jpeg",
-    name: "mom.jpeg",
+    name: "maldives.jpeg",
     alt: "Naman and Mom in a golf cart by the beach",
     w: 1024,
     h: 768,
   },
   {
     src: "/photos/dab.jpeg",
-    name: "louvre-2016.jpeg",
+    name: "louvre.jpeg",
     alt: "A young Naman posing in front of the Louvre pyramid",
     w: 665,
     h: 1182,
   },
   {
     src: "/photos/the-pru.jpeg",
-    name: "the-pru.jpeg",
+    name: "boston.jpeg",
     alt: "Boston skyline at dusk with the Prudential Tower",
     w: 1600,
     h: 1200,
   },
   {
     src: "/photos/sid2.jpeg",
-    name: "sid-again.jpeg",
+    name: "singapore.jpeg",
     alt: "Naman and a friend at a table at night in George Town",
     w: 1024,
     h: 768,
@@ -160,7 +160,7 @@ export const photos = [
   },
   {
     src: "/photos/strava-harvard-bridge.png",
-    name: "long_walks.jpeg",
+    name: "out_walking.jpeg",
     alt: "A Strava route across the Harvard Bridge from Cambridge into Boston",
     w: 982,
     h: 616,

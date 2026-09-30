@@ -11,8 +11,16 @@ import { profile } from "@/content/profile";
 import { siteUrl } from "@/lib/config";
 import "./globals.css";
 
-const departure = localFont({ src: "../fonts/DepartureMono-Regular.woff2", variable: "--font-departure", display: "swap" });
-const schibsted = Schibsted_Grotesk({ variable: "--font-schibsted", subsets: ["latin"], display: "swap" });
+const departure = localFont({
+  src: "../fonts/DepartureMono-Regular.woff2",
+  variable: "--font-departure",
+  display: "swap",
+});
+const schibsted = Schibsted_Grotesk({
+  variable: "--font-schibsted",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const description =
   "Naman Rusia: software engineer on backend, cloud and systems. CS + Business at Northeastern. Previously Sonos and Philips Healthcare.";
@@ -23,12 +31,20 @@ export const metadata: Metadata = {
   description,
   authors: [{ name: profile.name, url: siteUrl }],
   // Pages other than home set their own openGraph, which replaces this one wholesale.
-  openGraph: { type: "website", siteName: profile.name, title: profile.name, description },
+  openGraph: {
+    type: "website",
+    siteName: profile.name,
+    title: profile.name,
+    description,
+  },
   twitter: { card: "summary_large_image", creator: "@namanrusia1" },
   alternates: { canonical: "/" },
 };
 
-export const viewport: Viewport = { themeColor: "#0c0b0a", colorScheme: "dark" };
+export const viewport: Viewport = {
+  themeColor: "#0c0b0a",
+  colorScheme: "dark",
+};
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -41,7 +57,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <SceneMount />
-        <div aria-hidden className="dot-grid pointer-events-none fixed inset-0 z-0 opacity-40" />
+        <div
+          aria-hidden
+          className="dot-grid pointer-events-none fixed inset-0 z-0 opacity-40"
+        />
         <ScrollStage />
         <Shortcuts />
         <Terminal />

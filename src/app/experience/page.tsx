@@ -6,13 +6,18 @@ import { Gantt } from "@/components/Gantt";
 import { experience, monthYear, TIMELINE_START } from "@/content/experience";
 import { education, profile, skills } from "@/content/profile";
 
-const description = "Every internship, studio and campus role, and what I built in each.";
+const description =
+  "Every internship, studio and campus role, and what I built in each.";
 
 export const metadata: Metadata = {
   title: "Experience",
   description,
   alternates: { canonical: "/experience" },
-  openGraph: { title: "Experience · Naman Rusia", description, url: "/experience" },
+  openGraph: {
+    title: "Experience · Naman Rusia",
+    description,
+    url: "/experience",
+  },
 };
 
 export default function ExperiencePage() {
@@ -28,10 +33,12 @@ export default function ExperiencePage() {
           <p className="label text-dust">
             <span className="text-accent">02</span> · Full timeline
           </p>
-          <h1 className="font-display mt-3 text-[clamp(3rem,10vw,7.5rem)] text-bone">Experience</h1>
+          <h1 className="font-display mt-3 text-[clamp(3rem,10vw,7.5rem)] text-bone">
+            Experience
+          </h1>
           <p className="mt-5 max-w-2xl text-lg text-dust">
-            {experience.length} teams and {roles} roles since {monthYear(TIMELINE_START)}: internships first, then Sideband, where a few
-            friends and I build things together, then everything on campus. The skyline behind this page is the same timeline in voxels.
+            Stuff I have done at my previus Internships, and work for Student
+            organizations at Northeastern and beyond!
           </p>
         </header>
 
@@ -39,10 +46,19 @@ export default function ExperiencePage() {
           <Gantt />
           <ExperienceLog />
 
-          <section aria-labelledby="edu-title" className="grid gap-6 border-2 border-bone bg-coal p-6 md:grid-cols-[180px_1fr] md:gap-8">
+          <section
+            aria-labelledby="edu-title"
+            className="grid gap-6 border-2 border-bone bg-coal p-6 md:grid-cols-[180px_1fr] md:gap-8"
+          >
             <div className="flex items-start gap-3 md:flex-col">
               <span className="grid size-11 place-items-center bg-bone p-1.5">
-                <Image src={education.logo} alt="" width={32} height={32} className="size-8 object-contain" />
+                <Image
+                  src={education.logo}
+                  alt=""
+                  width={32}
+                  height={32}
+                  className="size-8 object-contain"
+                />
               </span>
               <div>
                 <p className="label text-accent">Home base</p>
@@ -52,19 +68,27 @@ export default function ExperiencePage() {
               </div>
             </div>
             <div>
-              <p className="text-lg font-semibold text-bone">{education.degree}</p>
+              <p className="text-lg font-semibold text-bone">
+                {education.degree}
+              </p>
               <p className="label mt-1 text-[10px] leading-relaxed text-dust">
-                {education.location} · Expected {education.graduation} · GPA {education.gpa} · {education.honors.join(", ")}
+                {education.location} · Expected {education.graduation} · GPA{" "}
+                {education.gpa} · {education.honors.join(", ")}
               </p>
               <p className="label mt-5 text-[10px] text-dust">Coursework</p>
               <ul className="mt-2 flex flex-wrap gap-1.5">
                 {education.courses.map((c) => (
-                  <li key={c} className="border border-line px-2 py-0.5 text-[13px] text-bone/80">
+                  <li
+                    key={c}
+                    className="border border-line px-2 py-0.5 text-[13px] text-bone/80"
+                  >
                     {c}
                   </li>
                 ))}
               </ul>
-              <p className="mt-4 text-sm text-dust">Before that: {education.highSchool}.</p>
+              <p className="mt-4 text-sm text-dust">
+                Before that: {education.highSchool}.
+              </p>
             </div>
           </section>
 
@@ -74,7 +98,10 @@ export default function ExperiencePage() {
             </h2>
             <dl className="space-y-3 border-t-2 border-line pt-4">
               {skills.map((g) => (
-                <div key={g.group} className="grid gap-1 md:grid-cols-[140px_1fr]">
+                <div
+                  key={g.group}
+                  className="grid gap-1 md:grid-cols-[140px_1fr]"
+                >
                   <dt className="label text-dust">{g.group}</dt>
                   <dd className="text-bone/85">{g.items.join(" · ")}</dd>
                 </div>

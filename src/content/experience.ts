@@ -38,7 +38,8 @@ export const experience: Org[] = [
     location: "Boston, MA",
     logo: "/logos/sonos.png",
     color: "#eee7d7",
-    impact: "Built 3 features from the ground up in the Sonos iOS app, a surface serving 10M+ DAUs.",
+    impact:
+      "Built 3 features from the ground up in the Sonos iOS app, a surface serving 10M+ DAUs.",
     roles: [
       {
         title: "Software Engineering Intern, iOS App Experience",
@@ -49,7 +50,15 @@ export const experience: Org[] = [
           "Owned a core latency-sensitive iOS feature end to end: architecture, tests, telemetry and staged rollout for a real-time suggestion layer on a high-traffic surface.",
           "Built a reusable framework for detecting and presenting device, connectivity, configuration and network-topology issues across multi-device setups, and the user-facing UI with UX, serving 10M+ DAUs.",
         ],
-        tech: ["Swift", "SwiftUI", "UIKit", "Swift Concurrency", "Combine", "Snowflake", "REST APIs"],
+        tech: [
+          "Swift",
+          "SwiftUI",
+          "UIKit",
+          "Swift Concurrency",
+          "Combine",
+          "Snowflake",
+          "REST APIs",
+        ],
         link: "https://lnkd.in/p/eqp8QR2B",
       },
     ],
@@ -62,7 +71,8 @@ export const experience: Org[] = [
     location: "Cambridge, MA",
     logo: "/logos/philips.png",
     color: "#4f8bff",
-    impact: "Automated PIC iX hospital deployments up to 2,550 beds, cutting setup from 100+ hours to 2 hours.",
+    impact:
+      "Automated PIC iX hospital deployments up to 2,550 beds, cutting setup from 100+ hours to 2 hours.",
     roles: [
       {
         title: "Software Engineering Co-op, Systems Integration & Automation",
@@ -75,7 +85,16 @@ export const experience: Org[] = [
           "Maintained and extended the internal Deployment Manager (PostgreSQL, React, FastAPI, Python multithreading), improving orchestration, concurrency handling and network reliability.",
           "Extended deployment automation from VMs to bare metal through a FOG/PXE network-boot path wired into the existing FastAPI service.",
         ],
-        tech: ["FastAPI", "Python", "PowerShell", "C#", ".NET", "TimescaleDB", "FOG/PXE", "Distributed Systems"],
+        tech: [
+          "FastAPI",
+          "Python",
+          "PowerShell",
+          "C#",
+          ".NET",
+          "TimescaleDB",
+          "FOG/PXE",
+          "Distributed Systems",
+        ],
       },
     ],
   },
@@ -87,7 +106,8 @@ export const experience: Org[] = [
     location: "Boston, MA",
     logo: "/logos/auribus.jpg",
     color: "#3ccf7e",
-    impact: "Hearing assessment at 95% accuracy in preliminary evaluations; FDA-compliant Rx iOS app used by 60+ clinical researchers.",
+    impact:
+      "Hearing assessment at 95% accuracy in preliminary evaluations; FDA-compliant Rx iOS app used by 60+ clinical researchers.",
     note: "Part-time",
     roles: [
       {
@@ -112,7 +132,8 @@ export const experience: Org[] = [
     location: "Remote",
     logo: "/logos/venu.png",
     color: "#ffd23f",
-    impact: "YC W21 startup. Core CRM workflows and async job pipelines; cut latency on high-volume endpoints by up to 70%.",
+    impact:
+      "YC W21 startup. Core CRM workflows and async job pipelines; cut latency on high-volume endpoints by up to 70%.",
     note: "Y Combinator W21 · part-time",
     roles: [
       {
@@ -138,7 +159,8 @@ export const experience: Org[] = [
     location: "Boston, MA",
     logo: "/logos/sideband.png",
     color: "#b79cff",
-    impact: "A few friends and I building cool stuff together: display streaming, media pipelines and web products.",
+    impact:
+      "A few friends and I building cool stuff together: display streaming, media pipelines and web products.",
     note: "A few friends building things together",
     roles: [
       {
@@ -165,7 +187,7 @@ export const experience: Org[] = [
     logo: "/logos/tamid.jpg",
     color: "#5ec8ff",
     impact:
-      "Director of Software. Before that: a quant research platform for a Boston hedge fund, and tech lead for a hotel-pricing startup.",
+      "Director of Software. Before that: a quant research platform for a Boston hedge fund, and tech lead for a hotel-pricing startup, SWEF instructor.",
     roles: [
       {
         title: "Director of Software",
@@ -173,7 +195,9 @@ export const experience: Org[] = [
         start: 2026.5,
         end: 2026.75,
         ongoing: true,
-        points: ["Runs the Software Engineering track (formerly Tech Consulting)."],
+        points: [
+          "Working with Movo to build integrate warehouse cameras into one seamless tracking system",
+        ],
         tech: [],
         link: "https://www.nutamidtech.org/",
       },
@@ -192,7 +216,9 @@ export const experience: Org[] = [
         period: "Jan — Jul 2026",
         start: 2026.0,
         end: 2026.583,
-        points: ["Taught the Tech Consulting Foundations curriculum to 15+ students."],
+        points: [
+          "Taught the Tech Consulting Foundations curriculum to 15+ students.",
+        ],
         tech: [],
       },
       {
@@ -200,7 +226,9 @@ export const experience: Org[] = [
         period: "Sep — Dec 2025",
         start: 2025.667,
         end: 2026.0,
-        points: ["Led Foresight, working with a startup in an agile setup to give boutique hotels real-time pricing insights."],
+        points: [
+          "Led Foresight, working with a startup in an agile setup to give boutique hotels real-time pricing insights.",
+        ],
         tech: ["FastAPI", "PostgreSQL", "Neon", "Next.js", "CI/CD", "RAG"],
         link: "https://foresight-tamid.vercel.app/about",
       },
@@ -222,9 +250,31 @@ export const experience: Org[] = [
     location: "Boston, MA",
     logo: "/logos/c4c.jpg",
     color: "#e8402a",
-    impact: "Pro-bono software for Boston nonprofits: Boston Health Care for the Homeless Program and 826 Boston.",
+    impact:
+      "Pro-bono software for Blue Hill Observatory, Boston Health Care for the Homeless Program and 826 Boston.",
     note: "Pro-bono software consultancy",
     roles: [
+      {
+        title: "Software Developer, Blue Hill Observatory",
+        period: "Sep 2026 — Present",
+        start: 2026.667,
+        end: 2026.75,
+        ongoing: true,
+        points: [
+          "New project this semester! Working with Blue Hill Observatory to automate a tedious manual data import and processing pipline",
+          "Drafted the initial database schema: uploads, daily, hourly and scheduled observations, historical daily records and an audit log.",
+        ],
+        tech: [
+          "AWS",
+          "Edge Computing",
+          "TypeScript",
+          "NestJS",
+          "React",
+          "PostgreSQL",
+          "TypeORM",
+        ],
+        link: "https://github.com/Code-4-Community/bho",
+      },
       {
         title: "Software Developer, BHCHP",
         period: "May — Aug 2026",
@@ -250,7 +300,9 @@ export const experience: Org[] = [
         period: "Sep — Dec 2025",
         start: 2025.667,
         end: 2026.0,
-        points: ["Core Infrastructure team, working on C4C's internal recruitment dashboard."],
+        points: [
+          "Core Infrastructure team, working on C4C's internal recruitment dashboard.",
+        ],
         tech: ["NestJS", "AWS", "TypeScript"],
         link: "https://www.c4cneu.com/people",
       },
@@ -264,7 +316,8 @@ export const experience: Org[] = [
     location: "Boston, MA",
     logo: "/logos/forge.jpg",
     color: "#ff8fb8",
-    impact: "Product studio. Software lead on BackBuddy, an Arduino-integrated posture app; engineer on SmartStep.",
+    impact:
+      "Product studio. Software lead on BackBuddy, an Arduino-integrated posture app; engineer on SmartStep.",
     note: "Product development studio",
     roles: [
       {
@@ -272,7 +325,9 @@ export const experience: Org[] = [
         period: "Jan — Apr 2025",
         start: 2025.0,
         end: 2025.333,
-        points: ["Software lead on BackBuddy, a cross-platform Arduino-integrated mobile app to help improve posture."],
+        points: [
+          "Software lead on BackBuddy, a cross-platform Arduino-integrated mobile app to help improve posture.",
+        ],
         tech: ["Embedded", "React Native", "Arduino", "Firebase"],
         link: "https://github.com/naman0r/backbuddy-app",
       },
@@ -281,7 +336,9 @@ export const experience: Org[] = [
         period: "Sep — Dec 2024",
         start: 2024.667,
         end: 2025.0,
-        points: ["An app for a height-adjusting cane with tracking, to help the elderly climb stairs and find the cane if it's lost."],
+        points: [
+          "An app for a height-adjusting cane with tracking, to help the elderly climb stairs and find the cane if it's lost.",
+        ],
         tech: ["React Native", "Arduino"],
         link: "https://www.forgenu.com/",
       },
@@ -295,14 +352,17 @@ export const experience: Org[] = [
     location: "Boston, MA",
     logo: "/logos/oasis.png",
     color: "#9fe870",
-    impact: "Built NUtrition, a Northeastern dining hall macro tracker, now in production.",
+    impact:
+      "Built NUtrition, a Northeastern dining hall macro tracker, now in production.",
     roles: [
       {
         title: "Software Developer",
         period: "Jan — May 2025",
         start: 2025.0,
         end: 2025.417,
-        points: ["Built NUtrition, a Northeastern dining hall macronutrient tracker, now in production."],
+        points: [
+          "Built NUtrition, a Northeastern dining hall macronutrient tracker, now in production.",
+        ],
         tech: ["Supabase", "Flask", "React", "Selenium"],
         link: "https://nutrition-oasis.vercel.app",
       },
@@ -310,20 +370,38 @@ export const experience: Org[] = [
   },
 ];
 
-const decimalYear = (d: Date) => d.getUTCFullYear() + d.getUTCMonth() / 12 + (d.getUTCDate() - 1) / 365;
+const decimalYear = (d: Date) =>
+  d.getUTCFullYear() + d.getUTCMonth() / 12 + (d.getUTCDate() - 1) / 365;
 
 /** Ongoing roles run to the day the site was built. */
 export const NOW = decimalYear(new Date());
 export const roleEnd = (r: Role) => (r.ongoing ? Math.max(r.end, NOW) : r.end);
 
-export const TIMELINE_START = Math.min(...experience.flatMap((o) => o.roles.map((r) => r.start)));
-export const TIMELINE_END = Math.max(...experience.flatMap((o) => o.roles.map(roleEnd)));
+export const TIMELINE_START = Math.min(
+  ...experience.flatMap((o) => o.roles.map((r) => r.start)),
+);
+export const TIMELINE_END = Math.max(
+  ...experience.flatMap((o) => o.roles.map(roleEnd)),
+);
 
 export function months(role: Role) {
   return Math.max(1, Math.round((roleEnd(role) - role.start) * 12));
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 export const monthYear = (y: number) => {
   const m = Math.round((y % 1) * 12);
   return `${MONTHS[m % 12]} ${Math.floor(y) + Math.floor(m / 12)}`;
