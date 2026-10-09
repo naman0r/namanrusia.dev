@@ -262,7 +262,23 @@ function latLon(lat: number, lon: number, r: number): [number, number, number] {
   return [r * Math.cos(la) * Math.sin(lo), r * Math.sin(la), r * Math.cos(la) * Math.cos(lo)];
 }
 
-const G = { land: 0, home: 1, ocean: 2, route: 3, beacon: 4, satellite: 5 } as const;
+const G = { land: 0, home: 1, ocean: 2, route: 3, beacon: 4, satellite: 5, craft: 6, exhaust: 7, pad: 8 } as const;
+
+const SPACEPORTS = [
+  { lat: 28, lon: -81, rocket: true, phase: 0.12 },
+  { lat: 14, lon: 80, rocket: true, phase: 0.64 },
+  { lat: 48, lon: 12, rocket: false, phase: 0.42 },
+  { lat: -25, lon: 134, rocket: false, phase: 0.86 },
+].map((site) => {
+  const up = latLon(site.lat, site.lon, 1);
+  const right = latLon(0, site.lon + 90, 1);
+  const forward: Rgb = [
+    right[1] * up[2] - right[2] * up[1],
+    right[2] * up[0] - right[0] * up[2],
+    right[0] * up[1] - right[1] * up[0],
+  ];
+  return { ...site, up, right, forward };
+});
 
 /** A chunky voxel Earth: a Fibonacci sphere where land is lime, the countries Naman lived in are blue. */
 function buildGlobe(n: number) {
@@ -270,7 +286,28 @@ function buildGlobe(n: number) {
   const r = rng(7);
   const legs = homes.length - 1;
   const beaconN = homes.length * 4;
-  const sphere = n - legs * (ROUTE_STEPS + 1) - beaconN - 16;
+  const craft: { x: number; y: number; z: number; c: Rgb }[][] = [[], []];
+  for (let y = 0; y < 7; y++) {
+    for (let x = -1; x <= 1; x++) {
+      for (let z = -1; z <= 1; z++) {
+        if (y === 6 && (x || z)) continue;
+        if (y < 2 && x && z) continue;
+        craft[0].push({ x, y, z, c: y === 6 || y === 1 ? C.red : y === 4 && z === 1 ? C.accent : C.bone });
+      }
+    }
+  }
+  for (const x of [-2, 2]) for (const z of [-1, 0, 1]) craft[0].push({ x, y: 0, z, c: C.red });
+  for (let x = -3; x <= 3; x++) {
+    for (let z = -3; z <= 3; z++) {
+      const d = Math.hypot(x, z);
+      if (d > 3.2) continue;
+      craft[1].push({ x, y: 1, z, c: d > 2.4 ? C.coin : C.bone });
+      if (d < 1.5) craft[1].push({ x, y: 2, z, c: C.accent });
+      if (d > 1.8 && d < 2.4) craft[1].push({ x, y: 0, z, c: C.lime });
+    }
+  }
+  const portN = SPACEPORTS.reduce((sum, site) => sum + 12 + craft[site.rocket ? 0 : 1].length + 14, 0);
+  const sphere = n - legs * (ROUTE_STEPS + 1) - beaconN - 16 - portN;
   const golden = Math.PI * (3 - Math.sqrt(5));
   const size = Math.sqrt((4 * Math.PI) / sphere) * GLOBE_R * 0.9;
   let i = 0;
@@ -328,6 +365,27 @@ function buildGlobe(n: number) {
     t.tag[i] = G.satellite;
     t.group[i] = k;
   }
+  SPACEPORTS.forEach((site, k) => {
+    // Store port voxels in their own tangent frame; animation places them on the spinning Earth.
+    for (let j = 0; j < 12; j++, i++) {
+      const a = (j / 12) * Math.PI * 2;
+      put(t, i, Math.cos(a) * 0.28, 0.035, Math.sin(a) * 0.28, C.coin, 0.065);
+      t.tag[i] = G.pad;
+      t.group[i] = k;
+    }
+    for (const voxel of craft[site.rocket ? 0 : 1]) {
+      put(t, i, voxel.x * 0.065, 0.13 + voxel.y * 0.065, voxel.z * 0.065, voxel.c, 0.062);
+      t.tag[i] = G.craft;
+      t.group[i++] = k;
+    }
+    for (let j = 0; j < 14; j++, i++) {
+      const a = j * 2.4;
+      put(t, i, Math.cos(a) * 0.055, 0.09 - j * 0.035, Math.sin(a) * 0.055, j < 4 ? C.coin : C.orange, 0.06);
+      t.tag[i] = G.exhaust;
+      t.group[i] = k;
+      t.aux[i] = j / 14;
+    }
+  });
   return t;
 }
 
@@ -345,7 +403,7 @@ function globe(n: number): Shot {
   let clock = 0;
 
   const turnGlobe = (c: FrameCtx) => {
-    clock += c.dt;
+    clock += c.reduced ? 0 : c.dt;
     const dt = c.dt;
     if (g.dragging) {
       // Follow the pointer exactly, and remember how fast it moved for the fling.
@@ -361,7 +419,7 @@ function globe(n: number): Shot {
     } else {
       // A fling coasts, then settles back into a slow drift; the tilt drifts home too.
       const drift = c.reduced ? 0 : 0.12;
-      velocity += (drift - velocity) * (1 - Math.exp(-dt * 1.2));
+      velocity = c.reduced ? 0 : velocity + (drift - velocity) * (1 - Math.exp(-dt * 1.2));
       spin += velocity * dt;
       tilt += (0.35 - tilt) * (1 - Math.exp(-dt * 0.8));
     }
@@ -391,6 +449,36 @@ function globe(n: number): Shot {
         const blink = 0.7 + ((Math.sin(clock * 3 + k * 1.7) + 1) / 2) * 0.6;
         for (let q = 0; q < 3; q++) scl[o + q] *= blink;
         continue;
+      }
+      if (tag === G.craft || tag === G.exhaust || tag === G.pad) {
+        const site = SPACEPORTS[t.group[i]];
+        const p = (clock / 12 + site.phase) % 1;
+        const launch = ease(clamp01((p - 0.16) / 0.62));
+        const approach = 1 - ease(clamp01(p / 0.38));
+        const depart = ease(clamp01((p - 0.7) / 0.3));
+        const lift = c.reduced ? 0 : (site.rocket ? launch : approach + depart) * (c.mobile ? 0.65 : 1.15);
+        const fade = site.rocket ? 1 - clamp01((p - 0.8) / 0.16) : 1;
+        const flying = c.reduced ? 0 : site.rocket ? clamp01((p - 0.12) / 0.08) * fade : Math.max(approach, depart);
+        if (tag === G.exhaust) {
+          const flicker = 0.75 + Math.sin(clock * 23 + i * 7) * 0.25;
+          const spread = 1 + t.aux[i] * 2;
+          pos[o] *= spread;
+          pos[o + 2] *= spread;
+          pos[o + 1] -= ((clock * 1.6 + t.aux[i]) % 1) * 0.08;
+          for (let q = 0; q < 3; q++) scl[o + q] *= flying * flicker * (1 - t.aux[i] * 0.7);
+        } else if (tag === G.craft) {
+          for (let q = 0; q < 3; q++) scl[o + q] *= fade;
+        } else {
+          for (let q = 0; q < 3; q++) col[o + q] *= 1 + flying * 0.8;
+        }
+        const x = pos[o];
+        const y = GLOBE_R + pos[o + 1] + (tag === G.pad ? 0 : lift);
+        const z = pos[o + 2];
+        for (let q = 0; q < 3; q++) {
+          pos[o + q] = site.right[q] * x + site.up[q] * y + site.forward[q] * z;
+        }
+        // Exhaust below the launch pad stays inside the Earth until the vehicle clears it.
+        if (tag === G.exhaust && y < GLOBE_R + 0.04) scl.fill(0, o, o + 3);
       }
       const x = pos[o];
       const y = pos[o + 1];
