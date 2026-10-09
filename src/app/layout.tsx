@@ -19,6 +19,8 @@ const departure = localFont({
 const schibsted = Schibsted_Grotesk({
   variable: "--font-schibsted",
   subsets: ["latin"],
+  // Posts use emphasis; without the italic cut the browser fakes a slant.
+  style: ["normal", "italic"],
   display: "swap",
 });
 

@@ -78,6 +78,68 @@
   background-size: 16px 16px;
 }
 
+/* Long-form posts. The MDX components carry most of the styling; these are the bits only CSS reaches. */
+.post-body {
+  counter-reset: section;
+}
+
+.post-body > p:first-of-type::first-letter {
+  float: left;
+  margin: 0.32rem 0.75rem 0 0;
+  font-family: var(--font-display);
+  font-size: 4.5rem;
+  line-height: 0.8;
+  text-transform: uppercase;
+  color: var(--post);
+}
+
+.post-h2::before {
+  counter-increment: section;
+  content: counter(section, decimal-leading-zero);
+  display: block;
+  margin-bottom: 0.875rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--post);
+}
+
+.post-body sup a {
+  margin-left: 0.125rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-decoration: none;
+  color: var(--post);
+}
+
+.post-body [data-footnotes] {
+  margin-top: 4rem;
+  border-top: 2px solid var(--color-line);
+  padding-top: 1.5rem;
+}
+
+.post-body [data-footnotes] li,
+.post-body [data-footnotes] p {
+  font-size: 1rem;
+  line-height: 1.75rem;
+  color: var(--color-dust);
+}
+
+/* Shiki's css-variables theme, mapped onto the palette. */
+:root {
+  --shiki-foreground: var(--color-bone);
+  --shiki-background: transparent;
+  --shiki-token-comment: var(--color-dust);
+  --shiki-token-keyword: var(--color-accent);
+  --shiki-token-string: var(--color-lime);
+  --shiki-token-string-expression: var(--color-lime);
+  --shiki-token-constant: var(--color-coin);
+  --shiki-token-function: #6fd6b0;
+  --shiki-token-parameter: #d9cfbc;
+  --shiki-token-punctuation: #a49a8a;
+  --shiki-token-link: var(--color-accent);
+}
+
 @keyframes blink {
   50% {
     opacity: 0;
