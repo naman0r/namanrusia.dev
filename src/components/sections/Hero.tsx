@@ -1,8 +1,31 @@
+import Link from "next/link";
 import { GlobeDrag } from "@/components/GlobeDrag";
 import { HeroLinks } from "@/components/HeroLinks";
 import { HomeLine } from "@/components/HomeLine";
 import { Name } from "@/components/Name";
 import { profile } from "@/content/profile";
+import { getPosts, isRecent } from "@/lib/blog";
+
+/** A quiet pointer to the newest post, under the character line. */
+async function LatestPost() {
+  const [post] = await getPosts();
+  if (!post) return null;
+  return (
+    <Link
+      href={`/blog/${post.slug}`}
+      className="label group mt-4 inline-flex max-w-full items-center gap-2.5 text-dust transition-colors hover:text-bone"
+      style={{ "--c": post.color } as React.CSSProperties}
+    >
+      <span aria-hidden className="size-1.5 shrink-0 bg-(--c)" />
+      <span className="shrink-0">{isRecent(post) ? "New post" : "Latest post"}</span>
+      <span aria-hidden className="text-line">/</span>
+      <span className="truncate normal-case tracking-normal text-bone/75 group-hover:text-bone">{post.title}</span>
+      <span aria-hidden className="shrink-0 transition-transform duration-150 ease-(--ease-step) group-hover:translate-x-1">
+        →
+      </span>
+    </Link>
+  );
+}
 
 export function Hero() {
   return (
@@ -40,6 +63,7 @@ export function Hero() {
           </p>
           <HeroLinks />
           <HomeLine />
+          <LatestPost />
         </div>
 
         <dl className="relative mt-6 hidden grid-cols-4 gap-x-6 border-t-2 border-line bg-ink pb-2 pt-5 md:grid">

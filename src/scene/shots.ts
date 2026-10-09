@@ -134,6 +134,7 @@ function spinY(pos: Float32Array, n: number, angle: number) {
 }
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const smoothstep = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 const pose = (x: number, y: number, z: number, rx: number, ry: number, s: number): Pose => ({ x, y, z, rx, ry, s });
 
@@ -1050,6 +1051,446 @@ function lost(n: number): Shot {
   };
 }
 
+/** FNV-1a, so a post's slug picks the same scene variation on every visit. */
+function hash(s: string) {
+  let h = 2166136261;
+  for (const ch of s) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  return h >>> 0;
+}
+
+/** Calls `build` again whenever a different post opens, with that post's seed and color. */
+function perPost(build: (seed: number, tint: Rgb) => void) {
+  let slug: string | null = null;
+  return () => {
+    if (slug === stage.post.slug) return;
+    slug = stage.post.slug;
+    build(hash(slug), rgb(stage.post.color || ACCENT));
+  };
+}
+
+const lerp3 = (a: Rgb, b: Rgb, f: number): Rgb => [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+
+const FOLIO_SHEETS = 7;
+const SHEET_W = 12;
+const SHEET_H = 16;
+
+/**
+ * /blog: a loose stack of voxel pages, one per post, newest on top. Each page's header bar takes
+ * its post's color, and pointing at a post slides its page out of the stack.
+ */
+function folio(n: number): Shot {
+  const t = alloc(n);
+  const v = 0.13;
+  const r = rng(41);
+  let i = 0;
+  for (let k = 0; k < FOLIO_SHEETS; k++) {
+    // Ragged line lengths, so every page reads as a different piece of writing.
+    const lines = Array.from({ length: 6 }, () => 4 + Math.floor(r() * (SHEET_W - 6)));
+    for (let x = 0; x < SHEET_W; x++) {
+      for (let y = 0; y < SHEET_H; y++) {
+        const row = SHEET_H - 1 - y;
+        const header = row >= 1 && row <= 2 && x >= 1 && x <= SHEET_W - 2;
+        const line = row >= 4 && row % 2 === 0 && (row - 4) / 2 < lines.length && x >= 1 && x <= lines[(row - 4) / 2];
+        put(t, i, (x - (SHEET_W - 1) / 2) * v, (y - (SHEET_H - 1) / 2) * v, 0, line ? C.stone : C.bone, [v * 0.94, v * 0.94, v * 0.5], line ? 1 : 0.85);
+        t.tag[i] = header ? TAG.label : TAG.base;
+        t.group[i] = k;
+        i++;
+      }
+    }
+  }
+  for (const end = Math.min(n, i + 220); i < end; i++) {
+    put(t, i, (r() - 0.5) * 7, (r() - 0.5) * 6, (r() - 0.5) * 4 - 1, r() > 0.85 ? C.stone : C.dust, 0.02 + r() * 0.03);
+    t.tag[i] = TAG.star;
+    t.aux[i] = r();
+  }
+  hideRest(t, i);
+
+  const heads: Rgb[] = [];
+  const lift = new Float32Array(FOLIO_SHEETS);
+  let colors = "";
+  return {
+    target: t,
+    pose: (c) => (c.mobile ? pose(0, 2.2, -3, 0.2, 0.5, 0.8) : pose(4.3, -0.3, 0, 0.12, -0.3 + Math.sin(c.time * 0.25) * 0.08, 1.1)),
+    tick(c) {
+      const key = stage.posts.join();
+      if (key !== colors) {
+        colors = key;
+        for (let k = 0; k < FOLIO_SHEETS; k++) heads[k] = stage.posts[k] ? rgb(stage.posts[k]) : C.dust;
+      }
+      const k6 = 1 - Math.exp(-c.dt * 6);
+      for (let k = 0; k < FOLIO_SHEETS; k++) lift[k] += ((stage.hoveredPost === k ? 1 : 0) - lift[k]) * k6;
+    },
+    animate(c, pos, col, scl) {
+      let any = 0;
+      for (let k = 0; k < FOLIO_SHEETS; k++) any = Math.max(any, lift[k]);
+      for (let i = 0; i < t.n; i++) {
+        const o = i * 3;
+        if (t.tag[i] === TAG.star) {
+          pos[o + 1] += ((t.aux[i] + c.time * 0.02) % 1) * 1.5 - 0.75;
+          continue;
+        }
+        const k = t.group[i];
+        if (k < 0) continue;
+        const h = lift[k];
+        // Fanned like a hand of cards from a pivot below the stack, so every header bar shows.
+        const fan = (2.5 - k) * 0.15 + Math.sin(c.time * 0.6 + k) * 0.01;
+        const x = pos[o];
+        const y = pos[o + 1] + 1.9;
+        pos[o] = x * Math.cos(fan) - y * Math.sin(fan);
+        pos[o + 1] = x * Math.sin(fan) + y * Math.cos(fan) - 1.9 + h * 0.45;
+        pos[o + 2] += -k * 0.16 + h * 0.9;
+        if (t.tag[i] === TAG.label) {
+          const head = heads[k];
+          col[o] = head[0];
+          col[o + 1] = head[1];
+          col[o + 2] = head[2];
+        }
+        const dim = (1 - k * 0.08) * (1 - (any - h) * 0.45) * (1 + h * 0.3);
+        for (let q = 0; q < 3; q++) col[o + q] *= dim;
+        scl[o + 2] *= 1 + h;
+      }
+    },
+  };
+}
+
+/**
+ * A tree that grows while the post is read: a sapling at the top of the page, full canopy by the
+ * end. The slug seeds its shape, the post's color is its leaves.
+ */
+function grove(n: number): Shot {
+  const t = alloc(n);
+  const v = 0.075;
+  /** Height above the base per voxel, so wind bends the crown more than the trunk. */
+  const height = new Float32Array(n);
+
+  // Phones get one level fewer, so the leaves still have budget to fill the crown.
+  const levels = n < 2500 ? 5 : 6;
+
+  const rebuild = perPost((seed, tint) => {
+    const r = rng(seed);
+    t.tag.fill(0);
+    t.group.fill(-1);
+    type Seg = { a: Rgb; b: Rgb; depth: number; born: number };
+    const segs: Seg[] = [];
+    const tips: { p: Rgb; born: number }[] = [];
+    const span = 0.82 / levels;
+    const grow = (p: Rgb, dir: Rgb, len: number, depth: number) => {
+      const b: Rgb = [p[0] + dir[0] * len, p[1] + dir[1] * len, p[2] + dir[2] * len];
+      const born = depth * span;
+      segs.push({ a: p, b, depth, born });
+      if (depth === levels - 1) {
+        tips.push({ p: b, born: born + span });
+        return;
+      }
+      const kids = r() < 0.35 ? 3 : 2;
+      const twist = r() * Math.PI * 2;
+      for (let k = 0; k < kids; k++) {
+        // Lean out from the parent around a turning axis, with a pull back toward the sky.
+        const az = twist + (k / kids) * Math.PI * 2;
+        const lean = 0.42 + r() * 0.35;
+        const d: Rgb = [dir[0] + Math.cos(az) * Math.sin(lean) * 1.3, dir[1] + 0.25, dir[2] + Math.sin(az) * Math.sin(lean) * 1.3];
+        const l = Math.hypot(d[0], d[1], d[2]);
+        grow(b, [d[0] / l, d[1] / l, d[2] / l], len * (0.68 + r() * 0.14), depth + 1);
+      }
+    };
+    grow([0, 0, 0], [(r() - 0.5) * 0.15, 1, (r() - 0.5) * 0.15], 1.05, 0);
+
+    let i = 0;
+    // A patch of ground to stand on.
+    for (let gx = -8; gx <= 8; gx++) {
+      for (let gz = -8; gz <= 8; gz++) {
+        const d = Math.hypot(gx, gz);
+        if (d > 8 - r() * 2.5 || i >= n) continue;
+        put(t, i, gx * v * 1.6, -v, gz * v * 1.6, r() > 0.75 ? C.moss : C.line, [v * 1.5, v * 0.6, v * 1.5], 1.2 - d / 10);
+        t.aux[i] = -1;
+        height[i] = 0;
+        i++;
+      }
+    }
+    const bark = rgb("#5a4632");
+    for (const s of segs) {
+      const len = Math.hypot(s.b[0] - s.a[0], s.b[1] - s.a[1], s.b[2] - s.a[2]);
+      const steps = Math.max(1, Math.round(len / v));
+      const w = s.depth === 0 ? 2 : s.depth < 3 ? 1 : 0;
+      for (let q = 0; q < steps; q++) {
+        const f = q / steps;
+        const p = lerp3(s.a, s.b, f);
+        for (let ox = -w; ox <= w; ox++) {
+          for (let oz = -w; oz <= w; oz++) {
+            if (Math.abs(ox) + Math.abs(oz) > w || i >= n) continue;
+            put(t, i, p[0] + ox * v * 0.8, p[1], p[2] + oz * v * 0.8, lerp3(bark, C.stone, s.depth / levels), v * (1.1 - s.depth * 0.08));
+            t.tag[i] = TAG.base;
+            t.aux[i] = s.born + f * span;
+            height[i] = p[1];
+            i++;
+          }
+        }
+      }
+    }
+    // Leaves split what's left of the budget, keeping a little back for pollen.
+    const per = Math.min(48, Math.floor((n * 0.94 - i) / Math.max(1, tips.length)));
+    const tones = [tint, lerp3(tint, C.bone, 0.45), lerp3(tint, C.plastic, 0.35), C.lime];
+    for (const tip of tips) {
+      for (let q = 0; q < per && i < n; q++) {
+        const th = r() * Math.PI * 2;
+        const u = r() * 2 - 1;
+        const rad = 0.08 + Math.cbrt(r()) * 0.26;
+        const s = Math.sqrt(1 - u * u);
+        const roll = r();
+        put(t, i, tip.p[0] + Math.cos(th) * s * rad, tip.p[1] + u * rad * 0.8, tip.p[2] + Math.sin(th) * s * rad, tones[roll > 0.95 ? 3 : roll > 0.7 ? 1 : roll > 0.45 ? 2 : 0], v * 0.95);
+        t.tag[i] = TAG.front;
+        t.aux[i] = tip.born + r() * 0.12;
+        height[i] = tip.p[1];
+        i++;
+      }
+    }
+    for (const end = Math.min(n, i + 120); i < end; i++) {
+      const a = r() * Math.PI * 2;
+      const rad = 0.4 + Math.sqrt(r()) * 1.8;
+      put(t, i, Math.cos(a) * rad, 0, Math.sin(a) * rad, lerp3(tint, C.bone, 0.6), 0.02 + r() * 0.02);
+      t.tag[i] = TAG.star;
+      t.aux[i] = r();
+      height[i] = 0;
+    }
+    hideRest(t, i);
+  });
+  rebuild();
+
+  return {
+    target: t,
+    pose: (c) => (c.mobile ? pose(0, -2.6, -3, 0.08, 0.4 + c.time * 0.04, 0.85) : pose(4.4, -3.1, 0, 0.1, 0.4 + c.time * 0.05, 1.05)),
+    tick: rebuild,
+    animate(c, pos, col, scl) {
+      const g = clamp01(0.12 + c.local * 1.05);
+      const wind = Math.sin(c.time * 0.7) * 0.5 + Math.sin(c.time * 1.9) * 0.2;
+      for (let i = 0; i < t.n; i++) {
+        const o = i * 3;
+        const born = t.aux[i];
+        if (t.tag[i] === TAG.star) {
+          // Pollen rises off the finished canopy.
+          const k = clamp01((g - 0.85) * 8);
+          pos[o + 1] = 1.2 + ((born + c.time * 0.04) % 1) * 3.2;
+          pos[o] += Math.sin(c.time * 0.6 + born * 30) * 0.2;
+          for (let q = 0; q < 3; q++) scl[o + q] *= k;
+          continue;
+        }
+        if (born < 0) continue;
+        const k = smoothstep(clamp01((g - born) * 12));
+        for (let q = 0; q < 3; q++) scl[o + q] *= k;
+        const h = height[i];
+        pos[o] += wind * h * h * 0.006;
+        if (t.tag[i] === TAG.front) {
+          pos[o] += Math.sin(c.time * 2.3 + i) * 0.012;
+          pos[o + 1] += Math.cos(c.time * 1.7 + i * 0.7) * 0.01;
+          // New leaves arrive bright and settle into their color.
+          const flash = 1 + (1 - k) * 0.8;
+          for (let q = 0; q < 3; q++) col[o + q] *= flash;
+        }
+      }
+    },
+  };
+}
+
+const ORBIT_RINGS = 5;
+
+/**
+ * A banded planet in a tangle of tilted rings, each on its own speed. Reading pulls the rings
+ * into one plane, so the system has settled by the time the post ends.
+ */
+function orbit(n: number): Shot {
+  const t = alloc(n);
+  const ring = { r: new Float32Array(ORBIT_RINGS), tilt: new Float32Array(ORBIT_RINGS), node: new Float32Array(ORBIT_RINGS), speed: new Float32Array(ORBIT_RINGS) };
+
+  const rebuild = perPost((seed, tint) => {
+    const r = rng(seed);
+    t.tag.fill(0);
+    t.group.fill(-1);
+    let i = 0;
+    const R = 0.95;
+    const bands = [tint, lerp3(tint, C.bone, 0.55), lerp3(tint, C.plastic, 0.5), C.bone];
+    const phase = r() * 6;
+    // A Fibonacci sphere like the home globe, which stays round where a voxel grid goes boxy.
+    const count = Math.floor(n * 0.2);
+    const size = Math.sqrt((4 * Math.PI) / count) * R * 0.95;
+    const golden = Math.PI * (3 - Math.sqrt(5));
+    for (let q = 0; q < count; q++, i++) {
+      const y = 1 - ((q + 0.5) / count) * 2;
+      const rad = Math.sqrt(1 - y * y);
+      const band = Math.floor(Math.sin(y * 7 + phase) + Math.sin(y * 3.1 + rad) + 2) % bands.length;
+      put(t, i, Math.cos(golden * q) * rad * R, y * R, Math.sin(golden * q) * rad * R, bands[band], size);
+      t.tag[i] = TAG.base;
+    }
+    const tones = [C.bone, tint, C.coin, lerp3(tint, C.bone, 0.5), C.stone];
+    const budget = Math.floor((n * 0.85 - i) / ORBIT_RINGS);
+    for (let k = 0; k < ORBIT_RINGS; k++) {
+      ring.r[k] = 1.3 + k * 0.48 + r() * 0.2;
+      ring.tilt[k] = (r() - 0.5) * 2.2;
+      ring.node[k] = r() * Math.PI;
+      ring.speed[k] = (r() > 0.5 ? 1 : -1) * (0.25 + r() * 0.3) / ring.r[k];
+      const tone = tones[k];
+      // Most of each ring is fine dust; one clump rides along as a moon.
+      const moon = r() * Math.PI * 2;
+      for (let q = 0; q < budget && i < n; q++, i++) {
+        const isMoon = q < 27;
+        const a = isMoon ? moon : r() * Math.PI * 2;
+        const dr = isMoon ? ((q % 3) - 1) * 0.07 : (r() - 0.5) * 0.18;
+        const dy = isMoon ? (Math.floor(q / 9) - 1) * 0.07 : (r() - 0.5) * 0.04;
+        const dz = isMoon ? ((Math.floor(q / 3) % 3) - 1) * 0.07 : 0;
+        put(t, i, ring.r[k] + dr, dy, dz, isMoon ? C.bone : tone, isMoon ? 0.07 : 0.035 + r() * 0.03, isMoon ? 1.1 : 0.6 + r() * 0.6);
+        t.tag[i] = isMoon ? TAG.front : TAG.label;
+        t.group[i] = k;
+        t.aux[i] = a + dz * 0.5;
+      }
+    }
+    for (; i < n; i++) {
+      const a = r() * Math.PI * 2;
+      const u = r() * 2 - 1;
+      const rad = 7 + r() * 8;
+      const s = Math.sqrt(1 - u * u);
+      put(t, i, Math.cos(a) * s * rad, u * rad * 0.6, Math.sin(a) * s * rad - 6, r() > 0.9 ? tint : C.dust, 0.02 + r() * 0.04);
+      t.tag[i] = TAG.star;
+    }
+  });
+  rebuild();
+
+  const rots = Array.from({ length: ORBIT_RINGS }, () => new Float32Array(9));
+  return {
+    target: t,
+    pose: (c) => (c.mobile ? pose(0, 2.3, -3, 0.35, 0, 0.75) : pose(4.5, 0.2, 0, 0.32, c.time * 0.03, 1.05)),
+    tick: rebuild,
+    animate(c, pos) {
+      const settle = smoothstep(clamp01(c.local * 1.15));
+      const spin = c.time * 0.15;
+      for (let k = 0; k < ORBIT_RINGS; k++) rots[k].set(rotation(ring.tilt[k] * (1 - settle * 0.9), ring.node[k] * (1 - settle)));
+      for (let i = 0; i < t.n; i++) {
+        const o = i * 3;
+        const tag = t.tag[i];
+        if (tag === TAG.base) {
+          const x = pos[o];
+          const z = pos[o + 2];
+          pos[o] = x * Math.cos(spin) + z * Math.sin(spin);
+          pos[o + 2] = -x * Math.sin(spin) + z * Math.cos(spin);
+          continue;
+        }
+        if (tag === TAG.star) continue;
+        const k = t.group[i];
+        const a = t.aux[i] + c.time * ring.speed[k];
+        const rad = pos[o];
+        const lx = Math.cos(a) * rad;
+        const lz = Math.sin(a) * rad;
+        const ly = pos[o + 1];
+        const R9 = rots[k];
+        pos[o] = R9[0] * lx + R9[1] * ly + R9[2] * lz;
+        pos[o + 1] = R9[3] * lx + R9[4] * ly + R9[5] * lz;
+        pos[o + 2] = R9[6] * lx + R9[7] * ly + R9[8] * lz;
+      }
+    },
+  };
+}
+
+/**
+ * Rain falling through a grid of columns onto a dark pool that ripples where it lands. The
+ * further into the post, the slower it falls, until the drops all but hang in the air.
+ */
+function rain(n: number): Shot {
+  const t = alloc(n);
+  const TOP = 2.8;
+  const FLOOR = -2.2;
+  const cols: { x: number; z: number; speed: number; phase: number; len: number }[] = [];
+  let tiles = 0;
+  let deep: Rgb = C.plastic;
+  let tintC: Rgb = C.accent;
+
+  const rebuild = perPost((seed, tint) => {
+    const r = rng(seed);
+    t.tag.fill(0);
+    t.group.fill(-1);
+    tintC = tint;
+    deep = lerp3(tint, C.plastic, 0.9);
+    cols.length = 0;
+    let i = 0;
+    const tile = 0.2;
+    const half = 14;
+    for (let gx = -half; gx < half; gx++) {
+      for (let gz = -half; gz < half; gz++) {
+        if (Math.hypot(gx + 0.5, gz + 0.5) > half || i >= n * 0.4) continue;
+        put(t, i, (gx + 0.5) * tile, FLOOR, (gz + 0.5) * tile, deep, [tile * 0.92, 0.05, tile * 0.92]);
+        t.tag[i] = TAG.base;
+        i++;
+      }
+    }
+    tiles = i;
+    const v = 0.06;
+    // Sparse on purpose: a few dozen streaks read as rain, a few hundred as a wall.
+    while (i < tiles + n * 0.14) {
+      const len = 3 + Math.floor(r() * 6);
+      const a = r() * Math.PI * 2;
+      const d = Math.sqrt(r()) * half * tile * 0.95;
+      const c = { x: Math.cos(a) * d, z: Math.sin(a) * d, speed: 1.6 + r() * 2.2, phase: r() * 10, len };
+      const k = cols.length;
+      cols.push(c);
+      for (let j = 0; j < len && i < n; j++, i++) {
+        put(t, i, c.x, 0, c.z, j === 0 ? C.bone : lerp3(tint, C.plastic, (j / len) * 0.8), [v, v * 2.2, v]);
+        t.tag[i] = TAG.route;
+        t.group[i] = k;
+        t.aux[i] = j * v * 3.4;
+      }
+    }
+    for (const end = Math.min(n, i + 160); i < end; i++) {
+      put(t, i, (r() - 0.5) * 9, (r() - 0.5) * 6, (r() - 0.5) * 5 - 2, C.dust, 0.02 + r() * 0.03);
+      t.tag[i] = TAG.star;
+    }
+    hideRest(t, i);
+  });
+  rebuild();
+
+  let clock = 0;
+  const hit = new Float32Array(512);
+  return {
+    target: t,
+    pose: (c) => (c.mobile ? pose(0, 1.6, -3, 0.35, 0.5, 0.8) : pose(4.4, 0, -0.5, 0.3, 0.6 + c.time * 0.03, 1)),
+    tick(c) {
+      rebuild();
+      clock += c.dt * (1 - 0.92 * smoothstep(clamp01(c.local * 1.1)));
+    },
+    animate(_c, pos, col, scl) {
+      const fall = TOP - FLOOR;
+      for (let k = 0; k < cols.length && k < hit.length; k++) {
+        const c = cols[k];
+        const y = (c.phase + clock * c.speed) % (fall + 1.5);
+        // Seconds of drop time since this column last touched the pool.
+        hit[k] = y > fall ? (y - fall) / c.speed : -1;
+      }
+      for (let i = 0; i < t.n; i++) {
+        const o = i * 3;
+        const tag = t.tag[i];
+        if (tag === TAG.route) {
+          const c = cols[t.group[i]];
+          const y = TOP - ((c.phase + clock * c.speed) % (fall + 1.5)) + t.aux[i];
+          // Below the surface the drop is gone; its tail keeps falling in after it.
+          pos[o + 1] = Math.max(FLOOR, y);
+          if (y <= FLOOR) scl.fill(0, o, o + 3);
+          continue;
+        }
+        if (tag !== TAG.base || i >= tiles) continue;
+        let wave = 0;
+        for (let k = 0; k < cols.length && k < hit.length; k++) {
+          if (hit[k] < 0) continue;
+          const d = Math.hypot(pos[o] - cols[k].x, pos[o + 2] - cols[k].z);
+          const front = hit[k] * 1.4;
+          const ring = 1 - Math.abs(d - front) / 0.14;
+          if (ring > 0) wave += ring * Math.max(0, 1 - hit[k] * 1.4);
+        }
+        pos[o + 1] += wave * 0.06;
+        const f = Math.min(1, wave) * 0.8;
+        col[o] = deep[0] + (tintC[0] * 1.6 - deep[0]) * f;
+        col[o + 1] = deep[1] + (tintC[1] * 1.6 - deep[1]) * f;
+        col[o + 2] = deep[2] + (tintC[2] * 1.6 - deep[2]) * f;
+      }
+    },
+  };
+}
+
 export function buildShots(n: number): Omit<Record<ShotId, Shot>, "city"> {
   return {
     globe: globe(n),
@@ -1062,5 +1503,9 @@ export function buildShots(n: number): Omit<Record<ShotId, Shot>, "city"> {
     library: library(n),
     monolith: monolith(n),
     lost: lost(n),
+    folio: folio(n),
+    grove: grove(n),
+    orbit: orbit(n),
+    rain: rain(n),
   };
 }

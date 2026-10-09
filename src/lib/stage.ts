@@ -1,6 +1,20 @@
 import { useSyncExternalStore } from "react";
+import type { PostScene } from "./blog";
 
-export type ShotId = "globe" | "cube" | "track" | "carts" | "terrain" | "city" | "monogram" | "skyline" | "library" | "monolith" | "lost";
+export type ShotId =
+  | "globe"
+  | "cube"
+  | "track"
+  | "carts"
+  | "terrain"
+  | "city"
+  | "monogram"
+  | "skyline"
+  | "library"
+  | "monolith"
+  | "lost"
+  | "folio"
+  | PostScene;
 
 export type Day = [date: string, count: number];
 
@@ -21,6 +35,11 @@ export const stage = {
   hoveredProject: -1,
   /** Slug of the project page being viewed, for its cartridge. */
   project: "",
+  /** The blog post being read: its slug seeds the scene, its color tints it. */
+  post: { slug: "", color: "" },
+  /** Post colors in /blog order, and the index of the row under the pointer. */
+  posts: [] as string[],
+  hoveredPost: -1,
   activeCheckpoint: -1,
   /** performance.now() when the last section was reached, to fire its burst once per visit. */
   burst: 0,
