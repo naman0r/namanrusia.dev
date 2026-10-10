@@ -262,7 +262,14 @@ function latLon(lat: number, lon: number, r: number): [number, number, number] {
   return [r * Math.cos(la) * Math.sin(lo), r * Math.sin(la), r * Math.cos(la) * Math.cos(lo)];
 }
 
-const G = { land: 0, home: 1, ocean: 2, route: 3, beacon: 4, satellite: 5 } as const;
+const G = { land: 0, home: 1, ocean: 2, route: 3, beacon: 4, satellite: 5, rocket: 6, exhaust: 7 } as const;
+const LAUNCH_UP = latLon(42, -165, 1);
+const LAUNCH_RIGHT = latLon(0, -75, 1);
+const LAUNCH_FORWARD: Rgb = [
+  LAUNCH_RIGHT[1] * LAUNCH_UP[2] - LAUNCH_RIGHT[2] * LAUNCH_UP[1],
+  LAUNCH_RIGHT[2] * LAUNCH_UP[0] - LAUNCH_RIGHT[0] * LAUNCH_UP[2],
+  LAUNCH_RIGHT[0] * LAUNCH_UP[1] - LAUNCH_RIGHT[1] * LAUNCH_UP[0],
+];
 
 /** A chunky voxel Earth: a Fibonacci sphere where land is lime, the countries Naman lived in are blue. */
 function buildGlobe(n: number) {
@@ -270,7 +277,24 @@ function buildGlobe(n: number) {
   const r = rng(7);
   const legs = homes.length - 1;
   const beaconN = homes.length * 4;
-  const sphere = n - legs * (ROUTE_STEPS + 1) - beaconN - 16;
+  const rocket: { x: number; y: number; z: number; c: Rgb }[] = [];
+  for (let y = 0; y < 9; y++) {
+    for (let x = -1; x <= 1; x++) {
+      for (let z = -1; z <= 1; z++) {
+        if (y === 8 && (x || z)) continue;
+        const window = y === 5 && x === 0 && Math.abs(z) === 1;
+        rocket.push({ x, y, z, c: y >= 7 ? C.accent : window ? C.deep : y === 0 ? C.stone : C.bone });
+      }
+    }
+  }
+  for (const side of [-1, 1]) {
+    for (let y = 0; y < 3; y++) {
+      rocket.push({ x: side * 2, y, z: 0, c: C.accent });
+      rocket.push({ x: 0, y, z: side * 2, c: C.accent });
+    }
+  }
+  const exhaustN = 18;
+  const sphere = n - legs * (ROUTE_STEPS + 1) - beaconN - 16 - rocket.length - exhaustN;
   const golden = Math.PI * (3 - Math.sqrt(5));
   const size = Math.sqrt((4 * Math.PI) / sphere) * GLOBE_R * 0.9;
   let i = 0;
@@ -328,6 +352,18 @@ function buildGlobe(n: number) {
     t.tag[i] = G.satellite;
     t.group[i] = k;
   }
+  // Local coordinates keep the whole rocket and its flame attached to one launch site.
+  for (const voxel of rocket) {
+    put(t, i, voxel.x * 0.075, 0.08 + voxel.y * 0.075, voxel.z * 0.075, voxel.c, 0.073);
+    t.tag[i++] = G.rocket;
+  }
+  for (let j = 0; j < exhaustN; j++, i++) {
+    const f = j / (exhaustN - 1);
+    const width = 0.12 * (1 - f) + 0.012;
+    put(t, i, 0, 0.01 - j * 0.032, 0, j < 3 ? C.bone : j < 9 ? C.coin : C.accent, [width, 0.045, width]);
+    t.tag[i] = G.exhaust;
+    t.aux[i] = f;
+  }
   return t;
 }
 
@@ -345,7 +381,7 @@ function globe(n: number): Shot {
   let clock = 0;
 
   const turnGlobe = (c: FrameCtx) => {
-    clock += c.dt;
+    clock += c.reduced ? 0 : c.dt;
     const dt = c.dt;
     if (g.dragging) {
       // Follow the pointer exactly, and remember how fast it moved for the fling.
@@ -361,7 +397,7 @@ function globe(n: number): Shot {
     } else {
       // A fling coasts, then settles back into a slow drift; the tilt drifts home too.
       const drift = c.reduced ? 0 : 0.12;
-      velocity += (drift - velocity) * (1 - Math.exp(-dt * 1.2));
+      velocity = c.reduced ? 0 : velocity + (drift - velocity) * (1 - Math.exp(-dt * 1.2));
       spin += velocity * dt;
       tilt += (0.35 - tilt) * (1 - Math.exp(-dt * 0.8));
     }
@@ -391,6 +427,32 @@ function globe(n: number): Shot {
         const blink = 0.7 + ((Math.sin(clock * 3 + k * 1.7) + 1) / 2) * 0.6;
         for (let q = 0; q < 3; q++) scl[o + q] *= blink;
         continue;
+      }
+      if (tag === G.rocket || tag === G.exhaust) {
+        const age = clock % 18;
+        const launch = clamp01((age - 2) / 4);
+        const landing = clamp01((age - 10) / 4);
+        const descending = age >= 10;
+        const flight = descending ? 1 - ease(landing) : launch * launch;
+        const lift = c.reduced ? 0 : flight * (c.mobile ? 0.6 : 0.9);
+        const fade = descending ? clamp01((age - 10) / 0.6) : 1 - clamp01((age - 5.4) / 0.6);
+        const thrust = c.reduced ? 0 : descending ? Math.sin(landing * Math.PI) * 0.65 : Math.sin(launch * Math.PI);
+        if (tag === G.exhaust) {
+          const flicker = 0.9 + Math.sin(clock * 19 - t.aux[i] * 8) * 0.1;
+          scl[o] *= thrust * fade * flicker;
+          scl[o + 2] *= thrust * fade * flicker;
+          scl[o + 1] *= thrust * fade;
+          pos[o + 1] *= 0.5 + thrust * 0.5;
+        } else {
+          for (let q = 0; q < 3; q++) scl[o + q] *= fade;
+        }
+        const x = pos[o];
+        const y = GLOBE_R + pos[o + 1] + lift;
+        const z = pos[o + 2];
+        for (let q = 0; q < 3; q++) {
+          pos[o + q] = LAUNCH_RIGHT[q] * x + LAUNCH_UP[q] * y + LAUNCH_FORWARD[q] * z;
+        }
+        if (tag === G.exhaust && y < GLOBE_R + 0.02) scl.fill(0, o, o + 3);
       }
       const x = pos[o];
       const y = pos[o + 1];
