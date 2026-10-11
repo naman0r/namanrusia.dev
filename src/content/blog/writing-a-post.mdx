@@ -1,0 +1,88 @@
+export const meta = {
+  title: "How to write a post here",
+  summary: "The sample post. It only renders under next dev, and it uses every element a post can, so it doubles as the style check.",
+  date: "2026-10-09",
+  scene: "grove",
+  color: "#9fe870",
+  draft: true,
+};
+
+Every post is one `.mdx` file in `src/content/blog`. The file name is the URL, so `src/content/blog/first-week-at-sonos.mdx` becomes `/blog/first-week-at-sonos`. Write it in Markdown, preview it with the dev server, and when it reads right, flip it out of draft and merge.
+
+## Start a file
+
+Copy this file, rename it, and replace the `meta` block at the top. Every field except `draft` is required, and a missing or misspelled one fails the build with the file's name in the error.
+
+```js
+export const meta = {
+  title: "What a CRDT taught me about undo",
+  summary: "One or two sentences. Shown under the title, in the list, and in link previews.",
+  date: "2026-11-02",
+  scene: "orbit",
+  color: "#5ec8ff",
+  draft: true,
+};
+```
+
+The `scene` is the voxel piece behind the post, and `color` tints it, along with the drop cap, links, and rules. Pick a different pairing per post:
+
+| Scene | What it does while you read |
+| --- | --- |
+| `grove` | A tree grows from a sapling to a full canopy by the last paragraph |
+| `orbit` | Tilted rings around a banded planet settle into one plane |
+| `rain` | Rain falls into a rippling pool, slowing until it hangs in the air |
+
+The slug seeds the scene too, so two posts that both pick `grove` still get different trees.
+
+## Preview it
+
+```bash
+npm run dev
+# then open http://localhost:3000/blog/<your-slug>
+```
+
+Drafts show up in the dev server, in the list, and on the home page link, with a yellow draft tag. A production build leaves them out entirely, so a half-written post can sit in the repo safely.
+
+## What you can write
+
+Plain Markdown covers most of it: **bold**, _italics_, `inline code`, [links to other sites](https://nextjs.org/docs/app/guides/mdx), and [links within this one](/projects). Lists:
+
+- Bullets get a square marker in the post's color
+- Numbered lists get zero-padded numbers
+- Both can nest, and take paragraphs
+
+1. Write the post
+2. Read it once on a phone
+3. Remove `draft: true`
+
+> A blockquote sets larger and brighter, for the one line the post is really about.
+
+Fenced code is highlighted at build time in the site's palette, and every block gets a copy button:
+
+```ts
+export async function getContributions(handle: string) {
+  const res = await fetch(`https://github.com/users/${handle}/contributions`);
+  if (!res.ok) return null; // the graph is optional; the page renders without it
+  return parse(await res.text());
+}
+```
+
+<Note title="Asides">
+  Wrap anything that shouldn't interrupt the main text in `<Note>`. It takes an optional title. No import needed.
+</Note>
+
+Footnotes work too, for the detail that would derail a sentence.[^1]
+
+### Images
+
+Put images in `public/blog/<slug>/` and reference them from the root. Text in quotes after the path becomes the caption:
+
+![The Prudential Center from below](/photos/the-pru.jpeg "Optional caption, set in the label style")
+
+---
+
+## Publish it
+
+Delete the `draft` line, check the date, and merge the change like any other. The post shows up at the top of `/blog`, in the sitemap, and in the small link under the name on the home page, which says "New post" for its first 30 days.
+
+[^1]: Footnotes collect at the bottom of the post, and each one links back to where it was cited.

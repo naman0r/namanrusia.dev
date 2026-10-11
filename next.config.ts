@@ -1,3 +1,4 @@
+import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -11,8 +12,16 @@ const nextConfig: NextConfig = {
     { source: "/links", destination: "/#contact", permanent: true },
     { source: "/terminal", destination: "/#terminal", permanent: true },
     { source: "/resume", destination: "/resume.pdf", permanent: true },
-    { source: "/blogs/:path*", destination: "/", permanent: true },
+    { source: "/blogs/:path*", destination: "/blog/:path*", permanent: true },
   ],
 };
 
-export default nextConfig;
+// Turbopack needs plugins by name rather than imported functions.
+const withMDX = createMDX({
+  options: {
+    remarkPlugins: ["remark-gfm"],
+    rehypePlugins: ["rehype-slug"],
+  },
+});
+
+export default withMDX(nextConfig);

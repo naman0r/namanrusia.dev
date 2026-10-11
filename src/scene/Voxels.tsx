@@ -105,7 +105,8 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
     S.time += reduced ? 0 : dt;
 
     const list = stage.shots;
-    const key = list.join(",");
+    // Two posts can share a scene but not its seed, so moving between them still morphs.
+    const key = list.join(",") + stage.post.slug;
     if (key !== S.key) {
       // A new page: freeze what's on screen and morph from it instead of jump-cutting.
       if (S.key) {

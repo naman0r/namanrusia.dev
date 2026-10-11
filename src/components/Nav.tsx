@@ -11,6 +11,7 @@ import { ACCENT, HEAT } from "@/scene/palette";
 const LINKS = [
   { href: "/experience", label: "Experience", section: "experience" },
   { href: "/projects", label: "Projects", section: "projects" },
+  { href: "/blog", label: "Writing", section: "blog" },
   { href: "/#about", label: "About", section: "about" },
   { href: "/#contact", label: "Contact", section: "contact" },
 ];
@@ -83,7 +84,7 @@ const TIMELINE = [
 ];
 
 // One small icon per scene shot, so the bar echoes whatever the big scene is morphing into.
-const SHAPES: Record<ShotId, string[]> = {
+export const SHAPES: Record<ShotId, string[]> = {
   globe: [
     "....aaaaa....",
     "...allaaaa...",
@@ -174,6 +175,50 @@ const SHAPES: Record<ShotId, string[]> = {
     ".....add.....",
     "sssssssssssss",
     ".............",
+  ],
+  folio: [
+    "bbbbbbbbb....",
+    "baaaaaaab....",
+    "bbbbbbbbbs...",
+    "bssssssbbs...",
+    "bbbbbbbbbss..",
+    "bsssssbbbss..",
+    "bbbbbbbbbss..",
+    ".ssssssssss..",
+    "..ssssssssss.",
+  ],
+  grove: [
+    "....lllll....",
+    "..lllglllll..",
+    ".llglllllgll.",
+    ".lllllgllll..",
+    "..lll.s.lll..",
+    "......s......",
+    ".....ss......",
+    "......s......",
+    "..mmmmmmmmm..",
+  ],
+  orbit: [
+    "......b......",
+    "....aaaaa....",
+    "...aadaaaa...",
+    "bbbbbbbbbbbbb",
+    "..aaaaadaaa..",
+    "...aaaaaaa...",
+    "....aaaaa....",
+    ".............",
+    "..y..........",
+  ],
+  rain: [
+    "a...b....a...",
+    "a...a..b.a..b",
+    "a.b.a..a....a",
+    "..a....a.b..a",
+    "..a.b.....a..",
+    "....a..b..a..",
+    "....a..a.....",
+    "..t..t..t..t.",
+    "ddddddddddddd",
   ],
   lost: [
     "....yyyy.....",
