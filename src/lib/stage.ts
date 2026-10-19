@@ -14,6 +14,7 @@ export type ShotId =
   | "monolith"
   | "lost"
   | "folio"
+  | "tower"
   | PostScene;
 
 export type Day = [date: string, count: number];

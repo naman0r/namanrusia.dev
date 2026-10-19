@@ -1113,6 +1113,53 @@ function lost(n: number): Shot {
   };
 }
 
+/** The playground's backdrop: a voxel king tower, turning slowly. */
+function kingTower(n: number): Shot {
+  const t = alloc(n);
+  const v = 0.14;
+  const half = 7;
+  const tall = 14;
+  const stone = rgb("#b0a690");
+  const mortar = rgb("#857a66");
+  const wood = rgb("#8a5a3a");
+  let i = 0;
+  const add = (x: number, y: number, z: number, c: Rgb, k = 1) => {
+    if (i < n) put(t, i++, (x + 0.5) * v, y * v, (z + 0.5) * v, c, v * 0.92, k);
+  };
+  const edge = (x: number, z: number, h: number) => x === -h || x === h - 1 || z === -h || z === h - 1;
+
+  for (let x = -half - 2; x < half + 2; x++) for (let z = -half - 2; z < half + 2; z++) add(x, -1, z, (x + z) & 1 ? C.stone : C.dust);
+  for (let y = 0; y < tall; y++)
+    for (let x = -half; x < half; x++)
+      for (let z = -half; z < half; z++) {
+        if (!edge(x, z, half) && y < tall - 1) continue;
+        const front = z === half - 1;
+        const door = front && Math.abs(x + 0.5) < 2 && y < 5;
+        const banner = front && Math.abs(x + 0.5) < 2.5 && y >= 7 && y < tall - 1;
+        const emblem = banner && Math.abs(x + 0.5) < 1 && y >= 9 && y < 11;
+        const brick = y % 3 === 0 || (x + z + (Math.floor(y / 3) % 2) * 2) % 4 === 0;
+        add(x, y, z, door ? wood : emblem ? C.coin : banner ? C.accent : brick ? mortar : stone);
+      }
+  for (let y = tall; y < tall + 2; y++)
+    for (let x = -half - 1; x <= half; x++) for (let z = -half - 1; z <= half; z++) if (edge(x, z, half + 1)) add(x, y, z, y === tall ? C.deep : C.accent);
+  for (let x = -half - 1; x <= half; x++)
+    for (let z = -half - 1; z <= half; z++) if (edge(x, z, half + 1) && (x + z) % 2 === 0) add(x, tall + 2, z, C.accent);
+
+  // A gold crown on the roof, five points with a gem in each.
+  const R = 3.2;
+  for (let k = 0; k < 24; k++) {
+    const a = (k / 24) * Math.PI * 2;
+    const phase = ((k / 24) * 5) % 1;
+    const rows = 3 + Math.round((1 - Math.abs(phase - 0.5) * 2) * 3);
+    for (let y = 0; y < rows; y++) add(Math.cos(a) * R - 0.5, tall + y, Math.sin(a) * R - 0.5, y === 1 && Math.abs(phase - 0.5) < 0.1 ? C.red : C.coin);
+  }
+  hideRest(t, i);
+  return {
+    target: t,
+    pose: (c) => (c.mobile ? pose(0, 1.6, -4, 0.3, c.time * 0.25, 0.55) : pose(4.4, 1.1, -1, 0.3, c.time * 0.25, 0.66)),
+  };
+}
+
 /** FNV-1a, so a post's slug picks the same scene variation on every visit. */
 function hash(s: string) {
   let h = 2166136261;
@@ -1557,6 +1604,7 @@ export function buildShots(n: number): Omit<Record<ShotId, Shot>, "city"> {
   return {
     globe: globe(n),
     cube: aboutCube(n),
+    tower: kingTower(n),
     track: track(n),
     carts: carts(n),
     terrain: terrain(n),

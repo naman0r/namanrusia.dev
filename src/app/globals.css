@@ -164,6 +164,23 @@
   animation: party 2.4s linear infinite;
 }
 
+/* Playground: a card or banner popping in, and a refusal wiggle. */
+@keyframes deal {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+
+@keyframes nope {
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
