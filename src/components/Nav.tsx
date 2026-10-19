@@ -220,6 +220,17 @@ export const SHAPES: Record<ShotId, string[]> = {
     "..t..t..t..t.",
     "ddddddddddddd",
   ],
+  tower: [
+    "....y.y.y....",
+    "....yyyyy....",
+    "..a.a.a.a.a..",
+    "..aaaaaaaaa..",
+    "...sbbabbs...",
+    "...bbayabb...",
+    "...sbbabbs...",
+    "...bbbsbbb...",
+    "..sssssssss..",
+  ],
   lost: [
     "....yyyy.....",
     "...yy..yy....",
