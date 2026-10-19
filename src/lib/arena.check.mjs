@@ -1,6 +1,6 @@
 // Rules check for the arena engine: `node --no-warnings src/lib/arena.check.mjs` (Node 22.18+ strips the types).
 import assert from "node:assert/strict";
-import { CARDS, RIVER, LANES, botStep, canPlace, createBot, createGame, play, snap, step } from "./arena.ts";
+import { CARDS, DECK_SIZE, DEFAULT_DECK, RIVER, LANES, botStep, canPlace, createBot, createGame, play, snap, step } from "./arena.ts";
 
 const DT = 1 / 60;
 const run = (g, seconds, each = () => {}) => {
@@ -15,7 +15,9 @@ const offRiver = (g) =>
 {
   const g = createGame(1);
   assert.equal(g.entities.length, 6);
-  assert.equal(new Set([...g.hand[0], ...g.queue[0]]).size, 8);
+  assert.equal(g.hand[0].length, 4);
+  assert.deepEqual(new Set([...g.hand[0], ...g.queue[0]]), new Set(DEFAULT_DECK));
+  assert.equal(new Set([...g.hand[1], ...g.queue[1]]).size, DECK_SIZE, "the bot brings six cards too");
   assert.ok(canPlace(g, 0, "knight", 9.5, 20.5));
   assert.ok(!canPlace(g, 0, "knight", 9.5, 10.5), "enemy half is off limits");
   assert.ok(!canPlace(g, 0, "knight", 3.5, 25.5), "not on a tower");
@@ -73,6 +75,45 @@ for (const level of ["easy", "medium", "hard"]) {
   play(g, 0, 0, 3.5, 20.5);
   run(g, 40, (g) => botStep(bot, g, DT));
   assert.equal(g.crowns[0], 0, "hard bot stops a lone Giant");
+}
+
+{
+  // A custom deck is what you cycle through.
+  const deck = ["skeletons", "valkyrie", "arrows", "minipekka", "speargoblins", "barbarians"];
+  const g = createGame(6, deck);
+  assert.deepEqual(new Set([...g.hand[0], ...g.queue[0]]), new Set(deck));
+  g.elixir[0] = 10;
+  g.hand[0][0] = "skeletons";
+  play(g, 0, 0, 9.5, 20.5);
+  assert.equal(g.entities.filter((e) => e.card === "skeletons").length, 15, "an army of fifteen");
+}
+
+{
+  // Valkyrie's spin hits every skeleton around her; Arrows clear a swarm.
+  const g = createGame(7);
+  // No towers to help.
+  g.entities = g.entities.filter((e) => e.kind !== "princess");
+  g.elixir = [10, 10];
+  g.hand[0][0] = "valkyrie";
+  play(g, 0, 0, 9.5, 18.5);
+  g.hand[1][0] = "skeletons";
+  play(g, 1, 0, 9.5, 14.5);
+  // Drop the army right on top of her, past the river.
+  for (const e of g.entities) if (e.card === "skeletons") e.y += 5.5;
+  run(g, 5);
+  assert.ok(g.entities.filter((e) => e.card === "skeletons").length <= 3, "the spin shreds the army");
+
+  const h = createGame(8);
+  h.elixir = [10, 10];
+  h.hand[1][0] = "barbarians";
+  play(h, 1, 0, 9.5, 10.5);
+  run(h, 1.2);
+  h.hand[0][0] = "arrows";
+  play(h, 0, 0, 9.5, 10.5);
+  run(h, 2);
+  const barbs = h.entities.filter((e) => e.card === "barbarians");
+  assert.equal(barbs.length, 5, "arrows don't kill barbarians");
+  assert.ok(barbs.every((e) => e.hp < e.maxHp), "but they hit all five");
 }
 
 console.log("arena: all checks passed");

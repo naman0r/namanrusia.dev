@@ -130,6 +130,86 @@ const SPRITES: Record<string, string[]> = {
     "..KrK.KrK.KrK.K..",
     "..KK..KK..KK.....",
   ],
+  minipekka: [
+    "..K.....K...",
+    "..KgK.KgK...",
+    "..KKKKKKK...",
+    ".KTTTTTTTK..",
+    ".KTKKKKKTK..",
+    ".KTKKKLKTK.B",
+    ".KTTTTTTTKBB",
+    "..KDTTTDKBK.",
+    ".KTKDDDKBK..",
+    "KTTKTTTKKK..",
+    ".KKKDDDK....",
+    "...KgKgK....",
+    "..KKK.KKK...",
+  ],
+  valkyrie: [
+    "..KKKKK.....",
+    ".KOOOOOK....",
+    "KOOOOOOOK...",
+    "KOOSSSSK..K.",
+    "KOKSKSSK.KGK",
+    "KOKSSSSK.KGK",
+    "KOOKSSKK.KWK",
+    ".KKTTTTSSKW.",
+    "..KTTYTKKW..",
+    "..KTTTTK.W..",
+    "..KDDDDK....",
+    "..KSKKSK....",
+    "..KK..KK....",
+  ],
+  skeletons: [
+    "..KKK..",
+    ".KBBBK.",
+    ".KBKBK.",
+    "..KBK.G",
+    ".KBKBKG",
+    "..KBK.G",
+    ".KB.BK.",
+    ".KK.KK.",
+  ],
+  speargoblins: [
+    "K.......K..",
+    "KNK.....NK.",
+    ".KNNNNNNK..",
+    ".KNNNYKNK..",
+    ".KNNNNNNK.G",
+    "..KNNXXKKWK",
+    "..KTTTTKWK.",
+    "..KTTTWKK..",
+    "..KnKWKnK..",
+    "..KKWK.KK..",
+    "...W.......",
+  ],
+  barbarians: [
+    "K.........K.",
+    "KBK.KKK.KBK.",
+    ".KBKGGGKBK..",
+    "..KGGGGGK...",
+    "..KYSSSSK...",
+    "..KYSKSSK..K",
+    ".KYYYYYYYK.B",
+    "..KYYYYYK.KB",
+    ".KSKTTTKKKBK",
+    "KSSKTTTTSBK.",
+    ".KKKwwwwKK..",
+    "...KDK.KDK..",
+    "...KK..KK...",
+  ],
+  arrows: [
+    "......KK..",
+    ".....KBK..",
+    "..KK.KWK..",
+    ".KBK.KWKKK",
+    ".KWKKKWKBK",
+    ".KWKKWKKWK",
+    "KXWKXWK.WK",
+    "KXKKXK.KWK",
+    ".K..K..KXK",
+    ".......KK.",
+  ],
   fireball: [
     "......KKK..",
     "....KKLLK..",
@@ -378,7 +458,17 @@ export function absorb(v: View, events: GameEvent[], calm: boolean) {
       burst(v, x, y + 2, 12, [TEAM[e.side].T, TEAM[e.side].L, BONE, "#b08a55"], 50, 2, 40);
       v.booms.push({ x, y, r: TILE, t: 0, color: TEAM[e.side].L });
     }
-    else if (e.type === "boom") {
+    else if (e.type === "volley") {
+      v.booms.push({ x, y, r: e.radius * TILE, t: 0, color: BONE });
+      for (let i = 0; i < 18; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const d = Math.random() * e.radius * TILE;
+        burst(v, x + Math.cos(a) * d, y + Math.sin(a) * d, 2, ["#8a5a3a", BONE], 30, 1, 60);
+      }
+    } else if (e.type === "spin") {
+      v.booms.push({ x, y, r: e.radius * TILE, t: 0, color: "#ff7a1a" });
+      burst(v, x, y - 4, 6, ["#ff7a1a", "#ffd23f", BONE], 70);
+    } else if (e.type === "boom") {
       v.booms.push({ x, y, r: e.radius * TILE, t: 0 });
       burst(v, x, y, 26, ["#ff7a1a", "#ffd23f", "#e8402a", BONE], 110, 2, 120);
       if (!calm) v.shake = Math.max(v.shake, 0.2);
@@ -712,7 +802,23 @@ export function render(ctx: CanvasRenderingContext2D, g: Game, v: View, dt: numb
   for (const p of g.projectiles) {
     const x = lerp(p.px, p.x) * TILE;
     const y = lerp(p.py, p.y) * TILE;
-    if (p.kind === "fireball") {
+    if (p.kind === "spell" && p.card === "arrows") {
+      // A volley: a few arrows arcing in a loose bunch.
+      const total = Math.hypot(p.tx - p.sx, p.ty - p.sy) || 1;
+      const done = 1 - Math.hypot(p.tx - p.x, p.ty - p.y) / total;
+      const lift = Math.sin(done * Math.PI) * 40;
+      const a = Math.atan2(p.ty - p.sy, p.tx - p.sx) + (done < 0.5 ? -0.6 : 0.6) * Math.sign(p.ty - p.sy || 1);
+      for (let k = 0; k < 7; k++) {
+        const ox = ((k * 37) % 23) - 11;
+        const oy = ((k * 53) % 19) - 9;
+        const ax = Math.round(x + ox);
+        const ay = Math.round(y - lift + oy);
+        for (let i = 0; i < 5; i++) {
+          ctx.fillStyle = i === 0 ? BONE : i > 3 ? "#e8402a" : "#8a5a3a";
+          ctx.fillRect(Math.round(ax - Math.cos(a) * i), Math.round(ay - Math.sin(a) * i), 1, 1);
+        }
+      }
+    } else if (p.kind === "spell") {
       const total = Math.hypot(p.tx - p.sx, p.ty - p.sy) || 1;
       const done = 1 - Math.hypot(p.tx - p.x, p.ty - p.y) / total;
       const lift = Math.sin(done * Math.PI) * 48;

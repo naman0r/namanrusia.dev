@@ -1,12 +1,41 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { CARDS, H, MAX_ELIXIR, W, botStep, createBot, createGame, play, snap, step, type Bot, type CardId, type Game, type Level, type Side } from "@/lib/arena";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { CARDS, DECK_SIZE, DEFAULT_DECK, H, MAX_ELIXIR, W, botStep, createBot, createGame, play, snap, step, type Bot, type CardId, type Game, type Level, type Rarity, type Side } from "@/lib/arena";
 import { TILE, absorb, createView, drawIcon, render } from "@/lib/arenaDraw";
 
 const STEP = 1 / 60;
 const LEVELS: Level[] = ["easy", "medium", "hard"];
-type Phase = "menu" | "countdown" | "play" | "over";
+type Phase = "menu" | "deck" | "countdown" | "play" | "over";
+const POOL = (Object.keys(CARDS) as CardId[]).sort((a, b) => CARDS[a].cost - CARDS[b].cost);
+const RARITY: Record<Rarity, string> = { common: "#5ec8ff", rare: "#ff7a1a", epic: "#c86bff" };
+
+// The deck lives in localStorage; the server renders the default and the client swaps in the saved one.
+const DECK_KEY = "bridge-brawl-deck";
+const deckListeners = new Set<() => void>();
+const deckStore = {
+  subscribe: (cb: () => void) => {
+    deckListeners.add(cb);
+    return () => void deckListeners.delete(cb);
+  },
+  get: () => localStorage.getItem(DECK_KEY) ?? "",
+  server: () => "",
+  save: (deck: CardId[]) => {
+    localStorage.setItem(DECK_KEY, deck.join(","));
+    deckListeners.forEach((f) => f());
+  },
+};
+/** A saved deck, or the default if it's missing or stale. */
+function parseDeck(raw: string): CardId[] {
+  const ids = [...new Set(raw.split(","))].filter((id): id is CardId => id in CARDS);
+  return ids.length === DECK_SIZE ? ids : DEFAULT_DECK;
+}
+const stats = (id: CardId) => {
+  const c = CARDS[id];
+  if (c.kind === "spell") return `Damage ${c.dmg} · Radius ${c.radius}`;
+  const base = `HP ${c.hp} · Damage ${c.dmg}${c.kind === "troop" && c.count > 1 ? ` x${c.count}` : ""}`;
+  return c.kind === "building" ? `${base} · Lasts ${c.life}s` : `${base} · ${c.range >= 2 ? `Range ${c.range}` : "Melee"}`;
+};
 type Hud = { hand: CardId[]; next: CardId; elixir: number; clock: number; overtime: boolean; crowns: [number, number]; winner: Side | -1 | null };
 
 const hudOf = (g: Game): Hud => ({
@@ -40,6 +69,10 @@ export function Arena() {
   const [selected, setSelectedState] = useState<number | null>(null);
   const [hud, setHud] = useState<Hud>(() => hudOf(PREVIEW));
   const [nope, setNope] = useState(0);
+  const saved = useSyncExternalStore(deckStore.subscribe, deckStore.get, deckStore.server);
+  const deck = useMemo(() => parseDeck(saved), [saved]);
+  const [draft, setDraft] = useState<CardId[]>(DEFAULT_DECK);
+  const [focus, setFocus] = useState<CardId>(DEFAULT_DECK[0]);
 
   const setPhase = (p: Phase) => {
     phaseRef.current = p;
@@ -104,11 +137,27 @@ export function Arena() {
   }, [phase, count]);
 
   const start = () => {
-    game.current = createGame((Math.random() * 2 ** 31) | 0);
+    game.current = createGame((Math.random() * 2 ** 31) | 0, deck);
     bot.current = createBot(level);
     select(null);
     setCount(3);
     setPhase("countdown");
+  };
+
+  const editDeck = () => {
+    setDraft(deck);
+    setFocus(deck[0]);
+    setPhase("deck");
+  };
+  const toggle = (id: CardId) => {
+    setFocus(id);
+    if (draft.includes(id)) setDraft(draft.filter((d) => d !== id));
+    else if (draft.length < DECK_SIZE) setDraft([...draft, id]);
+    else setNope((n) => n + 1);
+  };
+  const saveDeck = () => {
+    deckStore.save(draft);
+    setPhase("menu");
   };
 
   const tileAt = (cx: number, cy: number): [number, number] | null => {
@@ -171,6 +220,9 @@ export function Arena() {
     select(slot);
   };
 
+  const preview = phase === "menu" || phase === "deck";
+  const hand = preview ? deck.slice(0, 4) : hud.hand;
+  const next = preview ? deck[4] : hud.next;
   const result = hud.winner === 0 ? ["Victory", "text-lime"] : hud.winner === 1 ? ["Defeat", "text-[#e8402a]"] : ["Draw", "text-coin"];
 
   return (
@@ -192,6 +244,9 @@ export function Arena() {
             <span className="label text-bone">Crowns</span> for each tower. The king tower ends it.
           </li>
           <li>
+            <span className="label text-bone">Deck</span> pick any six of fourteen cards from the menu.
+          </li>
+          <li>
             <span className="label text-bone">1-4</span> pick a card, <span className="label text-bone">Esc</span> drops it.
           </li>
         </ul>
@@ -200,7 +255,7 @@ export function Arena() {
       <div className="flex flex-col items-center gap-3 lg:flex-row lg:items-end lg:gap-6">
         {/* The arena takes whatever height is left after the chrome; on phones the hand sits below it. */}
         <div className="flex w-[min(100%,calc((100svh_-_17.5rem)*9/16))] min-w-64 flex-col gap-2 lg:w-[calc((100svh_-_10rem)*9/16)]">
-          <div className={`flex h-8 items-center justify-between gap-2 ${phase === "menu" ? "invisible" : ""}`}>
+          <div className={`flex h-8 items-center justify-between gap-2 ${phase === "menu" || phase === "deck" ? "invisible" : ""}`}>
             <div className="flex items-center gap-2">
               <span className="label text-[#ff8f7a]">Bot · {level}</span>
               <Crowns n={hud.crowns[1]} side={1} />
@@ -230,7 +285,7 @@ export function Arena() {
               }}
             />
 
-            {phase !== "menu" && (
+            {phase !== "menu" && phase !== "deck" && (
               <div className="pointer-events-none absolute bottom-2 left-2 flex items-center gap-2 bg-ink/80 px-1.5 py-1">
                 <span className="label text-[10px] text-accent">You</span>
                 <Crowns n={hud.crowns[0]} side={0} />
@@ -246,6 +301,16 @@ export function Arena() {
                   Brawl
                 </h2>
                 <p className="max-w-[17rem] text-sm text-dust">Take their towers before they take yours. Drag a card onto your half of the arena to play it.</p>
+                <button type="button" onClick={editDeck} className="group flex flex-col items-center gap-2" aria-label="Edit deck">
+                  <span className="flex gap-1">
+                    {deck.map((id) => (
+                      <span key={id} className="grid h-10 w-8 place-items-center border-2" style={{ borderColor: RARITY[CARDS[id].rarity], background: tint(id) }}>
+                        <Icon name={id} className="h-5 w-auto" />
+                      </span>
+                    ))}
+                  </span>
+                  <span className="label text-[10px] text-dust group-hover:text-bone">Edit deck</span>
+                </button>
                 <div role="radiogroup" aria-label="Difficulty" className="flex border-2 border-line bg-ink">
                   {LEVELS.map((l) => (
                     <button
@@ -267,6 +332,76 @@ export function Arena() {
                 >
                   Play
                 </button>
+              </div>
+            )}
+
+            {phase === "deck" && (
+              <div className="absolute inset-0 flex flex-col gap-3 overflow-y-auto bg-ink/90 p-3 sm:p-4">
+                <div className="flex items-baseline justify-between">
+                  <h2 className="font-display text-2xl text-bone">Your deck</h2>
+                  <span className="label text-[10px] text-dust">
+                    <span className={draft.length === DECK_SIZE ? "text-lime" : "text-bone"}>
+                      {draft.length}/{DECK_SIZE}
+                    </span>
+                    {draft.length > 0 && ` · avg ${(draft.reduce((s, id) => s + CARDS[id].cost, 0) / draft.length).toFixed(1)}`}
+                  </span>
+                </div>
+                <div key={nope} className={`grid grid-cols-6 gap-1.5 ${nope ? "animate-[nope_0.3s_steps(6)]" : ""}`}>
+                  {Array.from({ length: DECK_SIZE }, (_, i) => {
+                    const id = draft[i];
+                    return id ? (
+                      <button key={id} type="button" onClick={() => toggle(id)} aria-label={`Remove ${CARDS[id].name}`} className="grid aspect-[4/5] animate-[deal_0.15s_steps(3)] place-items-center border-2" style={{ borderColor: RARITY[CARDS[id].rarity], background: tint(id) }}>
+                        <Icon name={id} className="h-1/2 w-auto" />
+                      </button>
+                    ) : (
+                      <span key={i} className="aspect-[4/5] border-2 border-dashed border-line" />
+                    );
+                  })}
+                </div>
+                <div className="min-h-[3.25rem] border-l-2 pl-2" style={{ borderColor: RARITY[CARDS[focus].rarity] }}>
+                  <p className="label text-[11px] text-bone">
+                    {CARDS[focus].name} <span style={{ color: RARITY[CARDS[focus].rarity] }}>· {CARDS[focus].rarity}</span>
+                  </p>
+                  <p className="text-xs leading-snug text-dust">{CARDS[focus].blurb}</p>
+                  <p className="label text-[9px] text-dust">{stats(focus)}</p>
+                </div>
+                <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                  {POOL.map((id) => {
+                    const c = CARDS[id];
+                    const on = draft.includes(id);
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        aria-pressed={on}
+                        aria-label={`${c.name}, ${c.cost} elixir`}
+                        onClick={() => toggle(id)}
+                        onPointerEnter={() => setFocus(id)}
+                        onFocus={() => setFocus(id)}
+                        className={`relative flex aspect-[4/5] flex-col items-center justify-center gap-1 border-2 transition-transform duration-100 hover:-translate-y-0.5 ${on ? "opacity-40" : ""}`}
+                        style={{ borderColor: RARITY[c.rarity], background: tint(id) }}
+                      >
+                        <Icon name={id} className="h-[46%] w-auto" />
+                        <span className="label w-full truncate px-0.5 text-center text-[8px] leading-none text-bone">{c.name}</span>
+                        <span className="font-display absolute -left-1.5 -top-1.5 grid h-5 w-5 place-items-center border-2 border-ink bg-[#b79cff] pt-0.5 text-xs text-ink">{c.cost}</span>
+                        {on && <span className="label absolute inset-x-0 bottom-1/2 translate-y-1/2 bg-ink py-0.5 text-center text-[8px] text-lime">In deck</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-auto flex justify-between gap-3 pt-1">
+                  <button type="button" onClick={() => setDraft(DEFAULT_DECK)} className="label border-2 border-line px-3 py-2 text-dust hover:border-bone hover:text-bone">
+                    Default
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveDeck}
+                    disabled={draft.length !== DECK_SIZE}
+                    className="font-display bg-accent px-5 pb-1.5 pt-2.5 text-xl text-ink shadow-[3px_3px_0_0_var(--color-bone)] enabled:hover:-translate-y-px enabled:active:translate-y-px enabled:active:shadow-none disabled:opacity-40"
+                  >
+                    Done
+                  </button>
+                </div>
               </div>
             )}
 
@@ -333,10 +468,10 @@ export function Arena() {
             <div className="flex flex-col items-center gap-1 lg:order-last lg:col-span-2 lg:flex-row lg:gap-3">
               <span className="label text-[9px] text-dust">Next</span>
               <div className="grid aspect-[4/5] w-full place-items-center border-2 border-line bg-ink lg:w-12">
-                <Icon key={hud.next} name={hud.next} label={CARDS[hud.next].name} className="h-1/2 w-auto opacity-70" />
+                <Icon key={next} name={next} label={CARDS[next].name} className="h-1/2 w-auto opacity-70" />
               </div>
             </div>
-            {hud.hand.map((id, i) => {
+            {hand.map((id, i) => {
               const c = CARDS[id];
               const afford = hud.elixir >= c.cost;
               const on = selected === i;
@@ -355,9 +490,10 @@ export function Arena() {
                       select(on ? null : i);
                     }
                   }}
-                  className={`relative flex aspect-[4/5] animate-[deal_0.2s_steps(4)] touch-none select-none flex-col items-center justify-center gap-1 border-2 bg-ink transition-transform duration-100 ${
-                    on ? "-translate-y-2 border-bone shadow-[3px_3px_0_0_var(--color-accent)]" : "border-line enabled:hover:-translate-y-0.5 enabled:hover:border-dust"
-                  } ${afford ? "" : "grayscale-[0.8] [&>canvas]:opacity-50"}`}
+                  style={{ borderColor: on ? undefined : RARITY[c.rarity], background: tint(id) }}
+                  className={`relative flex aspect-[4/5] animate-[deal_0.2s_steps(4)] touch-none select-none flex-col items-center justify-center gap-1 border-2 transition-transform duration-100 ${
+                    on ? "-translate-y-2 border-bone shadow-[3px_3px_0_0_var(--color-accent)]" : "enabled:hover:-translate-y-0.5"
+                  } ${afford || preview ? "" : "grayscale-[0.8] [&>canvas]:opacity-50"}`}
                 >
                   <Icon name={id} className="h-[48%] w-auto" />
                   <span className="label w-full truncate px-0.5 text-center text-[9px] leading-none text-bone">{c.name}</span>
@@ -371,6 +507,9 @@ export function Arena() {
     </div>
   );
 }
+
+/** A card's face: dark, washed with its rarity color. */
+const tint = (id: CardId) => `color-mix(in srgb, ${RARITY[CARDS[id].rarity]} 16%, var(--color-ink))`;
 
 function Icon({ name, side = 0, label, className = "" }: { name: CardId | "crown" | "drop"; side?: Side; label?: string; className?: string }) {
   return (

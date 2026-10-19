@@ -16,30 +16,58 @@ const ELIXIR_EVERY = 2.8;
 const DEPLOY_TIME = 1;
 /** Crown towers take this share of spell damage, as in the real game. */
 const TOWER_SPELL_SHARE = 0.3;
-const fireballDamage = 689;
 
 export type Side = 0 | 1;
-export type CardId = "knight" | "archers" | "giant" | "goblins" | "musketeer" | "hog" | "fireball" | "cannon";
+export type CardId =
+  | "knight"
+  | "archers"
+  | "giant"
+  | "goblins"
+  | "musketeer"
+  | "hog"
+  | "fireball"
+  | "cannon"
+  | "minipekka"
+  | "valkyrie"
+  | "skeletons"
+  | "speargoblins"
+  | "barbarians"
+  | "arrows";
+export type Rarity = "common" | "rare" | "epic";
 
 type Stats = { hp: number; dmg: number; hit: number; range: number; r: number };
-type Card = { name: string; cost: number; blurb: string } & (
-  | ({ kind: "troop"; count: number; speed: number; sight: number; buildings?: boolean; jumps?: boolean } & Stats)
+type Card = { name: string; cost: number; blurb: string; rarity: Rarity } & (
+  | ({ kind: "troop"; count: number; speed: number; sight: number; buildings?: boolean; jumps?: boolean; splash?: number } & Stats)
   | ({ kind: "building"; life: number } & Stats)
-  | { kind: "spell"; dmg: number; radius: number }
+  | { kind: "spell"; dmg: number; radius: number; knock?: boolean }
 );
 
 export const CARDS: Record<CardId, Card> = {
-  knight: { name: "Knight", cost: 3, blurb: "Sturdy sword, big mustache", kind: "troop", count: 1, hp: 1766, dmg: 202, hit: 1.2, range: 0.7, r: 0.5, speed: 1, sight: 5.5 },
-  archers: { name: "Archers", cost: 3, blurb: "Two archers, long reach", kind: "troop", count: 2, hp: 304, dmg: 107, hit: 0.9, range: 5, r: 0.4, speed: 1, sight: 5.5 },
-  giant: { name: "Giant", cost: 5, blurb: "Huge, slow, only hits towers", kind: "troop", count: 1, hp: 4091, dmg: 254, hit: 1.5, range: 1, r: 0.75, speed: 0.75, sight: 7.5, buildings: true },
-  goblins: { name: "Goblins", cost: 2, blurb: "Three fast stabby pests", kind: "troop", count: 3, hp: 202, dmg: 120, hit: 1.1, range: 0.5, r: 0.35, speed: 2, sight: 5.5 },
-  musketeer: { name: "Musketeer", cost: 4, blurb: "Fragile, hits hard from afar", kind: "troop", count: 1, hp: 721, dmg: 217, hit: 1, range: 6, r: 0.45, speed: 1, sight: 6 },
-  hog: { name: "Hog Rider", cost: 4, blurb: "Jumps the river, rams towers", kind: "troop", count: 1, hp: 1697, dmg: 318, hit: 1.6, range: 0.8, r: 0.6, speed: 2, sight: 9.5, buildings: true, jumps: true },
-  fireball: { name: "Fireball", cost: 4, blurb: "Splash damage anywhere", kind: "spell", dmg: fireballDamage, radius: 2.5 },
-  cannon: { name: "Cannon", cost: 3, blurb: "Pulls tower-hitters off course", kind: "building", life: 30, hp: 824, dmg: 212, hit: 0.9, range: 5.5, r: 1 },
+  knight: { name: "Knight", rarity: "common", cost: 3, blurb: "Sturdy sword, big mustache", kind: "troop", count: 1, hp: 1766, dmg: 202, hit: 1.2, range: 0.7, r: 0.5, speed: 1, sight: 5.5 },
+  archers: { name: "Archers", rarity: "common", cost: 3, blurb: "Two archers, long reach", kind: "troop", count: 2, hp: 304, dmg: 107, hit: 0.9, range: 5, r: 0.4, speed: 1, sight: 5.5 },
+  giant: { name: "Giant", rarity: "rare", cost: 5, blurb: "Huge, slow, only hits towers", kind: "troop", count: 1, hp: 4091, dmg: 254, hit: 1.5, range: 1, r: 0.75, speed: 0.75, sight: 7.5, buildings: true },
+  goblins: { name: "Goblins", rarity: "common", cost: 2, blurb: "Three fast stabby pests", kind: "troop", count: 3, hp: 202, dmg: 120, hit: 1.1, range: 0.5, r: 0.35, speed: 2, sight: 5.5 },
+  musketeer: { name: "Musketeer", rarity: "rare", cost: 4, blurb: "Fragile, hits hard from afar", kind: "troop", count: 1, hp: 721, dmg: 217, hit: 1, range: 6, r: 0.45, speed: 1, sight: 6 },
+  hog: { name: "Hog Rider", rarity: "rare", cost: 4, blurb: "Jumps the river, rams towers", kind: "troop", count: 1, hp: 1697, dmg: 318, hit: 1.6, range: 0.8, r: 0.6, speed: 2, sight: 9.5, buildings: true, jumps: true },
+  fireball: { name: "Fireball", rarity: "rare", cost: 4, blurb: "Big splash, knocks small troops back", kind: "spell", dmg: 689, radius: 2.5, knock: true },
+  cannon: { name: "Cannon", rarity: "common", cost: 3, blurb: "Pulls tower-hitters off course", kind: "building", life: 30, hp: 824, dmg: 212, hit: 0.9, range: 5.5, r: 1 },
+  minipekka: { name: "Mini P.E.K.K.A", rarity: "rare", cost: 4, blurb: "Pancakes! Huge single hits", kind: "troop", count: 1, hp: 1129, dmg: 598, hit: 1.6, range: 0.8, r: 0.45, speed: 1.5, sight: 5.5 },
+  valkyrie: { name: "Valkyrie", rarity: "rare", cost: 4, blurb: "Spins her axe, hits all around", kind: "troop", count: 1, hp: 1654, dmg: 221, hit: 1.5, range: 0.5, r: 0.5, speed: 1, sight: 5.5, splash: 1.2 },
+  skeletons: { name: "Skeleton Army", rarity: "epic", cost: 3, blurb: "Fifteen bony swarmers", kind: "troop", count: 15, hp: 67, dmg: 67, hit: 1, range: 0.5, r: 0.3, speed: 1.5, sight: 5.5 },
+  speargoblins: { name: "Spear Goblins", rarity: "common", cost: 2, blurb: "Three goblins with spears", kind: "troop", count: 3, hp: 133, dmg: 81, hit: 1.7, range: 5, r: 0.35, speed: 2, sight: 5.5 },
+  barbarians: { name: "Barbarians", rarity: "common", cost: 5, blurb: "Five angry mustaches", kind: "troop", count: 5, hp: 670, dmg: 192, hit: 1.4, range: 0.7, r: 0.5, speed: 1, sight: 5.5 },
+  arrows: { name: "Arrows", rarity: "common", cost: 3, blurb: "Wide volley, clears swarms", kind: "spell", dmg: 366, radius: 4 },
 };
 
-const DECK: CardId[] = ["knight", "archers", "giant", "goblins", "musketeer", "hog", "fireball", "cannon"];
+export const DECK_SIZE = 6;
+const HAND_SIZE = 4;
+export const DEFAULT_DECK: CardId[] = ["giant", "musketeer", "knight", "archers", "goblins", "fireball"];
+// The bot brings one of these, picked by the match seed.
+const BOT_DECKS: CardId[][] = [
+  ["giant", "musketeer", "knight", "archers", "goblins", "fireball"],
+  ["hog", "valkyrie", "musketeer", "cannon", "skeletons", "arrows"],
+  ["giant", "minipekka", "speargoblins", "barbarians", "archers", "fireball"],
+];
 
 export type Entity = {
   id: number;
@@ -61,6 +89,8 @@ export type Entity = {
   speed: number;
   buildings: boolean;
   jumps: boolean;
+  /** Melee splash radius around the attacker, 0 for single-target. */
+  splash: number;
   target: number;
   /** Attacking: in range of its target, which it keeps until it dies or walks off. */
   locked: boolean;
@@ -82,11 +112,13 @@ type Projectile = {
   px: number;
   py: number;
   side: Side;
-  kind: "arrow" | "bullet" | "fireball";
+  kind: "arrow" | "bullet" | "spell";
+  /** Which spell, for kind "spell". */
+  card?: CardId;
   target: number;
   dmg: number;
   speed: number;
-  /** Fireballs fly to a point; the rest home on `target`. */
+  /** Spells fly to a point; the rest home on `target`. */
   tx: number;
   ty: number;
   sx: number;
@@ -95,7 +127,7 @@ type Projectile = {
 
 export type GameEvent =
   | { type: "hit" | "death" | "deploy"; x: number; y: number; side: Side; big?: boolean }
-  | { type: "boom"; x: number; y: number; radius: number }
+  | { type: "boom" | "volley" | "spin"; x: number; y: number; radius: number }
   | { type: "tower"; x: number; y: number; side: Side; king: boolean };
 
 export type Game = {
@@ -150,6 +182,7 @@ function spawn(g: Game, e: Partial<Entity> & Pick<Entity, "side" | "kind" | "x" 
     speed: 0,
     buildings: false,
     jumps: false,
+    splash: 0,
     target: -1,
     locked: false,
     cooldown: 0,
@@ -166,7 +199,8 @@ function spawn(g: Game, e: Partial<Entity> & Pick<Entity, "side" | "kind" | "x" 
   return ent;
 }
 
-export function createGame(seed: number): Game {
+/** `deck` is side 0's six cards; the bot's deck comes from the seed. */
+export function createGame(seed: number, deck: CardId[] = DEFAULT_DECK): Game {
   const g: Game = {
     entities: [],
     projectiles: [],
@@ -183,10 +217,11 @@ export function createGame(seed: number): Game {
     nextId: 1,
     seed,
   };
+  const decks = [deck, BOT_DECKS[Math.abs(seed) % BOT_DECKS.length]];
   for (const side of [0, 1] as Side[]) {
-    const deck = shuffle(g, DECK);
-    g.hand[side] = deck.slice(0, 4);
-    g.queue[side] = deck.slice(4);
+    const d = shuffle(g, decks[side]);
+    g.hand[side] = d.slice(0, HAND_SIZE);
+    g.queue[side] = d.slice(HAND_SIZE);
     // Tower range is measured from the tower's edge, so these read as 7 and 7.5 tiles from center.
     spawn(g, { side, kind: "king", x: 9, y: flipY(side, 29), r: 2, hp: 4824, dmg: 120, hit: 1, range: 5, active: false });
     for (const x of LANES) spawn(g, { side, kind: "princess", x, y: flipY(side, 25.5), r: 1.5, hp: 3052, dmg: 109, hit: 0.8, range: 6 });
@@ -255,6 +290,9 @@ const SPREAD: Record<number, [number, number][]> = {
   2: [[-0.5, 0], [0.5, 0]],
   3: [[0, -0.45], [-0.5, 0.35], [0.5, 0.35]],
 };
+/** Bigger groups fan out in a sunflower spiral. */
+const spread = (n: number): [number, number][] =>
+  SPREAD[n] ?? Array.from({ length: n }, (_, i) => [Math.cos(i * 2.4) * 0.38 * Math.sqrt(i), Math.sin(i * 2.4) * 0.38 * Math.sqrt(i)]);
 
 /** Plays the card in hand `slot` at (x, y). Returns false if it can't be afforded or placed. */
 export function play(g: Game, side: Side, slot: number, x: number, y: number) {
@@ -269,13 +307,13 @@ export function play(g: Game, side: Side, slot: number, x: number, y: number) {
     const king = g.entities.find((e) => e.side === side && e.kind === "king");
     const sx = king?.x ?? 9;
     const sy = king?.y ?? flipY(side, 29);
-    g.projectiles.push({ x: sx, y: sy, px: sx, py: sy, sx, sy, side, kind: "fireball", target: -1, dmg: c.dmg, speed: 11, tx: x, ty: y });
+    g.projectiles.push({ x: sx, y: sy, px: sx, py: sy, sx, sy, side, kind: "spell", card: id, target: -1, dmg: c.dmg, speed: c.knock ? 11 : 16, tx: x, ty: y });
     return true;
   }
   if (c.kind === "building") {
     spawn(g, { side, kind: "building", card: id, x, y, r: c.r, hp: c.hp, dmg: c.dmg, hit: c.hit, range: c.range, sight: c.range, deploy: DEPLOY_TIME, decay: c.hp / c.life });
   } else {
-    for (const [ox, oy] of SPREAD[c.count]) {
+    for (const [ox, oy] of spread(c.count)) {
       spawn(g, {
         side,
         kind: "troop",
@@ -291,6 +329,7 @@ export function play(g: Game, side: Side, slot: number, x: number, y: number) {
         speed: c.speed,
         buildings: !!c.buildings,
         jumps: !!c.jumps,
+        splash: c.splash ?? 0,
         deploy: DEPLOY_TIME,
         face: x < W / 2 ? 1 : -1,
       });
@@ -411,6 +450,10 @@ export function step(g: Game, dt: number) {
         if (e.range >= 2) {
           const kind = e.card === "musketeer" ? "bullet" : "arrow";
           g.projectiles.push({ x: e.x, y: e.y, px: e.x, py: e.y, sx: e.x, sy: e.y, side: e.side, kind, target: t.id, dmg: e.dmg, speed: kind === "bullet" ? 20 : 14, tx: t.x, ty: t.y });
+        } else if (e.splash) {
+          for (const o of g.entities) if (o.side !== e.side && o.hp > 0 && o.kind === "troop" && edge(e, o) <= e.splash) damage(g, o, e.dmg);
+          if (t.kind !== "troop") damage(g, t, e.dmg);
+          g.events.push({ type: "spin", x: e.x, y: e.y, radius: e.splash + e.r });
         } else {
           damage(g, t, e.dmg);
           g.events.push({ type: "hit", x: t.x, y: t.y, side: t.side });
@@ -492,7 +535,7 @@ function fly(g: Game, dt: number) {
   g.projectiles = g.projectiles.filter((p) => {
     p.px = p.x;
     p.py = p.y;
-    if (p.kind !== "fireball") {
+    if (p.kind !== "spell") {
       const t = byId(g, p.target);
       if (!t) return false;
       p.tx = t.x;
@@ -507,19 +550,19 @@ function fly(g: Game, dt: number) {
     }
     p.x = p.tx;
     p.y = p.ty;
-    if (p.kind === "fireball") {
-      const c = CARDS.fireball;
+    if (p.kind === "spell") {
+      const c = CARDS[p.card!];
       if (c.kind !== "spell") return false;
       for (const e of g.entities) {
         if (e.side === p.side || e.hp <= 0 || dist(e, p) > c.radius + e.r) continue;
         damage(g, e, isTower(e) ? p.dmg * TOWER_SPELL_SHARE : p.dmg);
-        if (e.kind === "troop" && e.maxHp < 1500) {
+        if (c.knock && e.kind === "troop" && e.maxHp < 1500) {
           const d2 = dist(e, p) || 1;
           e.x += ((e.x - p.x) / d2) * 0.8;
           e.y += ((e.y - p.y) / d2) * 0.8;
         }
       }
-      g.events.push({ type: "boom", x: p.x, y: p.y, radius: c.radius });
+      g.events.push({ type: c.knock ? "boom" : "volley", x: p.x, y: p.y, radius: c.radius });
     } else {
       const t = byId(g, p.target);
       if (t) {
@@ -579,16 +622,17 @@ export function botStep(bot: Bot, g: Game, dt: number) {
       tryPlay(h.slot, lead.x, Math.min(lead.y - 1.5, RIVER[0] - 1));
       return;
     }
-    const fireball = has("fireball");
     const value = near.reduce((s, t) => {
       const c = CARDS[t.card!];
       return s + (c.kind === "troop" ? c.cost / c.count : c.cost);
     }, 0);
-    if (fireball && (near.length >= 3 || (value >= 4 && near.every((t) => t.maxHp < 1000)))) {
+    // A spell is worth it on a crowd it can actually kill.
+    const spell = affordable.find((h) => h.c.kind === "spell" && near.length >= 3 && near.filter((t) => t.hp <= h.c.dmg).length >= 3) ?? has("fireball");
+    if (spell && (near.length >= 3 || (spell.id === "fireball" && value >= 4 && near.every((t) => t.maxHp < 1000)))) {
       const cx = near.reduce((s, t) => s + t.x, 0) / near.length;
       const cy = near.reduce((s, t) => s + t.y, 0) / near.length;
-      // Lead the target: fireballs take a moment to land.
-      tryPlay(fireball.slot, cx, cy - lead.speed * 0.6);
+      // Lead the target: spells take a moment to land.
+      tryPlay(spell.slot, cx, cy - lead.speed * 0.6);
       return;
     }
     const cannon = has("cannon");
@@ -597,7 +641,12 @@ export function botStep(bot: Bot, g: Game, dt: number) {
       return;
     }
     const swarm = near.length >= 2 && near.every((t) => t.maxHp < 800);
-    const order: CardId[] = lead.maxHp > 1500 ? ["goblins", "knight", "musketeer", "archers", "cannon"] : swarm ? ["archers", "knight", "musketeer", "cannon", "goblins"] : ["knight", "musketeer", "archers", "goblins", "cannon"];
+    const order: CardId[] =
+      lead.maxHp > 1500
+        ? ["minipekka", "skeletons", "goblins", "barbarians", "knight", "musketeer", "valkyrie", "archers", "speargoblins", "cannon"]
+        : swarm
+          ? ["valkyrie", "archers", "speargoblins", "knight", "musketeer", "barbarians", "cannon", "goblins"]
+          : ["knight", "valkyrie", "minipekka", "musketeer", "barbarians", "archers", "goblins", "speargoblins", "skeletons", "cannon"];
     const h = order.map(has).find(Boolean);
     if (!h) return;
     const ranged = h.c.kind === "troop" && h.c.range >= 2;
@@ -621,16 +670,18 @@ export function botStep(bot: Bot, g: Game, dt: number) {
         return;
       }
     }
-    // Finish a weak tower with a fireball.
-    const fireball = affordable.find((h) => h.id === "fireball");
-    const kill = fireball && g.entities.find((e) => e.side === 0 && e.kind === "princess" && e.hp <= fireballDamage * TOWER_SPELL_SHARE);
-    if (fireball && kill) {
-      tryPlay(fireball.slot, kill.x, kill.y);
-      return;
+    // Finish a weak tower with a spell.
+    for (const h of affordable) {
+      const kill = h.c.kind === "spell" && g.entities.find((e) => e.side === 0 && e.kind === "princess" && e.hp <= h.c.dmg * TOWER_SPELL_SHARE);
+      if (kill) {
+        tryPlay(h.slot, kill.x, kill.y);
+        return;
+      }
     }
-    const giant = affordable.find((h) => h.id === "giant");
-    if (giant) {
-      tryPlay(giant.slot, lx, 1.5);
+    // Slow tanks start at the back so support can catch up.
+    const heavy = affordable.find((h) => h.c.kind === "troop" && h.c.hp > 3000);
+    if (heavy) {
+      tryPlay(heavy.slot, lx, 1.5);
       return;
     }
   }
