@@ -10,7 +10,7 @@ const run = (g, seconds, each = () => {}) => {
   }
 };
 const offRiver = (g) =>
-  g.entities.every((e) => e.kind !== "troop" || e.jumps || !(e.y > RIVER[0] && e.y < RIVER[1]) || LANES.some((x) => Math.abs(e.x - x) <= 1.5));
+  g.entities.every((e) => e.kind !== "troop" || e.jumps || e.air || !(e.y > RIVER[0] && e.y < RIVER[1]) || LANES.some((x) => Math.abs(e.x - x) <= 1.5));
 
 {
   const g = createGame(1);
@@ -114,6 +114,80 @@ for (const level of ["easy", "medium", "hard"]) {
   const barbs = h.entities.filter((e) => e.card === "barbarians");
   assert.equal(barbs.length, 5, "arrows don't kill barbarians");
   assert.ok(barbs.every((e) => e.hp < e.maxHp), "but they hit all five");
+}
+
+{
+  // One elixir every 2s, twice as fast in the last minute.
+  const g = createGame(9);
+  g.elixir = [0, 0];
+  run(g, 4);
+  assert.ok(Math.abs(g.elixir[0] - 2) < 0.05, `2 elixir after 4s, got ${g.elixir[0]}`);
+  g.elixir = [0, 0];
+  g.clock = 60;
+  run(g, 4);
+  assert.ok(Math.abs(g.elixir[0] - 4) < 0.05, `4 elixir after 4s of 2x, got ${g.elixir[0]}`);
+}
+
+{
+  // Flyers: they cross the river anywhere, melee and the Cannon can't touch them, Archers can.
+  const g = createGame(10);
+  g.entities = g.entities.filter((e) => e.kind !== "princess");
+  g.elixir = [10, 10];
+  g.hand[1][0] = "megaminion";
+  play(g, 1, 0, 9.5, 12.5);
+  g.hand[0][0] = "knight";
+  play(g, 0, 0, 9.5, 21.5);
+  g.hand[0][1] = "cannon";
+  play(g, 0, 1, 12, 22);
+  run(g, 4);
+  const mm = g.entities.find((e) => e.card === "megaminion");
+  assert.ok(mm && Math.abs(mm.x - 9.5) < 2 && mm.y > RIVER[0] + 1, "it flew straight over the water, not via a bridge");
+  run(g, 3);
+  assert.ok(g.entities.some((e) => e.card === "knight" && e.hp < e.maxHp), "the knight takes hits");
+  assert.equal(mm.hp, mm.maxHp, "but can't hit back, and neither can the cannon");
+  g.elixir[0] = 10;
+  g.hand[0][2] = "archers";
+  assert.ok(play(g, 0, 2, Math.round(mm.x) + 0.5, Math.round(mm.y) + 3.5));
+  run(g, 6);
+  assert.ok(mm.hp < mm.maxHp, "archers shoot it down");
+}
+
+{
+  // Zap freezes, and a Bomber's splash hits the group but never a flyer.
+  const g = createGame(11);
+  g.elixir = [10, 10];
+  g.hand[1][0] = "giant";
+  play(g, 1, 0, 9.5, 8.5);
+  run(g, 2);
+  const giant = g.entities.find((e) => e.card === "giant");
+  const y = giant.y;
+  g.hand[0][0] = "zap";
+  play(g, 0, 0, giant.x, giant.y);
+  run(g, 0.4);
+  assert.ok(Math.abs(giant.y - y) < 0.05, "stunned in place");
+  assert.ok(giant.hp < giant.maxHp, "and zapped");
+
+  const h = createGame(12);
+  h.entities = h.entities.filter((e) => e.kind !== "princess");
+  h.elixir = [10, 10];
+  h.hand[1][0] = "barbarians";
+  play(h, 1, 0, 9.5, 12.5);
+  for (const e of h.entities) if (e.card === "barbarians") e.y += 6;
+  h.hand[0][0] = "bomber";
+  play(h, 0, 0, 9.5, 23.5);
+  run(h, 3.5);
+  const hurt = h.entities.filter((e) => e.card === "barbarians" && e.hp < e.maxHp).length;
+  assert.ok(hurt >= 2, `bombs splash several barbarians, hit ${hurt}`);
+
+  const m = createGame(13);
+  m.entities = m.entities.filter((e) => e.kind !== "princess");
+  m.elixir = [10, 10];
+  m.hand[1][0] = "minions";
+  play(m, 1, 0, 9.5, 12.5);
+  m.hand[0][0] = "bomber";
+  play(m, 0, 0, 9.5, 20.5);
+  run(m, 3);
+  assert.ok(m.entities.filter((e) => e.card === "minions").every((e) => e.hp === e.maxHp), "minions are out of a bomber's reach");
 }
 
 console.log("arena: all checks passed");
