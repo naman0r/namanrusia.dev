@@ -14,7 +14,7 @@ export type ShotId =
   | "monolith"
   | "lost"
   | "folio"
-  | "tower"
+  | "arena"
   | PostScene;
 
 export type Day = [date: string, count: number];
@@ -48,6 +48,12 @@ export const stage = {
   globe: { dragging: false, dx: 0, dy: 0, hover: -1 },
   /** The GitHub contribution calendar, once the landing page hands it over. */
   days: null as Day[] | null,
+  /**
+   * A moment that takes over the scene from the page's own shot: the playground sets this when a
+   * card is played or a tower falls, and the scene morphs into that sprite until it's cleared.
+   * A new `key` re-triggers the morph even for the same sprite.
+   */
+  cue: null as { sprite: string; side: 0 | 1; key: number } | null,
   version: 0,
 };
 

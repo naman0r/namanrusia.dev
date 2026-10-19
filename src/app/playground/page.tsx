@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function Playground() {
   return (
-    <main id="main" data-shot="tower" className="px-4 pb-4 pt-[4.5rem] md:px-8 lg:pt-20">
+    <main id="main" data-shot="arena" className="px-4 pb-4 pt-[4.5rem] md:px-8 lg:pt-20">
       <Arena />
     </main>
   );

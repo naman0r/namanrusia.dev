@@ -3,6 +3,7 @@ import { experience, roleEnd, TIMELINE_END, TIMELINE_START } from "@/content/exp
 import { homes } from "@/content/profile";
 import { featured, projects } from "@/content/projects";
 import { stage, type Day, type ShotId } from "@/lib/stage";
+import { spritePixels } from "@/lib/arenaDraw";
 import { ACCENT, HEAT, heatLevel } from "./palette";
 import { EARTH, EARTH_H, EARTH_W } from "./earth";
 
@@ -1113,51 +1114,349 @@ function lost(n: number): Shot {
   };
 }
 
-/** The playground's backdrop: a voxel king tower, turning slowly. */
-function kingTower(n: number): Shot {
+// Sky over the playground arena, as color multipliers through one day.
+const DAY: Rgb = [1, 1, 1];
+const DUSK: Rgb = [1.05, 0.7, 0.52];
+const NIGHT: Rgb = [0.3, 0.36, 0.7];
+const DAWN: Rgb = [0.95, 0.68, 0.8];
+const SKY: [number, Rgb][] = [
+  [0, DAY],
+  [0.42, DAY],
+  [0.52, DUSK],
+  [0.6, NIGHT],
+  [0.84, NIGHT],
+  [0.92, DAWN],
+  [1, DAY],
+];
+
+/**
+ * The playground's backdrop: a small voxel arena where the match never stops. Troops meet on the
+ * bridges and one side bursts apart, the winner presses on while the tower shoots back, fireballs
+ * land on the fights, and the sky turns from day to night and back.
+ */
+function arena(n: number): Shot {
   const t = alloc(n);
-  const v = 0.14;
-  const half = 7;
-  const tall = 14;
-  const stone = rgb("#b0a690");
-  const mortar = rgb("#857a66");
-  const wood = rgb("#8a5a3a");
-  let i = 0;
-  const add = (x: number, y: number, z: number, c: Rgb, k = 1) => {
-    if (i < n) put(t, i++, (x + 0.5) * v, y * v, (z + 0.5) * v, c, v * 0.92, k);
+  const W = 14;
+  const L = 22;
+  const cell = 0.2;
+  const half = cell / 2;
+  const X = (cx: number) => (cx - W / 2) * cell;
+  const Z = (rz: number) => (rz - L / 2) * cell;
+  const LANES = [3, 11];
+  const P = {
+    grass: [rgb("#2f7b3a"), rgb("#34853f")],
+    dirt: rgb("#b08a55"),
+    water: rgb("#2f6bff"),
+    deep: rgb("#1c3a82"),
+    foam: rgb("#9cc0ff"),
+    wood: rgb("#a8743f"),
+    stone: rgb("#b0a690"),
+    mortar: rgb("#857a66"),
+    door: rgb("#5a3a24"),
+    skin: rgb("#f0b88a"),
+    torch: rgb("#ffd23f"),
+    cloud: rgb("#eee7d7"),
+    fire: [rgb("#fff3b0"), rgb("#ffd23f"), rgb("#ff7a1a"), rgb("#e8402a"), rgb("#6b6356")],
   };
-  const edge = (x: number, z: number, h: number) => x === -h || x === h - 1 || z === -h || z === h - 1;
+  const TEAM = [
+    { T: C.accent, D: rgb("#2f5fcf") },
+    { T: C.red, D: rgb("#a82a1a") },
+  ];
+  // Lights keep their own color through the night.
+  const light = new Uint8Array(n);
+  let i = 0;
 
-  for (let x = -half - 2; x < half + 2; x++) for (let z = -half - 2; z < half + 2; z++) add(x, -1, z, (x + z) & 1 ? C.stone : C.dust);
-  for (let y = 0; y < tall; y++)
-    for (let x = -half; x < half; x++)
-      for (let z = -half; z < half; z++) {
-        if (!edge(x, z, half) && y < tall - 1) continue;
-        const front = z === half - 1;
-        const door = front && Math.abs(x + 0.5) < 2 && y < 5;
-        const banner = front && Math.abs(x + 0.5) < 2.5 && y >= 7 && y < tall - 1;
-        const emblem = banner && Math.abs(x + 0.5) < 1 && y >= 9 && y < 11;
-        const brick = y % 3 === 0 || (x + z + (Math.floor(y / 3) % 2) * 2) % 4 === 0;
-        add(x, y, z, door ? wood : emblem ? C.coin : banner ? C.accent : brick ? mortar : stone);
+  const water: number[] = [];
+  for (let r = 0; r < L; r++)
+    for (let c = 0; c < W; c++) {
+      const onLane = LANES.some((l) => Math.abs(c + 0.5 - l) < 1.1);
+      const wet = r >= 10 && r < 12;
+      const bridge = wet && onLane;
+      if (wet && !bridge) water.push(i);
+      const color = bridge ? P.wood : wet ? P.water : onLane && r >= 2 && r < L - 2 ? P.dirt : P.grass[(c + r) % 2];
+      put(t, i++, X(c + 0.5), bridge ? 0.03 : wet ? -0.06 : 0, Z(r + 0.5), color, [cell * 0.98, wet && !bridge ? cell * 0.3 : cell * 0.5, cell * 0.98]);
+    }
+
+  type Tower = { x: number; z: number; top: number; batt: [number, number] };
+  const towers: Tower[] = [];
+  const tower = (cx: number, rz: number, wc: number, hv: number, side: number, king: boolean) => {
+    const nv = wc * 2;
+    const x0 = X(cx) - (nv - 1) * (half / 2);
+    const z0 = Z(rz) - (nv - 1) * (half / 2);
+    const base = cell * 0.25 + half / 2;
+    const front = side === 1 ? nv - 1 : 0;
+    for (let y = 0; y < hv; y++)
+      for (let a = 0; a < nv; a++)
+        for (let b = 0; b < nv; b++) {
+          const edge = a === 0 || b === 0 || a === nv - 1 || b === nv - 1;
+          if (!edge && y < hv - 1) continue;
+          const door = b === front && y < 3 && Math.abs(a - (nv - 1) / 2) < 1;
+          const brick = (a + b + (y % 2) * 2) % 4 === 0;
+          put(t, i++, x0 + a * half, base + y * half, z0 + b * half, door ? P.door : brick ? P.mortar : P.stone, half * 0.94);
+        }
+    const batt0 = i;
+    for (let a = -1; a <= nv; a++)
+      for (let b = -1; b <= nv; b++) {
+        if (a !== -1 && b !== -1 && a !== nv && b !== nv) continue;
+        put(t, i++, x0 + a * half, base + hv * half, z0 + b * half, TEAM[side].T, half * 0.94);
+        if ((a + b) % 2 === 0) put(t, i++, x0 + a * half, base + (hv + 1) * half, z0 + b * half, TEAM[side].D, half * 0.94);
       }
-  for (let y = tall; y < tall + 2; y++)
-    for (let x = -half - 1; x <= half; x++) for (let z = -half - 1; z <= half; z++) if (edge(x, z, half + 1)) add(x, y, z, y === tall ? C.deep : C.accent);
-  for (let x = -half - 1; x <= half; x++)
-    for (let z = -half - 1; z <= half; z++) if (edge(x, z, half + 1) && (x + z) % 2 === 0) add(x, tall + 2, z, C.accent);
+    const batt: [number, number] = [batt0, i];
+    for (const a of [-1, nv]) {
+      light[i] = 1;
+      put(t, i++, x0 + a * half, base + (hv + 2) * half, z0 + front * half, P.torch, half * 0.7);
+    }
+    if (king)
+      for (let k = 0; k < 12; k++) {
+        const ang = (k / 12) * Math.PI * 2;
+        const tall = k % 3 === 0 ? 2 : 1;
+        for (let y = 0; y < tall; y++) put(t, i++, X(cx) + Math.cos(ang) * half * 1.6, base + (hv + 1 + y) * half, Z(rz) + Math.sin(ang) * half * 1.6, C.coin, half * 0.8);
+      }
+    towers.push({ x: X(cx), z: Z(rz), top: base + (hv + 1) * half, batt });
+  };
+  tower(7, 2, 3, 9, 1, true);
+  for (const l of LANES) tower(l, 5, 2, 6, 1, false);
+  for (const l of LANES) tower(l, 17, 2, 6, 0, false);
+  tower(7, 20, 3, 9, 0, true);
+  // Princess towers by side and lane, for the winner to hit.
+  const princess = (side: number, lane: number) => towers[side === 1 ? 1 + lane : 3 + lane];
 
-  // A gold crown on the roof, five points with a gem in each.
-  const R = 3.2;
-  for (let k = 0; k < 24; k++) {
-    const a = (k / 24) * Math.PI * 2;
-    const phase = ((k / 24) * 5) % 1;
-    const rows = 3 + Math.round((1 - Math.abs(phase - 0.5) * 2) * 3);
-    for (let y = 0; y < rows; y++) add(Math.cos(a) * R - 0.5, tall + y, Math.sin(a) * R - 0.5, y === 1 && Math.abs(phase - 0.5) < 0.1 ? C.red : C.coin);
-  }
-  hideRest(t, i);
+  // Everything below moves, so it's parked at scale 0 and placed every frame.
+  const park = (count: number, isLight = false) => {
+    const from = i;
+    for (let k = 0; k < count; k++) {
+      light[i] = isLight ? 1 : 0;
+      put(t, i++, 0, 0, 0, C.bone, 0);
+    }
+    return from;
+  };
+  const PAIRS = 6;
+  const troops = park(PAIRS * 2 * 4);
+  const arrows = park(PAIRS * 2, true);
+  const shells = park(2 * 7, true);
+  const sparks = park(2 * 20, true);
+  const clouds = park(3 * 9);
+  const flies = park(24, true);
+  const used = i;
+
+  const r = rng(21);
+  const sparkDir = Array.from({ length: 20 }, () => {
+    const a = r() * Math.PI * 2;
+    const up = 0.3 + r() * 0.7;
+    return [Math.cos(a) * (1 - up * 0.5), up, Math.sin(a) * (1 - up * 0.5)];
+  });
+  const puff = Array.from({ length: 27 }, () => [(r() - 0.5) * cell * 3, (r() - 0.5) * cell * 0.8, (r() - 0.5) * cell * 1.6]);
+  const fly = Array.from({ length: 24 }, () => [(r() - 0.5) * W * cell, r(), (r() - 0.5) * L * cell, r()]);
+  const hash = (k: number) => {
+    let h = Math.imul(k ^ 0x9e3779b9, 0x85ebca6b);
+    h ^= h >>> 13;
+    return Math.imul(h, 0xc2b2ae35) >>> 0;
+  };
+
   return {
     target: t,
-    pose: (c) => (c.mobile ? pose(0, 1.6, -4, 0.3, c.time * 0.25, 0.55) : pose(4.4, 1.1, -1, 0.3, c.time * 0.25, 0.66)),
+    pose: (c) => (c.mobile ? pose(0, 2.6, -3, 0.62, 0.5 + c.time * 0.08, 0.62) : pose(4.55, 1.75, 0, 0.62, 0.5 + c.time * 0.08, 0.74)),
+    animate(c, pos, col, scl) {
+      const time = c.time;
+      const set = (k: number, x: number, y: number, z: number, color: Rgb, size: number) => {
+        const o = k * 3;
+        pos[o] = x;
+        pos[o + 1] = y;
+        pos[o + 2] = z;
+        col[o] = color[0];
+        col[o + 1] = color[1];
+        col[o + 2] = color[2];
+        scl.fill(Math.max(0, size), o, o + 3);
+      };
+
+      const ph = (time / 48) % 1;
+      let seg = 0;
+      while (SKY[seg + 1][0] < ph) seg++;
+      const [p0, c0] = SKY[seg];
+      const [p1, c1] = SKY[seg + 1];
+      const sky = lerp3(c0, c1, (ph - p0) / (p1 - p0));
+      const night = Math.max(0, Math.min(1, (1 - sky[1]) / 0.64));
+
+      for (const k of water) {
+        const o = k * 3;
+        const w = Math.sin(time * 1.8 + pos[o] * 7 + pos[o + 2] * 3) * 0.5 + 0.5;
+        const foam = w > 0.96;
+        const wc = foam ? P.foam : lerp3(P.deep, P.water, w);
+        col[o] = wc[0];
+        col[o + 1] = wc[1];
+        col[o + 2] = wc[2];
+        pos[o + 1] += w * 0.025;
+      }
+
+      // Troops: each pair walks to its bridge, fights, and one of them presses on.
+      const PERIOD = 13;
+      for (let k = 0; k < PAIRS; k++) {
+        const lane = k % 2;
+        const tt = time + (k >> 1) * (PERIOD / 3) + lane * 2.1;
+        const u = (tt % PERIOD) / PERIOD;
+        const cyc = Math.floor(tt / PERIOD);
+        const win = hash(k * 131 + cyc) & 1;
+        const giant = k === 4 && cyc % 2 === 0 ? 1.7 : 1;
+        for (const side of [0, 1]) {
+          const base = troops + (k * 2 + side) * 4;
+          const dir = side ? 1 : -1;
+          const start = side ? 6.4 : 15.6;
+          const meet = side ? 10.45 : 11.55;
+          let rz = start;
+          let size = 1;
+          let lunge = 0;
+          let burst = -1;
+          let walking = false;
+          if (u < 0.35) {
+            rz = start + (meet - start) * (u / 0.35);
+            walking = true;
+          } else if (u < 0.6) {
+            rz = meet;
+            lunge = Math.max(0, Math.sin(time * 11 + side * Math.PI)) * 0.25 * dir;
+          } else if (side !== win) {
+            rz = meet;
+            burst = (u - 0.6) / 0.14;
+          } else {
+            const goal = side ? 15.6 : 6.4;
+            if (u < 0.85) {
+              rz = meet + (goal - meet) * ((u - 0.6) / 0.25);
+              walking = true;
+            } else {
+              rz = goal;
+              lunge = Math.max(0, Math.sin(time * 9)) * 0.3 * dir;
+              if (u < 0.95 && lunge > 0.2) {
+                const tw = princess(1 - side, lane);
+                for (let q = tw.batt[0]; q < tw.batt[1]; q++) col.set(C.bone, q * 3);
+              }
+              if (u > 0.95) size = 1 - (u - 0.95) / 0.05;
+            }
+            const a = (tt * 1.3) % 1;
+            if (u > 0.6 && u < 0.95) {
+              const tw = princess(1 - side, lane);
+              const tx = X(LANES[lane]);
+              const tz = Z(rz + lunge);
+              const ax = tw.x + (tx - tw.x) * a;
+              const az = tw.z + (tz - tw.z) * a;
+              const ay = tw.top + (half * 2 - tw.top) * a + Math.sin(a * Math.PI) * 0.25;
+              set(arrows + k * 2, ax, ay, az, C.bone, half * 0.5);
+              set(arrows + k * 2 + 1, ax - (tx - tw.x) * 0.06, ay, az - (tz - tw.z) * 0.06, P.wood, half * 0.4);
+            }
+          }
+          if (u <= 0.6 || u >= 0.95) {
+            scl.fill(0, (arrows + k * 2) * 3, (arrows + k * 2 + 2) * 3);
+          }
+          const v = half * 1.1 * giant;
+          const x = X(LANES[lane]) + (side ? 0.18 : -0.18) * cell;
+          const z = Z(rz + lunge);
+          const bob = walking ? Math.abs(Math.sin(time * 10 + k)) * 0.03 : 0;
+          const team = TEAM[side];
+          const parts: [number, number, number, Rgb][] = [
+            [0, 0.5, 0, team.D],
+            [0, 1.5, 0, team.T],
+            [0, 2.5, 0, giant > 1 ? P.skin : P.skin],
+            [0.9, 1.6, dir * 0.6, C.bone],
+          ];
+          parts.forEach(([ox, oy, oz, pc], q) => {
+            if (burst >= 0) {
+              const d = sparkDir[(k * 4 + q) % 20];
+              const e = Math.min(1, burst);
+              set(base + q, x + d[0] * e * 0.4, oy * v + d[1] * e * 0.35 - e * e * 0.2, z + d[2] * e * 0.4, burst < 0.15 ? C.bone : pc, burst >= 1 ? 0 : v * (1 - e));
+            } else set(base + q, x + ox * v * dir * 0.5, oy * v + bob, z + oz * v, pc, v * 0.95 * size);
+          });
+        }
+      }
+
+      // Fireballs: each king lobs one at the fight on the far bridge, then it bursts.
+      for (let s = 0; s < 2; s++) {
+        const F = 10;
+        const tt = time + s * 5 + 1.5;
+        const u = (tt % F) / F;
+        const cyc = Math.floor(tt / F);
+        const king = towers[s === 0 ? 5 : 0];
+        const lane = LANES[(cyc + s) % 2];
+        const gx = X(lane);
+        const gz = Z(s === 0 ? 10.4 : 11.6);
+        for (let j = 0; j < 7; j++) {
+          const p = u / 0.22 - j * 0.035;
+          if (u >= 0.22 || p < 0) {
+            scl.fill(0, (shells + s * 7 + j) * 3, (shells + s * 7 + j + 1) * 3);
+            continue;
+          }
+          const x = king.x + (gx - king.x) * p;
+          const z = king.z + (gz - king.z) * p;
+          const y = king.top + (0.05 - king.top) * p + Math.sin(p * Math.PI) * 1.1;
+          set(shells + s * 7 + j, x, y, z, P.fire[Math.min(4, j)], j === 0 ? cell * 0.75 : cell * 0.5 * (1 - j / 8));
+        }
+        const e = (u - 0.22) / 0.22;
+        for (let q = 0; q < 20; q++) {
+          const k = sparks + s * 20 + q;
+          if (e < 0 || e >= 1) {
+            scl.fill(0, k * 3, k * 3 + 3);
+            continue;
+          }
+          const d = sparkDir[q];
+          set(k, gx + d[0] * e * 0.6, d[1] * e * 0.7 - e * e * 0.35 + 0.05, gz + d[2] * e * 0.6, P.fire[Math.min(4, Math.floor(e * 5))], cell * 0.55 * (1 - e));
+        }
+      }
+
+      for (let k = 0; k < 3; k++) {
+        const cx = (((time * 0.07 + k * 1.9) % 4.4) + 4.4) % 4.4 - 2.2;
+        const cz = Z(3 + k * 7.5);
+        for (let q = 0; q < 9; q++) {
+          const pf = puff[k * 9 + q];
+          set(clouds + k * 9 + q, cx + pf[0], 1.25 + k * 0.12 + pf[1], cz + pf[2], P.cloud, cell * 0.9);
+        }
+      }
+
+      for (let k = 0; k < 24; k++) {
+        const f = fly[k];
+        const y = 0.15 + (((time * 0.04 + f[1]) % 1) * 0.7);
+        set(flies + k, f[0] + Math.sin(time * 1.3 + k) * 0.1, y, f[2] + Math.cos(time * 1.1 + k) * 0.1, k % 2 ? C.lime : rgb("#b79cff"), cell * 0.16 * night);
+      }
+
+      // Torches flare at night.
+      for (let k = 0; k < used; k++) {
+        const o = k * 3;
+        if (light[k]) {
+          if (k < troops && night > 0) scl.fill(scl[o] * (1 + night * (0.5 + 0.2 * Math.sin(time * 17 + k))), o, o + 3);
+          continue;
+        }
+        col[o] *= sky[0];
+        col[o + 1] *= sky[1];
+        col[o + 2] *= sky[2];
+      }
+    },
   };
+}
+
+/**
+ * A card's pixel sprite rebuilt as a voxel figure, for the playground's cues. `load` swaps the
+ * figure in place; the scene's morph carries the voxels over from whatever was showing.
+ */
+export function buildHero(n: number) {
+  const t = alloc(n);
+  hideRest(t, 0);
+  const load = (name: string, side: 0 | 1) => {
+    const art = spritePixels(name, side);
+    t.scl.fill(0);
+    if (!art) return;
+    const v = Math.min(0.28, 3 / Math.max(art.h, art.w * 0.8));
+    let i = 0;
+    for (const p of art.px) {
+      const c = p.ink ? C.plastic : rgb(p.color);
+      for (let d = 0; d < 2 && i < n; d++) put(t, i++, (p.x - art.w / 2 + 0.5) * v, (art.h / 2 - p.y) * v, -d * v, c, v * 0.94, d ? 0.55 : 1);
+    }
+    hideRest(t, i, 3);
+  };
+  const shot: Shot = {
+    target: t,
+    pose: (c) => (c.mobile ? pose(0, 2.4, -3, 0.1, Math.sin(c.time * 0.7) * 0.4, 0.7) : pose(4.55, 1.6, 0, 0.1, Math.sin(c.time * 0.7) * 0.45, 1)),
+    animate(c, pos) {
+      const bob = Math.sin(c.time * 2.2) * 0.06;
+      for (let o = 1; o < t.n * 3; o += 3) pos[o] += bob;
+    },
+  };
+  return { shot, load };
 }
 
 /** FNV-1a, so a post's slug picks the same scene variation on every visit. */
@@ -1604,7 +1903,7 @@ export function buildShots(n: number): Omit<Record<ShotId, Shot>, "city"> {
   return {
     globe: globe(n),
     cube: aboutCube(n),
-    tower: kingTower(n),
+    arena: arena(n),
     track: track(n),
     carts: carts(n),
     terrain: terrain(n),

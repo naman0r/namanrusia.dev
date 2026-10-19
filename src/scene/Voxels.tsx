@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { DynamicDrawUsage, InstancedBufferAttribute, type InstancedMesh } from "three";
 import { stage, useStage } from "@/lib/stage";
-import { buildCity, buildShots, GATES, PROJECTS, rotation, type FrameCtx, type Shot } from "./shots";
+import { buildCity, buildHero, buildShots, GATES, PROJECTS, rotation, type FrameCtx, type Shot } from "./shots";
 
 /** A shot placed in the world. `rot` is its row-major 3x3 orientation, which every voxel shares. */
 type Buf = { pos: Float32Array; col: Float32Array; scl: Float32Array; rot: Float32Array };
@@ -87,6 +87,7 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
   const { days } = useStage();
   const base = useMemo(() => buildShots(count), [count]);
   const shots = useMemo(() => ({ ...base, city: buildCity(count, days) }), [base, count, days]);
+  const hero = useMemo(() => buildHero(count), [count]);
   const sim = useRef<ReturnType<typeof makeSim> | null>(null);
 
   useLayoutEffect(() => {
@@ -105,8 +106,9 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
     S.time += reduced ? 0 : dt;
 
     const list = stage.shots;
+    const cue = stage.cue;
     // Two posts can share a scene but not its seed, so moving between them still morphs.
-    const key = list.join(",") + stage.post.slug;
+    const key = (cue ? `cue:${cue.key}` : list.join(",")) + stage.post.slug;
     if (key !== S.key) {
       // A new page: freeze what's on screen and morph from it instead of jump-cutting.
       if (S.key) {
@@ -116,12 +118,13 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
         S.snap.rot.set(S.out.rot);
         S.snapAt = S.time;
       }
+      if (cue) hero.load(cue.sprite, cue.side);
       S.key = key;
-      S.pos = stage.position;
+      S.pos = cue ? 0 : stage.position;
     }
 
-    const last = list.length - 1;
-    const goal = Math.min(last, Math.max(0, stage.position));
+    const last = cue ? 0 : list.length - 1;
+    const goal = cue ? 0 : Math.min(last, Math.max(0, stage.position));
     S.pos += (goal - S.pos) * (1 - Math.exp(-dt * 5));
     if (Math.abs(goal - S.pos) < 1e-4) S.pos = goal;
 
@@ -135,8 +138,8 @@ export function Voxels({ count, mobile, reduced }: { count: number; mobile: bool
     const ia = Math.floor(S.pos);
     const ib = Math.min(last, ia + 1);
     const mix = S.pos - ia;
-    const A = shots[list[ia]];
-    const B = shots[list[ib]];
+    const A = cue ? hero.shot : shots[list[ia]];
+    const B = cue ? hero.shot : shots[list[ib]];
     const morphing = A !== B && mix > 1e-4;
     // Each shot reads the scroll progress of its own section, so neither jumps mid-morph.
     const ctx = (i: number): FrameCtx => ({
