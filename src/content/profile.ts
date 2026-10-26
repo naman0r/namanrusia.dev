@@ -86,81 +86,69 @@ export const about = {
   ],
 };
 
-// Captions are the file names from the old /more page.
 export const photos = [
   {
     src: "/photos/skydiving.jpg",
-    name: "8500.jpg",
     alt: "Naman tandem skydiving",
     w: 1600,
     h: 736,
   },
   {
     src: "/photos/hk.jpeg",
-    name: "hk.jpeg",
     alt: "Naman at The Peak in Hong Kong, the skyline behind",
     w: 1024,
     h: 768,
   },
   {
     src: "/photos/layla.jpeg",
-    name: "layla.jpeg",
     alt: "Layla, a fluffy white dog, looking up at the camera",
     w: 645,
     h: 1218,
   },
   {
     src: "/photos/big-buddha.jpg",
-    name: "hk2.jpg",
     alt: "Naman at the gate below the Big Buddha in Hong Kong",
     w: 1600,
     h: 1200,
   },
   {
     src: "/photos/rank-1-of-521.jpg",
-    name: "slitherio.png",
     alt: "A slither.io leaderboard showing rank 1 of 521",
     w: 1600,
     h: 736,
   },
   {
     src: "/photos/mom.jpeg",
-    name: "maldives.jpeg",
     alt: "Naman and Mom in a golf cart by the beach",
     w: 1024,
     h: 768,
   },
   {
     src: "/photos/dab.jpeg",
-    name: "louvre.jpeg",
     alt: "A young Naman posing in front of the Louvre pyramid",
     w: 665,
     h: 1182,
   },
   {
     src: "/photos/the-pru.jpeg",
-    name: "boston.jpeg",
     alt: "Boston skyline at dusk with the Prudential Tower",
     w: 1600,
     h: 1200,
   },
   {
     src: "/photos/sid2.jpeg",
-    name: "singapore.jpeg",
     alt: "Naman and a friend at a table at night in George Town",
     w: 1024,
     h: 768,
   },
   {
     src: "/photos/deck-12.jpeg",
-    name: "deck-12.jpeg",
     alt: "Sunset over the sea from a ship's top deck",
     w: 1600,
     h: 1200,
   },
   {
     src: "/photos/strava-harvard-bridge.png",
-    name: "out_walking.jpeg",
     alt: "A Strava route across the Harvard Bridge from Cambridge into Boston",
     w: 982,
     h: 616,

@@ -35,7 +35,7 @@ export function PhotoStrip() {
       {photos.map((p, i) => (
         <li
           key={p.src}
-          className={`shrink-0 snap-start bg-bone p-2 pb-0 shadow-[6px_6px_0_0_var(--color-coal)] transition-transform duration-150 ease-(--ease-step) hover:-translate-y-1 hover:rotate-0 ${
+          className={`shrink-0 snap-start bg-bone p-2 pb-8 shadow-[6px_6px_0_0_var(--color-coal)] transition-transform duration-150 ease-(--ease-step) hover:-translate-y-1 hover:rotate-0 ${
             i % 3 === 0 ? "-rotate-2" : i % 3 === 1 ? "rotate-1" : "-rotate-1"
           }`}
         >
@@ -48,7 +48,6 @@ export function PhotoStrip() {
             className="block h-[200px] w-auto object-cover md:h-[260px]"
             draggable={false}
           />
-          <p className="label py-2 text-[11px] normal-case tracking-normal text-ink">{p.name}</p>
         </li>
       ))}
     </ul>
