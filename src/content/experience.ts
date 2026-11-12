@@ -39,7 +39,7 @@ export const experience: Org[] = [
     logo: "/logos/sonos.png",
     color: "#eee7d7",
     impact:
-      "Built 3 features from the ground up in the Sonos iOS app, a surface serving 10M+ DAUs.",
+      "Built 3 features in the iOS app, which has 10M+ daily active users.",
     roles: [
       {
         title: "Software Engineering Intern, iOS App Experience",
@@ -72,7 +72,7 @@ export const experience: Org[] = [
     logo: "/logos/philips.png",
     color: "#4f8bff",
     impact:
-      "Automated PIC iX hospital deployments up to 2,550 beds, cutting setup from 100+ hours to 2 hours.",
+      "Automated PIC iX hospital deployments of up to 2,550 beds, cutting setup from 100+ hours to 2 hours.",
     roles: [
       {
         title: "Software Engineering Co-op, Systems Integration & Automation",
@@ -107,7 +107,7 @@ export const experience: Org[] = [
     logo: "/logos/auribus.jpg",
     color: "#3ccf7e",
     impact:
-      "Hearing assessment at 95% accuracy in preliminary evaluations; FDA-compliant Rx iOS app used by 60+ clinical researchers.",
+      "Built a hearing assessment that reached 95% accuracy in preliminary evaluations, and an FDA-compliant Rx iOS app used by 60+ clinical researchers.",
     note: "Part-time",
     roles: [
       {
@@ -133,7 +133,7 @@ export const experience: Org[] = [
     logo: "/logos/venu.png",
     color: "#ffd23f",
     impact:
-      "YC W21 startup. Core CRM workflows and async job pipelines; cut latency on high-volume endpoints by up to 70%.",
+      "Built CRM workflows and async job pipelines at a YC W21 startup, and cut latency on high-volume endpoints by up to 70%.",
     note: "Y Combinator W21 · part-time",
     roles: [
       {
@@ -160,7 +160,7 @@ export const experience: Org[] = [
     logo: "/logos/sideband.png",
     color: "#b79cff",
     impact:
-      "A few friends and I building cool stuff together: display streaming, media pipelines and web products.",
+      "A studio with a few friends. We build display streaming, media pipelines and web products.",
     note: "A few friends building things together",
     roles: [
       {
@@ -187,7 +187,7 @@ export const experience: Org[] = [
     logo: "/logos/tamid.jpg",
     color: "#5ec8ff",
     impact:
-      "Director of Software. Before that: a quant research platform for a Boston hedge fund, and tech lead for a hotel-pricing startup, SWEF instructor.",
+      "Director of Software. Before that I built a quant research platform for a Boston hedge fund, led a hotel-pricing project for a startup, and taught Tech Consulting Foundations.",
     roles: [
       {
         title: "Director of Software",
@@ -317,7 +317,7 @@ export const experience: Org[] = [
     logo: "/logos/forge.jpg",
     color: "#ff8fb8",
     impact:
-      "Product studio. Software lead on BackBuddy, an Arduino-integrated posture app; engineer on SmartStep.",
+      "Software lead on BackBuddy, an Arduino posture app, and engineer on SmartStep, an app for a height-adjusting cane.",
     note: "Product development studio",
     roles: [
       {

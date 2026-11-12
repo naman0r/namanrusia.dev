@@ -72,7 +72,7 @@ export function Activity({ days }: { days: Day[] }) {
         </div>
         <figcaption className="label mt-3 flex flex-wrap items-center justify-between gap-2 text-[10px] text-dust">
           <a href={profile.links.github} target="_blank" rel="noreferrer" className="hover:text-bone">
-            github.com/{profile.handle} · refreshes itself every six hours
+            github.com/{profile.handle} · updates every six hours
           </a>
           <span className="flex items-center gap-1">
             less

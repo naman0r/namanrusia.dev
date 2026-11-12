@@ -5,9 +5,7 @@ export const profile = {
   email: "rusia.n@northeastern.edu",
   photo: "/profile_pic.jpeg",
   resume: "/resume.pdf",
-  status: "Open to Spring 2027 and Summer 2027 co-ops and internships",
-  // From the note on the old /more page.
-  motto: "I like Building, Iterating and shipping software to effect impact",
+  status: "Open to Summer 2027 internships",
   links: {
     github: "https://github.com/naman0r",
     linkedin: "https://linkedin.com/in/namanrusia",
@@ -17,20 +15,17 @@ export const profile = {
   glance: [
     {
       label: "Now",
-      value:
-        "Classes, Director of Software at TAMID at Northeastern, Developer at Code4Community",
+      value: "Director of Software at TAMID, developer at Code4Community",
     },
     {
       label: "Previously",
-      value:
-        "SWE intern @ Sonos and Philips Healthcare, + Auribus Labs and Venu AI (YC W21)",
+      value: "Sonos, Philips Healthcare, Auribus Labs, Venu AI (YC W21)",
     },
     {
       label: "Education",
       value:
-        "Computer Science and Finance at Northeastern University, graduating in May 2028",
+        "Computer Science and Finance at Northeastern, graduating May 2028",
     },
-    { label: "Focus", value: "Backend, cloud, systems and novel problems" },
   ],
 } as const;
 
@@ -80,9 +75,9 @@ export const countriesVisited = 16;
 
 export const about = {
   paragraphs: [
-    "I'm Naman. I grew up in India and Singapore, and now live in Boston, where I study Computer Science and Business at Northeastern.",
-    "I got into software during my first semester of college. Since then, I've worked at startups, Philips, and Sonos, and a lot of side projects. Lately, I've been interested in backend systems and tools that make building software easier.",
-    "At school, Director of Software Engineering at TAMID, and developer at Code4Community (pro bono Software for non profits). Outside of that, I like playing guitar, music, lifting, and Clash Royale.",
+    "I'm Naman. I grew up in India and Singapore and now live in Boston, where I study Computer Science and Business at Northeastern.",
+    "I got into software in my first semester of college. Since then I've interned at Sonos and Philips, worked at two startups, and built a lot of side projects. Lately I've been into backend systems and developer tools.",
+    "At school I'm Director of Software at TAMID and a developer at Code4Community, which builds pro-bono software for nonprofits. Outside of that I like guitar, music, lifting, and Clash Royale.",
   ],
 };
 

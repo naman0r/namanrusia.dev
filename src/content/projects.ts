@@ -159,8 +159,7 @@ export const projects: Project[] = [
     when: 2026.72,
     featured: true,
     highlights: [
-      "A workhorse productivity and observability tool for serious developers.",
-      "Watches your agents, from Claude Code to Codex, and cleans up the servers they leave behind",
+      "Watches Claude Code and Codex agents and cleans up the dev servers they leave behind",
       "Guarded kills: tree-kill, confirmed SIGKILL and PID-reuse protection",
       "Manages other Macs over your own SSH; nothing leaves your machines",
     ],

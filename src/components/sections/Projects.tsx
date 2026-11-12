@@ -19,13 +19,10 @@ export function Projects() {
           <ProjectCard key={p.slug} project={p} />
         ))}
       </div>
-      <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-4">
+      <div className="mt-12">
         <CtaLink href="/projects" shadow="var(--color-coin)">
           Browse all {projects.length} projects
         </CtaLink>
-        <p className="text-sm text-dust">
-          view more cool things and software I've built
-        </p>
       </div>
     </Section>
   );

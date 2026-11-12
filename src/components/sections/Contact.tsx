@@ -23,7 +23,7 @@ export function Contact() {
           <span className="text-accent">06</span> · Contact
         </p>
         <h2 id="contact-title" className="mt-4 max-w-3xl text-2xl leading-tight text-bone md:text-5xl">
-          Feel free to reach out.
+          Get in touch.
         </h2>
         <a
           href={`mailto:${profile.email}`}
@@ -51,7 +51,7 @@ export function Contact() {
           Back to top ↑
         </a>
         <p className="label text-[10px] leading-relaxed text-dust">
-          Built from scratch by Naman in Boston ·{" "}
+          Built by Naman in Boston ·{" "}
           <a href={profile.links.source} target="_blank" rel="noreferrer" className="text-bone hover:text-accent">
             source
           </a>{" "}
