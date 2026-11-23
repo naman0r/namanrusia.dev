@@ -128,7 +128,7 @@ export default async function Image() {
     >
       <img src={globe()} width={BOX} height={BOX} style={{ position: "absolute", left: 410, top: -185 }} alt="" />
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", padding: 64, width: "100%" }}>
-        <div style={{ display: "flex", fontSize: 24, color: ACCENT }}>Open to Spring + Summer 2027 co-ops</div>
+        <div style={{ display: "flex", fontSize: 24, color: ACCENT }}>Open to Summer 2027 internships</div>
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 560 }}>
           <div style={{ display: "flex", flexDirection: "column", fontSize: 112, lineHeight: 0.9, textTransform: "uppercase" }}>
             <span>{first}</span>

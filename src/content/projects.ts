@@ -27,7 +27,10 @@ export type Project = {
   links: { label: string; href: string }[];
   image?: string;
   video?: string;
-  gallery?: { src: string; caption: string }[];
+  /** Shows the hero video or image at four-fifths width, for media that reads fine smaller. */
+  smallHero?: boolean;
+  /** `w` and `h` are the file's real pixel size, so the page reserves the right space before it loads. */
+  gallery?: { src: string; caption: string; w: number; h: number }[];
   /** Accent used for the project's pixel frame. */
   color: string;
   problem?: string[];
@@ -41,7 +44,7 @@ export const projects: Project[] = [
   {
     slug: "tandemcode",
     title: "TandemCode",
-    tagline: "Practice coding problems with a partner.",
+    tagline: "Multiplayer interview prep and a better platform for coding practice.",
     summary:
       "Two people share a room, edit the same code with live cursors, chat, and run their solution against hidden tests together. Every session can be replayed.",
     status: "Live",
@@ -82,13 +85,15 @@ export const projects: Project[] = [
     gallery: [
       {
         src: "/projects/tandemcode-mascot.png",
-        caption: "The mascot, which is also the README logo",
+        caption: "The mascot",
+        w: 512,
+        h: 512,
       },
     ],
     color: "#4f8bff",
     problem: [
-      "As an underclassman it's hard to find peers who want to do mock interviews or practice DSA in a pair. TandemCode is a place to find a partner at your level and actually practice together.",
-      "The bigger goal: make interview prep social and consistent, with the accountability of doing it with someone else.",
+      "Finding someone to practice DSA or do mock interviews with is hard. TandemCode puts two people in a room with the same problem, one shared editor and a judge, so they can solve it together.",
+      "The goal is interview prep that is social and consistent, because someone else is expecting you to show up.",
     ],
     built: {
       intro: "One shared editor, one judge, and a replay of the whole session.",
@@ -120,7 +125,8 @@ export const projects: Project[] = [
       ],
     },
     architecture: [
-      "Five parts: a React single-page app on Vercel; a FastAPI process serving HTTP under /api and two websockets under /ws; a separate runner process from the same image that judges submissions; Postgres for everything (users, rooms, chat, editor history, problems, submissions); and Clerk for sign-in, so TandemCode stores no passwords.",
+      "TandemCode is a web app, an API and a runner, all sharing one Postgres database. The API answers the web app's requests and holds two live connections per room: one for chat, presence and run results, and one that passes editor changes between the people in the room. The runner is a separate process that picks up each submission, judges it in a sandbox and saves the verdict, which the API then sends to everyone in the room.",
+      "The hard part was doing two things at once: keeping several people's editors in sync while they type, and running code from strangers on my server. One slow connection must not freeze a room, and one malicious submission must not reach the host.",
       "Routes → services → DAOs. Services hold the rules (who can read a room, how many runs per hour); DAOs hold hand-written SQL for asyncpg. Rate limits that must hold under parallel requests are enforced inside a transaction, not by counting first and inserting later.",
       "A run is queued as a pending submission; the runner claims it, judges it and stores the verdict, which fires a Postgres NOTIFY that the API broadcasts to the room. Fan-out to many sockets sends in parallel with a deadline so one stalled peer can't freeze a room.",
       "Every submission is treated as hostile: a fresh container with no network, a read-only root filesystem, an unprivileged user with every capability dropped, memory and process caps, and a hard time budget. In production each container runs under gVisor, so escaping takes a gVisor bug and a kernel bug.",
@@ -151,7 +157,7 @@ export const projects: Project[] = [
   {
     slug: "dockmaster",
     title: "Dockmaster",
-    tagline: "Know what's running on your Mac and your homelab.",
+    tagline: "A local observability tool for AI agents and development.",
     summary:
       "A local dashboard that finds stray dev servers, inspects repos and worktrees, watches running coding agents, and checks system health, and can safely act on all of it.",
     status: "Released",
@@ -185,30 +191,38 @@ export const projects: Project[] = [
     ],
     image: "/projects/dockmaster-harbor.webp",
     video: "/projects/dockmaster-film.mp4",
+    smallHero: true,
     gallery: [
       {
         src: "/projects/dockmaster-harbor.webp",
         caption: "Harbor: one live card per module plus system vitals",
+        w: 1600,
+        h: 1178,
       },
       {
         src: "/projects/dockmaster-ports.webp",
         caption: "Ports: every listening dev server, with a guarded stop",
+        w: 1600,
+        h: 1000,
       },
       {
         src: "/projects/dockmaster-repos.webp",
         caption:
           "Repos: dirty files, ahead/behind and stale branches under your dev root",
+        w: 1600,
+        h: 1000,
       },
       {
         src: "/projects/dockmaster-receipt.webp",
         caption:
           "Receipt: the last seven days of agent work as a shareable image",
+        w: 1600,
+        h: 1000,
       },
     ],
     color: "#5ec8ff",
     problem: [
       "Dev machines fill up with things nobody remembers starting: servers on random ports, worktrees from finished branches, gigabytes of build output, and now coding agents that leave processes behind.",
-      "Dockmaster grew out of Port Authority, a single-file port dashboard. The idea scaled: a dev tool should know what's on your machine, and it should be able to act on it safely.",
     ],
     built: {
       features: [
@@ -379,6 +393,8 @@ export const projects: Project[] = [
       "The Homebrew formula installs an isolated Python environment from checksummed prebuilt packages, with a pinned source release as the fallback.",
     ],
   },
+  // Peel is hidden until it has a real screenshot. Its page showed a placeholder and read as unfinished.
+  /*
   {
     slug: "peel",
     title: "Peel",
@@ -423,6 +439,7 @@ export const projects: Project[] = [
       "Targets macOS 26 on Apple Silicon, written in Swift 6 with strict concurrency and no third-party dependencies. Milestone 4 is in; the pure logic is covered by 50 passing tests.",
     ],
   },
+  */
   {
     slug: "open-brain",
     title: "Open Brain",

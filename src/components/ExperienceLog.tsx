@@ -15,6 +15,26 @@ const TRACKS: { track: Track; label: string }[] = [
   { track: "studio", label: "Studio" },
 ];
 
+/** Renders the [label](url) links a bullet may carry; splitting on the pattern yields text, label, url, text, ... */
+function withLinks(text: string) {
+  const parts = text.split(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/);
+  return parts.map((part, i) =>
+    i % 3 === 0 ? (
+      part
+    ) : i % 3 === 1 ? (
+      <a
+        key={i}
+        href={parts[i + 1]}
+        target="_blank"
+        rel="noreferrer"
+        className="text-bone underline decoration-accent decoration-2 underline-offset-4 hover:text-accent"
+      >
+        {part}
+      </a>
+    ) : null,
+  );
+}
+
 /** One collapsed headline per org; open one, or all of them, for every role and bullet. */
 export function ExperienceLog() {
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -47,7 +67,7 @@ export function ExperienceLog() {
     <div>
       <div className="mb-4 flex items-center justify-between gap-4">
         <p className="label text-dust">
-          Click a team for every role, bullet and stack
+          Click to expand and view more details
         </p>
         <button
           type="button"
@@ -174,7 +194,7 @@ export function ExperienceLog() {
                                 key={p}
                                 className="relative pl-5 before:absolute before:left-0 before:top-[0.6em] before:size-1.5 before:bg-accent"
                               >
-                                {p}
+                                {withLinks(p)}
                               </li>
                             ))}
                           </ul>

@@ -7,6 +7,7 @@ export type Role = {
   start: number;
   end: number;
   ongoing?: boolean;
+  /** A bullet may hold links, written as [label](https://url). */
   points: string[];
   tech: string[];
   link?: string;
@@ -30,6 +31,27 @@ export type Org = {
 
 // Internship bullets come from the resume (updated Sep 2026); campus blurbs from the old /experience page.
 export const experience: Org[] = [
+  {
+    id: "klaviyo",
+    org: "Klaviyo",
+    code: "KLV",
+    track: "work",
+    location: "Boston, MA",
+    logo: "/logos/klaviyo.png",
+    color: "#ffa94d",
+    note: "Incoming",
+    impact: "",
+    roles: [
+      {
+        title: "Software Engineering Co-op",
+        period: "Jan — May 2027",
+        start: 2027.0,
+        end: 2027.417,
+        points: [],
+        tech: [],
+      },
+    ],
+  },
   {
     id: "sonos",
     org: "Sonos",
@@ -171,7 +193,8 @@ export const experience: Org[] = [
         ongoing: true,
         points: [
           "A few friends and I building things together under one name (formerly Eternal Reverse): display streaming, media pipelines, fitness software and web products, including EternalMonitor and Exerly.",
-          "Worked on the rebrand to Sideband and the new studio site at sideband.studio. TandemCode is mirrored in the studio's GitHub org.",
+          "Worked on the rebrand to Sideband and the studio site at [sideband.studio](https://sideband.studio/).",
+          "Projects: [TandemCode](https://www.tandemcode.space/) and [Clawtrate](https://github.com/sidebandstudio/clawtrate), which I'm building with a friend.",
         ],
         tech: ["Next.js", "TypeScript", "Rust", "Swift"],
         link: "https://www.sideband.studio",
