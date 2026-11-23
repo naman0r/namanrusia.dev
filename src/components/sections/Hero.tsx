@@ -45,7 +45,7 @@ export function Hero() {
           <p className="label mb-5 flex items-center gap-2.5 text-[11px] normal-case tracking-normal text-bone md:mb-6">
             <span className="blink size-2 shrink-0 bg-lime" aria-hidden />
             <span className="md:hidden">
-              Open to Spring + Summer 2027 co-ops
+              Open to Summer 2027 internships
             </span>
             <span className="max-md:hidden">{profile.status}</span>
           </p>

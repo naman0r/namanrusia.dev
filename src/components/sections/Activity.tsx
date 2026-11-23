@@ -20,9 +20,11 @@ export function Activity({ days }: { days: Day[] }) {
     if (label && label !== months.at(-1)?.label) months.push({ col: w, label });
   }
 
+  const recent = days.slice(-30).reduce((a, [, n]) => a + n, 0);
+
   const stats = [
     { value: total.toLocaleString("en-US"), label: "contributions in the last year", tone: "text-accent" },
-    { value: String(days.filter(([, n]) => n > 0).length), label: "days with at least one", tone: "text-bone" },
+    { value: recent.toLocaleString("en-US"), label: "in the last 30 days", tone: "text-bone" },
   ];
 
   return (
@@ -72,7 +74,7 @@ export function Activity({ days }: { days: Day[] }) {
         </div>
         <figcaption className="label mt-3 flex flex-wrap items-center justify-between gap-2 text-[10px] text-dust">
           <a href={profile.links.github} target="_blank" rel="noreferrer" className="hover:text-bone">
-            github.com/{profile.handle} · refreshes itself every six hours
+            github.com/{profile.handle}
           </a>
           <span className="flex items-center gap-1">
             less

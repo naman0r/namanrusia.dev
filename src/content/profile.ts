@@ -5,7 +5,7 @@ export const profile = {
   email: "rusia.n@northeastern.edu",
   photo: "/profile_pic.jpeg",
   resume: "/resume.pdf",
-  status: "Open to Spring 2027 and Summer 2027 co-ops and internships",
+  status: "Open to Summer 2027 internships",
   // From the note on the old /more page.
   motto: "I like Building, Iterating and shipping software to effect impact",
   links: {
@@ -80,9 +80,9 @@ export const countriesVisited = 16;
 
 export const about = {
   paragraphs: [
-    "I'm Naman. I grew up in India and Singapore, and now live in Boston, where I study Computer Science and Business at Northeastern.",
-    "I got into software during my first semester of college. Since then, I've worked at startups, Philips, and Sonos, and a lot of side projects. Lately, I've been interested in backend systems and tools that make building software easier.",
-    "At school, Director of Software Engineering at TAMID, and developer at Code4Community (pro bono Software for non profits). Outside of that, I like playing guitar, music, lifting, and Clash Royale.",
+    "I'm Naman. I was born in the US, grew up in India, finished high school in Singapore, and now live in Boston, where I study Computer Science and Business at Northeastern.",
+    "I got into software in my first semester of college. Since then I've built features in the Sonos iOS app, interned at Philips Healthcare and two startups, and in January I start a co-op at Klaviyo. On the side I build tools for my own workflow, like Dockmaster, which finds the dev servers my coding agents leave running.",
+    "At school I'm Director of Software Engineering at TAMID, and I build pro bono software for nonprofits at Code4Community. Outside of that I play guitar, listen to music, lift and play Clash Royale. I've been to 16 countries, and I once finished first out of 521 players in slither.io.",
   ],
 };
 
@@ -146,12 +146,6 @@ export const photos = [
     alt: "Sunset over the sea from a ship's top deck",
     w: 1600,
     h: 1200,
-  },
-  {
-    src: "/photos/strava-harvard-bridge.png",
-    alt: "A Strava route across the Harvard Bridge from Cambridge into Boston",
-    w: 982,
-    h: 616,
   },
 ];
 

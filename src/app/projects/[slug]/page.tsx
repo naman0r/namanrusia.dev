@@ -114,7 +114,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
           {p.gallery.map((g) => (
             <li key={g.src}>
               <figure className="border-2 border-line bg-coal">
-                <Image src={g.src} alt={g.caption} width={900} height={560} className="block h-auto w-full" />
+                <Image src={g.src} alt={g.caption} width={900} height={Math.round((900 * g.h) / g.w)} className="block h-auto w-full" />
                 <figcaption className="label border-t-2 border-line px-3 py-2 text-[10px] normal-case tracking-normal text-dust">
                   {g.caption}
                 </figcaption>
@@ -174,7 +174,10 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
           )}
         </header>
 
-        <div className="mt-12 border-2 border-bone bg-ink" style={{ boxShadow: `8px 8px 0 0 ${p.color}` }}>
+        <div
+          className={`mt-12 border-2 border-bone bg-ink ${p.smallHero ? "max-w-[960px]" : ""}`}
+          style={{ boxShadow: `8px 8px 0 0 ${p.color}` }}
+        >
           {p.video ? (
             <video
               src={p.video}
