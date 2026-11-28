@@ -263,7 +263,7 @@ export const projects: Project[] = [
     tagline:
       "A pre-commit hook that interviews you about your code before letting you commit.",
     summary:
-      "Before each commit it reads your staged diff, asks interview-style questions in a persona of your choice, and won't let the commit through without a real answer.",
+      "Before each commit it reads your staged diff, asks interview-style questions in a persona of your choice, and won't let the commit through without a real answer. 1,300+ downloads on PyPI.",
     status: "Released",
     period: "Dec 2025",
     when: 2025.95,
@@ -273,7 +273,7 @@ export const projects: Project[] = [
     stack: ["Python", "Git hooks", "PyPI", "Rich", "OpenAI API"],
     links: [
       {
-        label: "PyPI v1.0.0",
+        label: "PyPI · 1,300+ downloads",
         href: "https://pypi.org/project/git-interviewer/1.0.0/",
       },
       { label: "GitHub", href: "https://github.com/naman0r/git-interviewer" },
